@@ -1,0 +1,81 @@
+@model List<Sector>
+@{
+    ViewData["Title"] = "إدارة القواطع";
+}
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl text-camp-gold font-bold">إدارة القواطع</h1>
+    <a asp-action="CreateSector" class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-bold">
+        + إضافة قاطع
+    </a>
+</div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@successMsg</div>
+}
+
+<div class="overflow-x-auto">
+    <table class="w-full bg-camp-accent-grey rounded-xl border border-gray-700">
+        <thead>
+            <tr class="border-b border-gray-700 text-camp-gold text-sm">
+                <th class="p-3 text-right">اسم القاطع</th>
+                <th class="p-3 text-right">المخيم</th>
+                <th class="p-3 text-right">الإحداثيات</th>
+                <th class="p-3 text-right">المنطقة</th>
+                <th class="p-3 text-center">خيم تصنيع</th>
+                <th class="p-3 text-center">خيم يدوي</th>
+                <th class="p-3 text-center">حمامات</th>
+                <th class="p-3 text-center">المسؤولون</th>
+                <th class="p-3 text-center">إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sector in Model)
+            {
+                <tr class="border-b border-gray-700 hover:bg-gray-800/50 text-sm">
+                    <td class="p-3 font-bold text-white">@sector.Name</td>
+                    <td class="p-3 text-gray-300">@sector.Camp</td>
+                    <td class="p-3 text-gray-300 dir="ltr" class="text-left">@sector.Coordinate</td>
+                    <td class="p-3 text-gray-300">@sector.Area</td>
+                    <td class="p-3 text-center text-gray-300">@sector.ManufacturedTentsCount</td>
+                    <td class="p-3 text-center text-gray-300">@sector.HandmadeTentsCount</td>
+                    <td class="p-3 text-center text-gray-300">@sector.BathroomsCount</td>
+                    <td class="p-3 text-center">
+                        @if (sector.Admins.Any())
+                        {
+                            <div class="flex flex-col gap-0.5">
+                                <span class="text-camp-gold text-xs">@sector.Admins.Count</span>
+                                @foreach (var a in sector.Admins)
+                                {
+                                    <span class="text-gray-400 text-xs block">@a.Name</span>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-gray-500">—</span>
+                        }
+                    </td>
+                    <td class="p-3 text-center">
+                        <a asp-action="EditSector" asp-route-id="@sector.Id" class="text-camp-gold hover:text-yellow-500 transition ml-2">تعديل</a>
+                        <form method="post" asp-action="DeleteSector" asp-route-id="@sector.Id" class="inline"
+                              onsubmit="return confirm('حذف القاطع @sector.Name؟')">
+                            <button type="submit" class="text-red-400 hover:text-red-300 transition">حذف</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="9" class="p-6 text-center text-gray-500">لا توجد قواطع بعد</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Dashboard" class="text-gray-400 hover:text-camp-gold text-sm transition">← العودة إلى لوحة التحكم</a>
+</div>

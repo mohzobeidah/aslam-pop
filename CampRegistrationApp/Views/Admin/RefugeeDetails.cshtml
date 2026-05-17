@@ -1,0 +1,146 @@
+@model FamilyRegistration
+@{
+    ViewData["Title"] = "تفاصيل النازح";
+    var head = Model.FamilyHead;
+}
+
+<div class="mb-6">
+    <a asp-action="Refugees" class="text-gray-400 hover:text-camp-gold text-sm transition">← النازحين</a>
+    <h1 class="text-2xl text-camp-gold font-bold mt-1">@head.FullName</h1>
+    <p class="text-gray-400 text-sm">رقم القيد: @Model.RecordId</p>
+</div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@successMsg</div>
+}
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Head Info -->
+    <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700">
+        <h2 class="text-lg text-camp-gold font-bold mb-4">بيانات رب الأسرة</h2>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+            <div><span class="text-gray-400">الاسم:</span> <span class="text-white">@head.FullName</span></div>
+            <div><span class="text-gray-400">رقم الهوية:</span> <span class="text-white">@head.IdNumber</span></div>
+            <div><span class="text-gray-400">القاطع:</span> <span class="text-white">@head.Sector</span></div>
+            <div><span class="text-gray-400">تاريخ الميلاد:</span> <span class="text-white">@head.DateOfBirth.ToString("yyyy/MM/dd")</span></div>
+            <div><span class="text-gray-400">الجنس:</span> <span class="text-white">@head.Gender</span></div>
+            <div><span class="text-gray-400">الهاتف:</span> <span class="text-white" dir="ltr">@head.PhoneNumber</span></div>
+            <div><span class="text-gray-400">الجنسية:</span> <span class="text-white">@head.Nationality</span></div>
+            <div><span class="text-gray-400">الحالة الاجتماعية:</span> <span class="text-white">@head.MaritalStatus</span></div>
+            <div><span class="text-gray-400">الوظيفة:</span> <span class="text-white">@head.EmploymentStatus</span></div>
+            <div><span class="text-gray-400">المستوى التعليمي:</span> <span class="text-white">@head.EducationLevel</span></div>
+            <div><span class="text-gray-400">مكان السكن الأصلي:</span> <span class="text-white">@head.OriginalGovernorate</span></div>
+            <div><span class="text-gray-400">المنزل مدمر:</span> <span class="text-white">@(head.IsHouseDestroyed ? "نعم" : "لا")</span></div>
+            <div><span class="text-gray-400">أسير:</span> <span class="text-white">@(head.IsPrisoner ? "نعم" : "لا")</span></div>
+        </div>
+    </div>
+
+    <!-- Health Info -->
+    <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700">
+        <h2 class="text-lg text-camp-gold font-bold mb-4">الحالة الصحية</h2>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+            <div><span class="text-gray-400">الحالة الصحية:</span> <span class="text-white">@head.HealthStatus</span></div>
+            <div><span class="text-gray-400">الأمراض المزمنة:</span> <span class="text-white">@head.ChronicDiseases</span></div>
+            <div><span class="text-gray-400">أنواع الإعاقة:</span> <span class="text-white">@head.DisabilityTypes</span></div>
+            <div><span class="text-gray-400">إصابة:</span> <span class="text-white">@(head.HasInjury ? "نعم" : "لا")</span></div>
+            @if (head.HasInjury)
+            {
+                <div><span class="text-gray-400">تاريخ الإصابة:</span> <span class="text-white">@head.InjuryDate?.ToString("yyyy/MM/dd")</span></div>
+                <div><span class="text-gray-400">تفاصيل الإصابة:</span> <span class="text-white">@head.InjuryDetails</span></div>
+            }
+            @if (head.IsPregnant == true)
+            {
+                <div><span class="text-gray-400">حامل:</span> <span class="text-white">الشهر @head.PregnancyMonth</span></div>
+            }
+            @if (head.IsNursing == true)
+            {
+                <div><span class="text-gray-400">مرضع:</span> <span class="text-white">@head.NursingInfantName</span></div>
+            }
+        </div>
+    </div>
+
+    <!-- Housing -->
+    <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700">
+        <h2 class="text-lg text-camp-gold font-bold mb-4">السكن والحالات الخاصة</h2>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+            <div><span class="text-gray-400">رب أسرة طفل:</span> <span class="text-white">@(Model.IsChildHeaded ? "نعم" : "لا")</span></div>
+            @if (Model.IsChildHeaded) { <div><span class="text-gray-400">تفاصيل:</span> <span class="text-white">@Model.ChildHeadedDetails</span></div> }
+            <div><span class="text-gray-400">ربة أسرة امرأة:</span> <span class="text-white">@(Model.IsFemaleHeaded ? "نعم" : "لا")</span></div>
+            @if (Model.IsFemaleHeaded) { <div><span class="text-gray-400">تفاصيل:</span> <span class="text-white">@Model.FemaleHeadedDetails</span></div> }
+            <div><span class="text-gray-400">شخص خارجي:</span> <span class="text-white">@(Model.SupportsOutsidePerson ? "نعم" : "لا")</span></div>
+            @if (Model.SupportsOutsidePerson) { <div><span class="text-gray-400">اسم الخارجي:</span> <span class="text-white">@Model.OutsidePersonName</span></div> }
+            <div><span class="text-gray-400">يسكن في خيمة:</span> <span class="text-white">@(Model.LivesInTent ? "نعم" : "لا")</span></div>
+            @if (Model.LivesInTent) { <div><span class="text-gray-400">نوع الخيمة:</span> <span class="text-white">@Model.TentType @(!string.IsNullOrEmpty(Model.OtherTentType) ? "(" + Model.OtherTentType + ")" : "")</span></div> }
+            <div><span class="text-gray-400">حمام:</span> <span class="text-white">@(Model.HasBathroom ? "نعم" : "لا")</span></div>
+            @if (Model.HasBathroom) { <div><span class="text-gray-400">نوع الحمام:</span> <span class="text-white">@(Model.BathroomType == "Private" ? "خاص" : Model.BathroomType == "Shared" ? "مشترك" : Model.BathroomType)</span></div> }
+            <div><span class="text-gray-400">حفائظ:</span> <span class="text-white">@(Model.NeedsDiapers ? "نعم" : "لا")</span></div>
+            <div><span class="text-gray-400">أسر بنفس الخيمة:</span> <span class="text-white">@(Model.HasMultipleFamiliesInTent ? "نعم" : "لا")</span></div>
+        </div>
+    </div>
+
+    <!-- Status -->
+    <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700">
+        <h2 class="text-lg text-camp-gold font-bold mb-4">حالة التسجيل</h2>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+            <div>
+                <span class="text-gray-400">الحالة:</span>
+                <span class="@(Model.ApprovalStatus == RegistrationApprovalStatus.Approved ? "text-green-400" : Model.ApprovalStatus == RegistrationApprovalStatus.Pending ? "text-yellow-400" : "text-red-400") font-bold">
+                    @(Model.ApprovalStatus == RegistrationApprovalStatus.Approved ? "مقبول" : Model.ApprovalStatus == RegistrationApprovalStatus.Pending ? "قيد المراجعة" : "مرفوض")
+                </span>
+            </div>
+            <div><span class="text-gray-400">تاريخ التسجيل:</span> <span class="text-white">@Model.RegistrationTimestamp.ToString("yyyy/MM/dd HH:mm")</span></div>
+            @if (Model.ApprovedBy != null)
+            {
+                <div><span class="text-gray-400">تمت الموافقة بواسطة:</span> <span class="text-white">@Model.ApprovedBy.Name</span></div>
+                <div><span class="text-gray-400">تاريخ الموافقة:</span> <span class="text-white">@Model.ApprovedAt?.ToString("yyyy/MM/dd HH:mm")</span></div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Family Members -->
+<div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700 mt-6">
+    <h2 class="text-lg text-camp-gold font-bold mb-4">أفراد الأسرة (@Model.Members.Count)</h2>
+    @if (Model.Members.Any())
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-700 text-camp-gold text-sm">
+                        <th class="p-2 text-right">الاسم</th>
+                        <th class="p-2 text-center">رقم الهوية</th>
+                        <th class="p-2 text-center">صلة القرابة</th>
+                        <th class="p-2 text-center">الجنس</th>
+                        <th class="p-2 text-center">تاريخ الميلاد</th>
+                        <th class="p-2 text-center">الجنسية</th>
+                        <th class="p-2 text-center">الحالة الصحية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.Members)
+                    {
+                        var p = m.Person;
+                        <tr class="border-b border-gray-700 text-sm hover:bg-gray-800/50">
+                            <td class="p-2 text-white font-bold">@p.FullName</td>
+                            <td class="p-2 text-center text-gray-300">@p.IdNumber</td>
+                            <td class="p-2 text-center text-gray-300">@m.RelationshipToHead</td>
+                            <td class="p-2 text-center text-gray-300">@p.Gender</td>
+                            <td class="p-2 text-center text-gray-300">@p.DateOfBirth.ToString("yyyy/MM/dd")</td>
+                            <td class="p-2 text-center text-gray-300">@p.Nationality</td>
+                            <td class="p-2 text-center text-gray-300">@p.HealthStatus</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p class="text-gray-500 text-center py-4">لا يوجد أفراد إضافيون</p>
+    }
+</div>
+
+<div class="mt-6">
+    <a asp-action="Refugees" class="text-gray-400 hover:text-camp-gold text-sm transition">← العودة إلى قائمة النازحين</a>
+</div>

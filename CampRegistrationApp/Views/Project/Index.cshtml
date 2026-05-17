@@ -1,0 +1,84 @@
+@model List<ProjectListViewModel>
+@{
+    ViewData["Title"] = "إدارة المشاريع";
+}
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl text-camp-gold font-bold">المشاريع</h1>
+    <a asp-action="Create" class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-bold">
+        + مشروع جديد
+    </a>
+</div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@successMsg</div>
+}
+
+<div class="overflow-x-auto">
+    <table class="w-full bg-camp-accent-grey rounded-xl border border-gray-700">
+        <thead>
+            <tr class="border-b border-gray-700 text-camp-gold text-sm">
+                <th class="p-3 text-right">اسم المشروع</th>
+                <th class="p-3 text-right">الوصف</th>
+                <th class="p-3 text-center">تاريخ البداية</th>
+                <th class="p-3 text-center">تاريخ النهاية</th>
+                <th class="p-3 text-center">العدد المطلوب</th>
+                <th class="p-3 text-center">الترشيحات</th>
+                <th class="p-3 text-center">الحالة</th>
+                <th class="p-3 text-center">تاريخ الإنشاء</th>
+                <th class="p-3 text-center">إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
+                var statusColor = p.Status switch
+                {
+                    "Active" => "text-green-400",
+                    "Draft" => "text-yellow-400",
+                    "Closed" => "text-red-400",
+                    _ => "text-gray-400"
+                };
+                var statusText = p.Status switch
+                {
+                    "Active" => "نشط",
+                    "Draft" => "مسودة",
+                    "Closed" => "مغلق",
+                    _ => p.Status
+                };
+                <tr class="border-b border-gray-700 hover:bg-gray-800/50 text-sm">
+                    <td class="p-3 font-bold text-white">@p.Name</td>
+                    <td class="p-3 text-center text-gray-300">@p.StartDate.ToString("yyyy/MM/dd")</td>
+                    <td class="p-3 text-center text-gray-300">@p.EndDate.ToString("yyyy/MM/dd")</td>
+                    <td class="p-3 text-center text-gray-300">@p.RequiredCount</td>
+                    <td class="p-3 text-center">
+                        <span class="@(p.NominationCount >= p.RequiredCount ? "text-green-400" : "text-camp-gold") font-bold">
+                            @p.NominationCount
+                        </span>
+                    </td>
+                    <td class="p-3 text-center"><span class="@statusColor font-bold">@statusText</span></td>
+                    <td class="p-3 text-center text-gray-400 text-xs">@p.CreatedAt.ToString("yyyy/MM/dd")</td>
+                    <td class="p-3 text-center">
+                        <a asp-action="View" asp-route-id="@p.Id" class="text-camp-gold hover:text-yellow-500 transition ml-2">الترشيحات</a>
+                        <a asp-action="Edit" asp-route-id="@p.Id" class="text-blue-400 hover:text-blue-300 transition ml-2">تعديل</a>
+                        <form method="post" asp-action="Delete" asp-route-id="@p.Id" class="inline"
+                              onsubmit="return confirm('حذف المشروع @p.Name؟')">
+                            <button type="submit" class="text-red-400 hover:text-red-300 transition">حذف</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="8" class="p-6 text-center text-gray-500">لا توجد مشاريع بعد</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-4">
+    <a asp-controller="Admin" asp-action="Dashboard" class="text-gray-400 hover:text-camp-gold text-sm transition">← العودة إلى لوحة التحكم</a>
+</div>

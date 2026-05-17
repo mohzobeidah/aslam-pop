@@ -1,0 +1,58 @@
+@model List<AssistanceImport>
+@{
+    ViewData["Title"] = "سجل الاستيراد";
+}
+<div class="mb-6">
+    <a asp-action="Index" class="text-gray-400 hover:text-camp-gold transition">← العودة للمساعدات</a>
+</div>
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl text-camp-gold font-bold">سجل الاستيراد</h1>
+    <a asp-action="Import" class="bg-camp-gold text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-yellow-500 transition">➕ استيراد جديد</a>
+</div>
+
+<div class="overflow-x-auto">
+    <table class="w-full bg-camp-accent-grey rounded-xl border border-gray-700 text-sm">
+        <thead>
+            <tr class="border-b border-gray-700 text-camp-gold">
+                <th class="p-3 text-right">اسم الملف</th>
+                <th class="p-3 text-center">المستخدم</th>
+                <th class="p-3 text-center">القاطع</th>
+                <th class="p-3 text-center">إجمالي</th>
+                <th class="p-3 text-center">نجاح</th>
+                <th class="p-3 text-center">مكرر</th>
+                <th class="p-3 text-center">فشل</th>
+                <th class="p-3 text-center">التاريخ</th>
+                <th class="p-3 text-center">تقرير الأخطاء</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var i in Model)
+            {
+                <tr class="border-b border-gray-700 hover:bg-camp-dark-grey/50 transition">
+                    <td class="p-3 text-white font-bold" dir="ltr">@i.FileName</td>
+                    <td class="p-3 text-center text-gray-300">@i.ImportedBy?.Name</td>
+                    <td class="p-3 text-center text-camp-gold">@i.Sector?.Name</td>
+                    <td class="p-3 text-center text-white">@i.TotalRows</td>
+                    <td class="p-3 text-center text-green-400">@i.SuccessRows</td>
+                    <td class="p-3 text-center text-yellow-400">@i.DuplicateRows</td>
+                    <td class="p-3 text-center text-red-400">@i.FailedRows</td>
+                    <td class="p-3 text-center text-gray-400 text-xs">@i.ImportedAt.ToString("yyyy/MM/dd HH:mm")</td>
+                    <td class="p-3 text-center">
+                        @if (!string.IsNullOrEmpty(i.ErrorFilePath))
+                        {
+                            <a asp-action="DownloadErrorReport" asp-route-id="@i.Id" class="text-red-400 hover:text-red-300 transition text-xs">⬇ الأخطاء</a>
+                        }
+                        else
+                        {
+                            <span class="text-gray-600">—</span>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr><td colspan="9" class="p-6 text-center text-gray-500">لا يوجد سجل استيراد بعد</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,790 @@
+@model CampRegistrationApp.Models.ViewModels.RegistrationViewModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen bg-camp-dark-grey text-white font-cairo" dir="rtl">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-camp-gold mb-2">تعديل بيانات العائلة</h1>
+            <p class="text-gray-400">معرف التسجيل: <span class="font-mono text-camp-gold">@Model.RecordId</span></p>
+        </header>
+
+        <div class="max-w-4xl mx-auto">
+            @if (TempData["Success"] != null)
+            {
+                <div class="bg-green-900/50 border border-green-500 text-green-300 p-4 rounded mb-6 text-center">
+                    @TempData["Success"]
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="bg-red-900/50 border border-red-500 text-red-300 p-4 rounded mb-6 text-center">
+                    @TempData["Error"]
+                </div>
+            }
+
+            <div class="text-red-500 text-sm text-center mb-4">
+                @Html.ValidationSummary(false, "", new { @class = "text-red-500 text-sm" })
+            </div>
+
+            <form asp-action="Update" method="post" class="space-y-8">
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <input type="hidden" name="RecordId" value="@Model.RecordId" />
+                <input type="hidden" name="CurrentStep" value="1" />
+                <!-- ============ HEAD OF FAMILY ============ -->
+                <div class="bg-camp-accent-grey p-6 rounded-lg border-r-4 border-camp-gold shadow-xl">
+                    <h2 class="text-2xl font-semibold text-camp-gold mb-6">بيانات رب الأسرة</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm mb-1">الاسم الأول</label>
+                            <input name="Head.FirstName" value="@Model.Head.FirstName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">الاسم الثاني</label>
+                            <input name="Head.SecondName" value="@Model.Head.SecondName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">الاسم الثالث</label>
+                            <input name="Head.ThirdName" value="@Model.Head.ThirdName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">اسم العائلة</label>
+                            <input name="Head.LastName" value="@Model.Head.LastName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm mb-1">رقم الهوية</label>
+                            <input name="Head.IdNumber" value="@Model.Head.IdNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required onblur="validateIdField(this)" oninput="clearIdError(this)" />
+                            <span class="id-error text-red-500 text-xs hidden">رقم الهوية يجب أن يتكون من 9 أرقام</span>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">القاطع</label>
+                            <select name="Head.Sector" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
+                                <option value="">اختر القاطع...</option>
+                                @foreach (var s in ViewBag.Sectors)
+                                {
+                                    <option value="@s.Name" selected="@(Model.Head.Sector == s.Name)">@s.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">تاريخ الميلاد</label>
+                            <input name="Head.DateOfBirth" type="date" value="@Model.Head.DateOfBirth.ToString("yyyy-MM-dd")" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">الجنس</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="Head.Gender" value="ذكر" @(Model.Head.Gender == "ذكر" ? "checked" : "") class="accent-camp-gold" /> ذكر
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="Head.Gender" value="أنثى" @(Model.Head.Gender == "أنثى" ? "checked" : "") class="accent-camp-gold" /> أنثى
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">رقم الهاتف</label>
+                            <input name="Head.PhoneNumber" value="@Model.Head.PhoneNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">مكان السكن الأصلي</label>
+                            <select name="Head.OriginalGovernorate" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                                <option value="">اختر المنطقة...</option>
+                                @foreach (var g in new[] { "غزة", "خانيونيس", "شمال غزة", "رفح", "دير البلح", "النصيرات", "المغازي" })
+                                {
+                                    <option value="@g" selected="@(Model.Head.OriginalGovernorate == g )">@g</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">الجنسية</label>
+                            <select name="Head.Nationality" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                                <option value="">اختر الجنسية...</option>
+                                @foreach (var n in new[] { "فلسطيني", "مصري", "أردني", "سوري", "لبناني", "عراقي", "يمني", "ليبي", "تونسي", "جزائري", "مغربي", "سوداني", "أخرى" })
+                                {
+                                    <option value="@n" selected="@(Model.Head.Nationality == n )">@n</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">الحالة الاجتماعية</label>
+                            <select name="Head.MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                                <option value="">اختر الحالة...</option>
+                                @foreach (var s in new[] { "متزوج", "أعزب", "أرمل", "مطلق", "منفصل" })
+                                {
+                                    <option value="@s" selected="@(Model.Head.MaritalStatus == s )">@s</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">الوظيفة</label>
+                            <input name="Head.EmploymentStatus" value="@Model.Head.EmploymentStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">المستوى التعليمي</label>
+                            <select name="Head.EducationLevel" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                                <option value="">اختر...</option>
+                                @foreach (var e in new[] { "بدون", "ابتدائي", "إعدادي", "ثانوي", "جامعي", "دراسات عليا" })
+                                {
+                                    <option value="@e" selected="@(Model.Head.EducationLevel == e )">@e</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" name="Head.IsHouseDestroyed" value="true" @(Model.Head.IsHouseDestroyed ? "checked" : "") class="accent-camp-gold" />
+                                <span class="text-sm">المنزل مدمر</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" name="Head.IsPrisoner" value="true" @(Model.Head.IsPrisoner ? "checked" : "") class="accent-camp-gold" />
+                                <span class="text-sm">أسير</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Health Section -->
+                    <div class="border-t border-gray-700 pt-6">
+                        <h3 class="text-xl font-semibold text-camp-gold mb-4">الحالة الصحية</h3>
+                        <div class="flex gap-6 mb-6">
+                            @foreach (var hs in ViewBag.HealthStatuses)
+                            {
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="Head.HealthStatus" value="@hs.Name" @(Model.Head.HealthStatus == hs.Name ? "checked" : "") class="accent-camp-gold" onchange="toggleHealth(this, 'head-health-details')" /> @hs.Name
+                                </label>
+                            }
+                        </div>
+
+                        <div id="head-health-details" class="@(Model.Head.HealthStatus == "مريض" ? "" : "hidden") space-y-6">
+                            <div>
+                                <label class="block text-sm mb-2">الأمراض المزمنة</label>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    @foreach (var d in ViewBag.ChronicDiseases)
+                                    {
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.ChronicDiseases" value="@d.Name" class="accent-camp-gold" @(Model.Head.ChronicDiseases?.Contains(d.Name) == true ? "checked" : "") /> @d.Name
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2">أنواع الإعاقة</label>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    @foreach (var dis in ViewBag.DisabilityTypes)
+                                    {
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.DisabilityTypes" value="@dis.Name" class="accent-camp-gold" @(Model.Head.DisabilityTypes?.Contains(dis.Name) == true ? "checked" : "") /> @dis.Name
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 mb-4">
+                                <input type="checkbox" name="Head.HasInjury" value="true" class="accent-camp-gold" @(Model.Head.HasInjury ? "checked" : "") onchange="toggleSection(this, 'head-injury-details')" />
+                                <label class="text-sm">هل تعرض لإصابة؟</label>
+                            </div>
+                            <div id="head-injury-details" class="@(Model.Head.HasInjury ? "" : "hidden") grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm mb-1">تاريخ الإصابة</label>
+                                    <input type="date" name="Head.InjuryDate" value="@(Model.Head.InjuryDate?.ToString("yyyy-MM-dd"))" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">تفاصيل الإصابة</label>
+                                    <textarea name="Head.InjuryDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" rows="2">@Model.Head.InjuryDetails</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Female-specific -->
+                        <div class="flex items-center gap-2 mt-4">
+                            <input type="checkbox" name="Head.IsPregnant" value="true" class="accent-camp-gold" @(Model.Head.IsPregnant == true ? "checked" : "") onchange="toggleSection(this, 'head-pregnancy-details')" />
+                            <label class="text-sm">حامل</label>
+                        </div>
+                        <div id="head-pregnancy-details" class="@(Model.Head.IsPregnant == true ? "" : "hidden") grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm mb-1">شهر الحمل</label>
+                                <select name="Head.PregnancyMonth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                                    <option value="">اختر الشهر...</option>
+                                    @for (int m = 1; m <= 9; m++)
+                                    {
+                                        <option value="@m" selected="@(Model.Head.PregnancyMonth == m )">@m</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 mt-4">
+                            <input type="checkbox" name="Head.IsNursing" value="true" class="accent-camp-gold" @(Model.Head.IsNursing == true ? "checked" : "") onchange="toggleSection(this, 'head-nursing-details')" />
+                            <label class="text-sm">مرضع</label>
+                        </div>
+                        <div id="head-nursing-details" class="@(Model.Head.IsNursing == true ? "" : "hidden") grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm mb-1">اسم الطفل</label>
+                                <input name="Head.NursingInfantName" value="@Model.Head.NursingInfantName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-1">تاريخ ميلاد الطفل</label>
+                                <input type="date" name="Head.NursingInfantDOB" value="@(Model.Head.NursingInfantDOB?.ToString("yyyy-MM-dd"))" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-1">رقم هوية الطفل</label>
+                                <input name="Head.NursingInfantID" value="@Model.Head.NursingInfantID" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ FAMILY MEMBERS ============ -->
+                <div class="bg-camp-accent-grey p-6 rounded-lg border-r-4 border-camp-gold shadow-xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold text-camp-gold">أفراد الأسرة</h2>
+                        <button type="button" onclick="addMember()" class="bg-camp-gold text-camp-dark-grey px-4 py-2 rounded font-bold hover:bg-yellow-600 transition-colors">
+                            + إضافة فرد
+                        </button>
+                    </div>
+
+                    @{
+                        var firstHealthName = ((List<CampRegistrationApp.Models.HealthStatus>)ViewBag.HealthStatuses)[0].Name;
+                    }
+                    <div id="members-container" class="space-y-6">
+                        @for (int i = 0; i < Model.Members.Count; i++)
+                        {
+                            var m = Model.Members[i];
+                            <div class="member-card bg-camp-dark-grey p-4 rounded border border-gray-700 relative mb-4" data-index="@i">
+                                <button type="button" onclick="removeMember(this)" class="absolute top-2 left-2 text-red-500 hover:text-red-700 text-xl">✕</button>
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+                                    <div>
+                                        <label class="block text-xs mb-1">الاسم الأول</label>
+                                        <input name="Members[@i].FirstName" value="@m.FirstName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs mb-1">الاسم الثاني</label>
+                                        <input name="Members[@i].SecondName" value="@m.SecondName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs mb-1">الاسم الثالث</label>
+                                        <input name="Members[@i].ThirdName" value="@m.ThirdName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs mb-1">اسم العائلة</label>
+                                        <input name="Members[@i].LastName" value="@m.LastName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs mb-1">رقم الهوية</label>
+                                        <input name="Members[@i].IdNumber" value="@m.IdNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onblur="validateIdField(this)" oninput="clearIdError(this)" />
+                                        <span class="id-error text-red-500 text-xs hidden">رقم الهوية يجب أن يتكون من 9 أرقام</span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs mb-1">تاريخ الميلاد</label>
+                                        <input type="date" name="Members[@i].DateOfBirth" value="@m.DateOfBirth.ToString("yyyy-MM-dd")" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs mb-1">الجنس</label>
+                                        <select name="Members[@i].Gender" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                            <option value="ذكر" selected="@(m.Gender == "ذكر" )">ذكر</option>
+                                            <option value="أنثى" selected="@(m.Gender == "أنثى" )">أنثى</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs mb-1">صلة القرابة</label>
+                                        <select name="Members[@i].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                            <option value="">اختر...</option>
+                                            @foreach (var rel in new[] { "زوج/زوجة", "ابن", "ابنة", "أم", "أب", "أخ", "أخت", "جدة/جد", "حفيد/حفيدة", "أخ غير شقيق", "أخت غير شقيقة", "Other" })
+                                            {
+                                                <option value="@rel" selected="@(m.RelationshipToHead == rel )">@rel</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs mb-1">الجنسية</label>
+                                        <select name="Members[@i].Nationality" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                            <option value="">اختر...</option>
+                                            @foreach (var n in new[] { "فلسطيني", "مصري", "أردني", "سوري", "لبناني", "عراقي", "يمني", "ليبي", "تونسي", "جزائري", "مغربي", "سوداني", "أخرى" })
+                                            {
+                                                <option value="@n" selected="@(m.Nationality == n )">@n</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <input type="checkbox" name="Members[@i].IsPrisoner" value="true" class="accent-camp-gold" @(m.IsPrisoner ? "checked" : "") />
+                                        <label class="text-xs">أسير</label>
+                                    </div>
+                                </div>
+
+                                <!-- Member Health -->
+                                <div class="border-t border-gray-700 pt-4">
+                                    <h4 class="text-md font-semibold text-camp-gold mb-3">الحالة الصحية</h4>
+                                    <div class="flex gap-4 mb-4">
+                                        @foreach (var hs in ViewBag.HealthStatuses)
+                                        {
+                                            var isChecked = m.HealthStatus == hs.Name || (string.IsNullOrEmpty(m.HealthStatus) && hs.Name == firstHealthName);
+                                            <label class="flex items-center gap-2 cursor-pointer text-xs">
+                                                <input type="radio" name="Members[@i].HealthStatus" value="@hs.Name" class="accent-camp-gold" onchange="toggleMemberHealth(@i)" @(isChecked ? "checked" : "") /> @hs.Name
+                                            </label>
+                                        }
+                                    </div>
+                                    <div id="member-health-@i" class="@(m.HealthStatus != firstHealthName && !string.IsNullOrEmpty(m.HealthStatus) ? "" : "hidden") space-y-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-xs mb-1">الأمراض المزمنة</label>
+                                                <div class="grid grid-cols-2 gap-2">
+                                                    @foreach (var d in ViewBag.ChronicDiseases)
+                                                    {
+                                                        <label class="flex items-center gap-1 text-xs">
+                                                            <input type="checkbox" name="Members[@i].ChronicDiseases" value="@d.Name" class="accent-camp-gold" @(m.ChronicDiseases?.Contains(d.Name) == true ? "checked" : "") /> @d.Name
+                                                        </label>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs mb-1">أنواع الإعاقة</label>
+                                                <div class="grid grid-cols-2 gap-2">
+                                                    @foreach (var dis in ViewBag.DisabilityTypes)
+                                                    {
+                                                        <label class="flex items-center gap-1 text-xs">
+                                                            <input type="checkbox" name="Members[@i].DisabilityTypes" value="@dis.Name" class="accent-camp-gold" @(m.DisabilityTypes?.Contains(dis.Name) == true ? "checked" : "") /> @dis.Name
+                                                        </label>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <input type="checkbox" name="Members[@i].HasInjury" value="true" class="accent-camp-gold" @(m.HasInjury ? "checked" : "") onchange="toggleMemberInjury(@i)" />
+                                            <label class="text-xs">تعرض لإصابة</label>
+                                        </div>
+                                        <div id="member-injury-@i" class="@(m.HasInjury ? "" : "hidden") grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-xs mb-1">تاريخ الإصابة</label>
+                                                <input type="date" name="Members[@i].InjuryDate" value="@(m.InjuryDate?.ToString("yyyy-MM-dd"))" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs mb-1">تفاصيل الإصابة</label>
+                                                <textarea name="Members[@i].InjuryDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2">@m.InjuryDetails</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div class="flex items-center gap-2">
+                                                <input type="checkbox" name="Members[@i].IsPregnant" value="true" class="accent-camp-gold" @(m.IsPregnant == true ? "checked" : "") onchange="toggleMemberSection(@i, 'pregnancy')" />
+                                                <label class="text-xs">حامل</label>
+                                            </div>
+                                            <div id="member-pregnancy-@i" class="@(m.IsPregnant == true ? "" : "hidden") md:col-span-2">
+                                                <label class="block text-xs mb-1">شهر الحمل</label>
+                                                <select name="Members[@i].PregnancyMonth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                                    <option value="">اختر الشهر...</option>
+                                                    @for (int pm = 1; pm <= 9; pm++)
+                                                    {
+                                                        <option value="@pm" selected="@(m.PregnancyMonth == pm )">@pm</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div class="flex items-center gap-2">
+                                                <input type="checkbox" name="Members[@i].IsNursing" value="true" class="accent-camp-gold" @(m.IsNursing == true ? "checked" : "") onchange="toggleMemberSection(@i, 'nursing')" />
+                                                <label class="text-xs">مرضع</label>
+                                            </div>
+                                            <div id="member-nursing-@i" class="@(m.IsNursing == true ? "" : "hidden") md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                <div>
+                                                    <label class="block text-xs mb-1">اسم الطفل</label>
+                                                    <input name="Members[@i].NursingInfantName" value="@m.NursingInfantName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs mb-1">تاريخ ميلاد الطفل</label>
+                                                    <input type="date" name="Members[@i].NursingInfantDOB" value="@(m.NursingInfantDOB?.ToString("yyyy-MM-dd"))" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs mb-1">رقم هوية الطفل</label>
+                                                    <input name="Members[@i].NursingInfantID" value="@m.NursingInfantID" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <p id="no-members-msg" class="text-gray-500 text-center py-8 @(Model.Members.Count > 0 ? "hidden" : "")">لم يتم إضافة أفراد بعد. اضغط على "إضافة فرد" للبدء.</p>
+                </div>
+
+                <!-- ============ HOUSING & SPECIAL ============ -->
+                <div class="bg-camp-accent-grey p-6 rounded-lg border-r-4 border-camp-gold shadow-xl">
+                    <h2 class="text-2xl font-semibold text-camp-gold mb-6">السكن والحالات الخاصة</h2>
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" name="IsChildHeaded" value="true" class="accent-camp-gold" @(Model.IsChildHeaded ? "checked" : "") onchange="toggleSection(this, 'child-headed-details')" />
+                            <label>رب الأسرة طفل (أقل من 18 سنة)</label>
+                        </div>
+                        <div id="child-headed-details" class="@(Model.IsChildHeaded ? "" : "hidden") p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <label class="block text-sm mb-1">تفاصيل</label>
+                            <textarea name="ChildHeadedDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2">@Model.ChildHeadedDetails</textarea>
+                        </div>
+
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" name="IsFemaleHeaded" value="true" class="accent-camp-gold" @(Model.IsFemaleHeaded ? "checked" : "") onchange="toggleSection(this, 'female-headed-details')" />
+                            <label>ربة الأسرة امرأة</label>
+                        </div>
+                        <div id="female-headed-details" class="@(Model.IsFemaleHeaded ? "" : "hidden") p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <label class="block text-sm mb-1">تفاصيل</label>
+                            <textarea name="FemaleHeadedDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2">@Model.FemaleHeadedDetails</textarea>
+                        </div>
+
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" name="SupportsOutsidePerson" value="true" class="accent-camp-gold" @(Model.SupportsOutsidePerson ? "checked" : "") onchange="toggleSection(this, 'outside-person-details')" />
+                            <label>هناك شخص خارج الأسرة مشمول في الكفالة</label>
+                        </div>
+                        <div id="outside-person-details" class="@(Model.SupportsOutsidePerson ? "" : "hidden") grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <div><label class="block text-sm mb-1">الاسم</label><input name="OutsidePersonName" value="@Model.OutsidePersonName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                            <div><label class="block text-sm mb-1">صلة القرابة</label><input name="OutsidePersonRelation" value="@Model.OutsidePersonRelation" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                        </div>
+
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <label>هل تسكن العائلة في خيمة؟</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="LivesInTent" value="true" class="accent-camp-gold" @(Model.LivesInTent ? "checked" : "") onchange="toggleSection(this, 'tent-details')" /> نعم
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="LivesInTent" value="false" class="accent-camp-gold" @(!Model.LivesInTent ? "checked" : "") onchange="toggleSection(this, 'tent-details')" /> لا
+                                </label>
+                            </div>
+                        </div>
+                        <div id="tent-details" class="@(Model.LivesInTent ? "" : "hidden") p-4 bg-camp-dark-grey rounded border border-gray-700 space-y-4">
+                            <select name="TentType" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                <option value="">اختر النوع...</option>
+                                @foreach (var t in new[] { "Installation", "Dome", "Emirati", "Qatari", "Other" })
+                                {
+                                    <option value="@t" selected="@(Model.TentType == t )">@t</option>
+                                }
+                            </select>
+                            <input name="OtherTentType" value="@Model.OtherTentType" placeholder="يرجى تحديد النوع الآخر" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                        </div>
+
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <label>هل يوجد حمام؟</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="HasBathroom" value="true" class="accent-camp-gold" @(Model.HasBathroom ? "checked" : "") onchange="toggleSection(this, 'bathroom-details')" /> نعم
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="HasBathroom" value="false" class="accent-camp-gold" @(!Model.HasBathroom ? "checked" : "") onchange="toggleSection(this, 'bathroom-details')" /> لا
+                                </label>
+                            </div>
+                        </div>
+                        <div id="bathroom-details" class="@(Model.HasBathroom ? "" : "hidden") p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="BathroomType" value="Private" class="accent-camp-gold" @(Model.BathroomType == "Private" ? "checked" : "") /> خاص
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="BathroomType" value="Shared" class="accent-camp-gold" @(Model.BathroomType == "Shared" ? "checked" : "") /> مشترك
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" name="NeedsDiapers" value="true" class="accent-camp-gold" @(Model.NeedsDiapers ? "checked" : "") onchange="toggleSection(this, 'diaper-details')" />
+                            <label>هل تحتاج العائلة حفائظ (لكبار السن أو آخرين)؟</label>
+                        </div>
+                        <div id="diaper-details" class="@(Model.NeedsDiapers ? "" : "hidden") p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <textarea name="DiaperDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2">@Model.DiaperDetails</textarea>
+                        </div>
+
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" name="HasMultipleFamiliesInTent" value="true" class="accent-camp-gold" @(Model.HasMultipleFamiliesInTent ? "checked" : "") onchange="toggleSection(this, 'multiple-families-details')" />
+                            <label>هل يوجد أكثر من عائلة تسكن في نفس الخيمة؟</label>
+                        </div>
+                        <div id="multiple-families-details" class="@(Model.HasMultipleFamiliesInTent ? "" : "hidden") p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <select name="AdditionalFamiliesCount" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                <option value="">اختر...</option>
+                                @for (int af = 1; af <= 5; af++)
+                                {
+                                    <option value="@af" selected="@(Model.AdditionalFamiliesCount == af )">@af</option>
+                                }
+                                <option value="6" selected="@(Model.AdditionalFamiliesCount == 6 )">أكثر من 5</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="flex gap-4 justify-center pt-4">
+                    <button type="submit" onclick="return submitEditForm()" class="px-10 py-3 rounded bg-green-600 text-white font-bold hover:bg-green-700 transition-colors text-lg">
+                        حفظ التعديلات
+                    </button>
+                    <button type="button" onclick="confirmLogout()" class="px-6 py-3 rounded border border-gray-600 text-gray-400 hover:text-white hover:border-gray-400 transition-colors">
+                        خروج
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .field-error { border-color: #ef4444 !important; }
+        .field-error:focus { border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3); }
+        .id-error { display: block; margin-top: 4px; }
+        .id-error.hidden { display: none; }
+    </style>
+
+    <script>
+        // ========== LOOKUP DATA FROM DB ==========
+        const HEALTH_STATUSES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.HealthStatus>)ViewBag.HealthStatuses).Select(h => h.Name)));
+        const CHRONIC_DISEASES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.ChronicDisease>)ViewBag.ChronicDiseases).Select(c => c.Name)));
+        const DISABILITY_TYPES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.DisabilityType>)ViewBag.DisabilityTypes).Select(d => d.Name)));
+
+        let memberIdx = @Model.Members.Count;
+
+        function validatePalestinianId(id) {
+            return /^\d{9}$/.test(id);
+        }
+
+        function validateIdField(el) {
+            const val = el.value.trim();
+            const errorSpan = el.parentElement.querySelector('.id-error');
+            if (!errorSpan) return true;
+            if (val && !validatePalestinianId(val)) {
+                errorSpan.classList.remove('hidden');
+                el.classList.add('field-error');
+                return false;
+            }
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+            return true;
+        }
+
+        function clearIdError(el) {
+            const errorSpan = el.parentElement.querySelector('.id-error');
+            if (!errorSpan) return;
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+        }
+
+        function toggleHealth(el, sectionId) {
+            const radios = document.querySelectorAll(`[name="${el.name}"]`);
+            let isFirst = true;
+            radios.forEach((r, i) => { if (r === el && i === 0) isFirst = true; if (r === el && i > 0) isFirst = false; });
+            document.getElementById(sectionId).classList.toggle('hidden', isFirst);
+        }
+
+        function toggleSection(el, sectionId) {
+            const section = document.getElementById(sectionId);
+            if (el.type === 'checkbox') {
+                section.classList.toggle('hidden', !el.checked);
+            } else if (el.type === 'radio') {
+                section.classList.toggle('hidden', el.value === 'false');
+            }
+        }
+
+        function addMember() {
+            const idx = memberIdx++;
+            const container = document.getElementById('members-container');
+            const card = document.createElement('div');
+            card.className = 'member-card bg-camp-dark-grey p-4 rounded border border-gray-700 relative mb-4';
+            card.innerHTML = `
+                <button type="button" onclick="removeMember(this)" class="absolute top-2 left-2 text-red-500 hover:text-red-700 text-xl">✕</button>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+                    <div><label class="block text-xs mb-1">الاسم الأول</label><input name="Members[\${idx}].FirstName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                    <div><label class="block text-xs mb-1">الاسم الثاني</label><input name="Members[\${idx}].SecondName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                    <div><label class="block text-xs mb-1">الاسم الثالث</label><input name="Members[\${idx}].ThirdName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                    <div><label class="block text-xs mb-1">اسم العائلة</label><input name="Members[\${idx}].LastName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                    <div><label class="block text-xs mb-1">رقم الهوية</label><input name="Members[\${idx}].IdNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onblur="validateIdField(this)" oninput="clearIdError(this)" /><span class="id-error text-red-500 text-xs hidden">رقم الهوية يجب أن يتكون من 9 أرقام</span></div>
+                    <div><label class="block text-xs mb-1">تاريخ الميلاد</label><input type="date" name="Members[\${idx}].DateOfBirth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                    <div><label class="block text-xs mb-1">الجنس</label>
+                        <select name="Members[\${idx}].Gender" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                            <option value="ذكر">ذكر</option><option value="أنثى">أنثى</option>
+                        </select>
+                    </div>
+                    <div><label class="block text-xs mb-1">صلة القرابة</label>
+                        <select name="Members[\${idx}].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                            <option value="">اختر...</option>
+                            ${['زوج/زوجة','ابن','ابنة','أم','أب','أخ','أخت','جدة/جد','حفيد/حفيدة','أخ غير شقيق','أخت غير شقيقة','Other'].map(r => '<option value="'+r+'">'+r+'</option>').join('')}
+                        </select>
+                    </div>
+                    <div><label class="block text-xs mb-1">الجنسية</label>
+                        <select name="Members[\${idx}].Nationality" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                            <option value="">اختر...</option>
+                            ${['فلسطيني','مصري','أردني','سوري','لبناني','عراقي','يمني','ليبي','تونسي','جزائري','مغربي','سوداني','أخرى'].map(n => '<option value="'+n+'">'+n+'</option>').join('')}
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" name="Members[\${idx}].IsPrisoner" value="true" class="accent-camp-gold" />
+                        <label class="text-xs">أسير</label>
+                    </div>
+                </div>
+                <div class="border-t border-gray-700 pt-4">
+                    <h4 class="text-md font-semibold text-camp-gold mb-3">الحالة الصحية</h4>
+                    <div class="flex gap-4 mb-4">
+                        ${HEALTH_STATUSES.map((hs, hi) => '<label class="flex items-center gap-2 cursor-pointer text-xs"><input type="radio" name="Members[\${idx}].HealthStatus" value="'+hs+'" class="accent-camp-gold" '+(hi===0?'checked':'')+' onchange="toggleMemberHealth(\${idx})" /> '+hs+'</label>').join('')}
+                    </div>
+                    <div id="member-health-\${idx}" class="hidden space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs mb-1">الأمراض المزمنة</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    ${CHRONIC_DISEASES.map(d => '<label class="flex items-center gap-1 text-xs"><input type="checkbox" name="Members[\${idx}].ChronicDiseases" value="'+d+'" class="accent-camp-gold" /> '+d+'</label>').join('')}
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs mb-1">أنواع الإعاقة</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    ${DISABILITY_TYPES.map(d => '<label class="flex items-center gap-1 text-xs"><input type="checkbox" name="Members[\${idx}].DisabilityTypes" value="'+d+'" class="accent-camp-gold" /> '+d+'</label>').join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" name="Members[\${idx}].HasInjury" value="true" class="accent-camp-gold" onchange="toggleMemberInjury(\${idx})" />
+                            <label class="text-xs">تعرض لإصابة</label>
+                        </div>
+                        <div id="member-injury-\${idx}" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-xs mb-1">تاريخ الإصابة</label><input type="date" name="Members[\${idx}].InjuryDate" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                            <div><label class="block text-xs mb-1">تفاصيل الإصابة</label><textarea name="Members[\${idx}].InjuryDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2"></textarea></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="flex items-center gap-2"><input type="checkbox" name="Members[\${idx}].IsPregnant" value="true" class="accent-camp-gold" onchange="toggleMemberSection(\${idx}, 'pregnancy')" /><label class="text-xs">حامل</label></div>
+                            <div id="member-pregnancy-\${idx}" class="hidden md:col-span-2">
+                                <select name="Members[\${idx}].PregnancyMonth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                    <option value="">اختر الشهر...</option>
+                                    ${Array.from({length:9}, (_, i) => i+1).map(m => '<option value="'+m+'">'+m+'</option>').join('')}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="flex items-center gap-2"><input type="checkbox" name="Members[\${idx}].IsNursing" value="true" class="accent-camp-gold" onchange="toggleMemberSection(\${idx}, 'nursing')" /><label class="text-xs">مرضع</label></div>
+                            <div id="member-nursing-\${idx}" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div><label class="block text-xs mb-1">اسم الطفل</label><input name="Members[\${idx}].NursingInfantName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                                <div><label class="block text-xs mb-1">تاريخ ميلاد الطفل</label><input type="date" name="Members[\${idx}].NursingInfantDOB" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                                <div><label class="block text-xs mb-1">رقم هوية الطفل</label><input name="Members[\${idx}].NursingInfantID" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+            document.getElementById('no-members-msg')?.classList.add('hidden');
+        }
+
+        function removeMember(btn) {
+            btn.closest('.member-card').remove();
+            if (document.querySelectorAll('.member-card').length === 0) {
+                document.getElementById('no-members-msg')?.classList.remove('hidden');
+            }
+        }
+
+        function toggleMemberHealth(idx) {
+            const radios = document.querySelectorAll(`[name="Members[${idx}].HealthStatus"]`);
+            let show = false;
+            radios.forEach((r, i) => { if (r.checked && i > 0) show = true; });
+            const section = document.getElementById(`member-health-${idx}`);
+            if (section) section.classList.toggle('hidden', !show);
+        }
+
+        function toggleMemberInjury(idx) {
+            const section = document.getElementById(`member-injury-${idx}`);
+            if (section) section.classList.toggle('hidden');
+        }
+
+        function toggleMemberSection(idx, type) {
+            const section = document.getElementById(`member-${type}-${idx}`);
+            if (section) section.classList.toggle('hidden');
+        }
+
+        function submitEditForm() {
+            // Validate IDs
+            let valid = true;
+            document.querySelectorAll('[name$=".IdNumber"], [name="Head.IdNumber"]').forEach(el => {
+                if (!validateIdField(el)) valid = false;
+            });
+
+            const required = ['Head.FirstName', 'Head.SecondName', 'Head.ThirdName', 'Head.LastName', 'Head.IdNumber', 'Head.Sector'];
+            required.forEach(key => {
+                const el = document.querySelector(`[name="${key}"]`);
+                if (!el || !el.value.trim()) {
+                    el?.classList.add('field-error');
+                    valid = false;
+                } else {
+                    el?.classList.remove('field-error');
+                }
+            });
+
+            if (!valid) {
+                alert('يرجى تعبئة جميع الحقول المطلوبة بشكل صحيح');
+                return false;
+            }
+
+            const form = document.querySelector('form');
+
+            // Disable ALL checkboxes + radios so only hidden inputs submit values
+            form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
+            form.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
+
+            // Head multi-value: ChronicDiseases, DisabilityTypes
+            [['Head.ChronicDiseases'], ['Head.DisabilityTypes']].forEach(([name]) => {
+                const checked = Array.from(form.querySelectorAll(`[name="${name}"]:checked`)).map(cb => cb.value);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = name;
+                hidden.value = checked.join('، ');
+                form.appendChild(hidden);
+            });
+
+            // Members multi-value + bools
+            document.querySelectorAll('.member-card').forEach((card, idx) => {
+                ['ChronicDiseases', 'DisabilityTypes'].forEach(field => {
+                    const checked = Array.from(card.querySelectorAll(`[name="Members[${idx}].${field}"]:checked`)).map(cb => cb.value);
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = `Members[${idx}].${field}`;
+                    hidden.value = checked.join('، ');
+                    form.appendChild(hidden);
+                });
+                ['HasInjury', 'IsPregnant', 'IsNursing', 'IsPrisoner'].forEach(field => {
+                    const cb = card.querySelector(`[name="Members[${idx}].${field}"]`);
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = `Members[${idx}].${field}`;
+                    hidden.value = cb?.checked ? 'true' : 'false';
+                    form.appendChild(hidden);
+                });
+            });
+
+            // Head bools
+            ['Head.IsHouseDestroyed', 'Head.IsPrisoner'].forEach(field => {
+                const cb = form.querySelector(`[name="${field}"]`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = field;
+                hidden.value = cb?.checked ? 'true' : 'false';
+                form.appendChild(hidden);
+            });
+
+            // Registration-level bools
+            ['NeedsDiapers', 'HasMultipleFamiliesInTent', 'IsChildHeaded', 'IsFemaleHeaded', 'SupportsOutsidePerson', 'LivesInTent', 'HasBathroom'].forEach(field => {
+                const el = form.querySelector(`[name="${field}"]`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = field;
+                if (el?.type === 'radio') {
+                    hidden.value = document.querySelector(`[name="${field}"]:checked`)?.value || 'false';
+                } else {
+                    hidden.value = el?.checked ? 'true' : 'false';
+                }
+                form.appendChild(hidden);
+            });
+
+            return true;
+        }
+
+        function confirmLogout() {
+            if (confirm('هل تريد تسجيل الخروج؟')) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '@Url.Action("Logout")';
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+</div>
+

@@ -1,0 +1,46 @@
+@{
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen bg-camp-dark-grey text-white font-cairo flex items-center justify-center" dir="rtl">
+    <div class="max-w-md w-full p-8 bg-camp-accent-grey rounded-lg border-t-4 border-camp-gold shadow-2xl">
+        <div class="text-center mb-8">
+            <div class="text-4xl text-camp-gold mb-4">🔑</div>
+            <h1 class="text-2xl font-bold text-camp-gold">تسجيل الدخول</h1>
+            <p class="text-gray-400">أدخل رقم الهوية وكلمة المرور لتعديل بيانات العائلة</p>
+        </div>
+
+        @if (TempData["Error"] is string errorMsg)
+        {
+            <div class="bg-yellow-900/50 text-yellow-300 p-3 rounded-lg mb-4 text-sm text-center">@errorMsg</div>
+        }
+
+        <form asp-action="Login" method="post" class="space-y-6">
+            <div>
+                <label class="block text-sm mb-2">رقم هوية رب الأسرة</label>
+                <input name="idNumber" class="w-full p-3 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none text-center" placeholder="أدخل رقم الهوية (9 أرقام)" pattern="\d{9}" title="9 أرقام" required />
+            </div>
+            <div>
+                <label class="block text-sm mb-2">كلمة المرور</label>
+                <input type="password" name="password" class="w-full p-3 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none text-center" placeholder="أدخل كلمة المرور" required />
+            </div>
+
+            <div class="text-red-500 text-sm text-center">
+                @Html.ValidationSummary(false, "", new { @class = "text-red-500 text-sm" })
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors">
+                دخول للتعديل
+            </button>
+        </form>
+
+        <div class="mt-6 text-center space-y-2">
+            <p class="text-xs text-gray-500">
+                لا تملك حساباً؟ <a href="@Url.Action("Index", "Registration")" class="text-camp-gold hover:underline">تسجيل عائلة جديدة</a>
+            </p>
+            <p class="text-xs text-gray-500">
+                نسيت كلمة المرور؟ <a href="@Url.Action("Search", "Record")" class="text-camp-gold hover:underline">البحث عن طريق معرف التسجيل</a>
+            </p>
+        </div>
+    </div>
+</div>

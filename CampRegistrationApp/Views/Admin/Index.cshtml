@@ -1,0 +1,69 @@
+@model List<Admin>
+@{
+    ViewData["Title"] = "إدارة المسؤولين";
+}
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl text-camp-gold font-bold">إدارة المسؤولين</h1>
+    <a asp-action="Create" class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-bold">
+        + إضافة مسؤول
+    </a>
+</div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@successMsg</div>
+}
+
+<div class="overflow-x-auto">
+    <table class="w-full bg-camp-accent-grey rounded-xl border border-gray-700">
+        <thead>
+            <tr class="border-b border-gray-700 text-camp-gold text-sm">
+                <th class="p-3 text-right">الاسم</th>
+                <th class="p-3 text-right">رقم الهوية</th>
+                <th class="p-3 text-right">الجوال</th>
+                <th class="p-3 text-right">الدور</th>
+                <th class="p-3 text-right">القاطع</th>
+                <th class="p-3 text-center">إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var admin in Model)
+            {
+                <tr class="border-b border-gray-700 hover:bg-gray-800/50 text-sm">
+                    <td class="p-3 text-white font-bold">@admin.Name</td>
+                    <td class="p-3 text-gray-300">@admin.NationalId</td>
+                    <td class="p-3 text-gray-300">@admin.Mobile</td>
+                    <td class="p-3">
+                        @if (admin.Role == AdminRole.Admin)
+                        {
+                            <span class="bg-camp-gold/20 text-camp-gold px-2 py-1 rounded text-xs">مدير</span>
+                        }
+                        else
+                        {
+                            <span class="bg-blue-900/50 text-blue-300 px-2 py-1 rounded text-xs">مندوب</span>
+                        }
+                    </td>
+                    <td class="p-3 text-gray-300">@admin.Sector?.Name ?? "—"</td>
+                    <td class="p-3 text-center">
+                        <a asp-action="Edit" asp-route-id="@admin.Id" class="text-camp-gold hover:text-yellow-500 transition ml-2">تعديل</a>
+                        <form method="post" asp-action="Delete" asp-route-id="@admin.Id" class="inline"
+                              onsubmit="return confirm('حذف المسؤول @admin.Name؟')">
+                            <button type="submit" class="text-red-400 hover:text-red-300 transition">حذف</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="6" class="p-6 text-center text-gray-500">لا يوجد مسؤولون بعد</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Dashboard" class="text-gray-400 hover:text-camp-gold text-sm transition">← العودة إلى لوحة التحكم</a>
+</div>

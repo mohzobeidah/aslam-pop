@@ -1,0 +1,39 @@
+@model CampRegistrationApp.Models.ViewModels.RegistrationViewModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen bg-camp-dark-grey text-white font-cairo flex items-center justify-center" dir="rtl">
+    <div class="max-w-md w-full p-8 bg-camp-accent-grey rounded-lg border-t-4 border-camp-gold shadow-2xl">
+        <div class="text-center mb-8">
+            <div class="text-4xl text-camp-gold mb-4">🔍</div>
+            <h1 class="text-2xl font-bold text-camp-gold">البحث عن سجل</h1>
+            <p class="text-gray-400">أدخل بيانات السجل للوصول إلى البيانات وتعديلها</p>
+        </div>
+
+        <form asp-action="Find" method="post" class="space-y-6">
+            <div>
+                <label class="block text-sm mb-2">معرف التسجيل (8 رموز)</label>
+                <input name="recordId" class="w-full p-3 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none text-center font-mono text-xl tracking-widest" placeholder="مثال: A1B2C3D4" />
+            </div>
+            <div>
+                <label class="block text-sm mb-2">رقم هوية رب الأسرة</label>
+                <input name="headIdNumber" class="w-full p-3 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none text-center" placeholder="أدخل رقم الهوية" />
+            </div>
+
+            <div class="text-red-500 text-sm text-center">
+                @Html.ValidationSummary(false, "", new { @class = "text-red-500 text-sm" })
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors">
+                بحث وتعديل
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <a href="@Url.Action("Index", "Registration")" class="text-sm text-gray-500 hover:text-camp-gold transition-colors">
+                ← العودة لصفحة التسجيل الجديدة
+            </a>
+        </div>
+    </div>
+</div>

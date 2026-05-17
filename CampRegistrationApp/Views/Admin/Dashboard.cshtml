@@ -1,0 +1,106 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "لوحة التحكم";
+    var role = ViewBag.AdminRole as string;
+    var isSuper = role == "Admin";
+}
+
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-2xl text-camp-gold font-bold">لوحة التحكم</h1>
+        <p class="text-gray-400 text-sm">
+            مرحباً، <span class="text-white">@ViewBag.AdminName</span>
+            @if (isSuper)
+            {
+                <span class="bg-camp-gold/20 text-camp-gold text-xs px-2 py-0.5 rounded mr-2">مدير</span>
+            }
+            else
+            {
+                <span class="bg-blue-900/50 text-blue-300 text-xs px-2 py-0.5 rounded mr-2">مندوب</span>
+            }
+        </p>
+    </div>
+    <div class="flex gap-2">
+        <a asp-action="Refugees" class="bg-camp-accent-grey text-camp-gold px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
+            النازحين
+        </a>
+        <a asp-action="Registrations" class="bg-camp-accent-grey text-camp-gold px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
+            الموافقة على التسجيلات
+        </a>
+        <a asp-controller="Project" asp-action="Index" class="bg-camp-accent-grey text-camp-gold px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
+            المشاريع
+        </a>
+        @if (isSuper)
+        {
+            <a asp-action="Index" class="bg-camp-accent-grey text-camp-gold px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
+                إدارة المسؤولين
+            </a>
+            <a asp-action="Sectors" class="bg-camp-accent-grey text-camp-gold px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
+                إدارة القواطع
+            </a>
+        }
+        <form method="post" asp-action="Logout" class="inline">
+            <button type="submit" class="bg-red-900/50 text-red-300 px-4 py-2 rounded-lg hover:bg-red-800/50 transition text-sm">
+                تسجيل خروج
+            </button>
+        </form>
+    </div>
+</div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@successMsg</div>
+}
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700">
+        <div class="text-3xl font-bold text-camp-gold">@Model.TotalRegistrations</div>
+        <div class="text-gray-400 text-sm mt-1">إجمالي التسجيلات</div>
+    </div>
+    <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700">
+        <div class="text-3xl font-bold text-camp-gold">@Model.TotalAdmins</div>
+        <div class="text-gray-400 text-sm mt-1">إجمالي المسؤولين</div>
+    </div>
+    <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700">
+        <div class="text-3xl font-bold text-camp-gold">@Model.TotalSectors</div>
+        <div class="text-gray-400 text-sm mt-1">عدد القواطع</div>
+    </div>
+</div>
+
+<h2 class="text-xl text-camp-gold font-bold mb-4">إحصائيات القواطع</h2>
+
+<div class="overflow-x-auto">
+    <table class="w-full bg-camp-accent-grey rounded-xl border border-gray-700">
+        <thead>
+            <tr class="border-b border-gray-700 text-camp-gold text-sm">
+                <th class="p-3 text-right">القاطع</th>
+                <th class="p-3 text-right">المخيم</th>
+                <th class="p-3 text-right">المنطقة</th>
+                <th class="p-3 text-center">خيم تصنيع</th>
+                <th class="p-3 text-center">خيم يدوي</th>
+                <th class="p-3 text-center">حمامات</th>
+                <th class="p-3 text-center">عدد المسجلين</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model.Sectors)
+            {
+                <tr class="border-b border-gray-700 hover:bg-gray-800/50 text-sm">
+                    <td class="p-3 font-bold text-white">@s.SectorName</td>
+                    <td class="p-3 text-gray-300">@s.Camp</td>
+                    <td class="p-3 text-gray-300">@s.Area</td>
+                    <td class="p-3 text-center text-gray-300">@s.ManufacturedTents</td>
+                    <td class="p-3 text-center text-gray-300">@s.HandmadeTents</td>
+                    <td class="p-3 text-center text-gray-300">@s.Bathrooms</td>
+                    <td class="p-3 text-center text-camp-gold font-bold">@s.RegistrationCount</td>
+                </tr>
+            }
+            @if (!Model.Sectors.Any())
+            {
+                <tr>
+                    <td colspan="7" class="p-6 text-center text-gray-500">لا توجد قواطع بعد</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

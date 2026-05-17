@@ -1,0 +1,66 @@
+@model ProjectViewModel
+@{
+    ViewData["Title"] = "مشروع جديد";
+}
+
+<div class="max-w-2xl mx-auto">
+    <div class="flex items-center mb-6">
+        <a asp-action="Index" class="text-gray-400 hover:text-camp-gold transition ml-4">← العودة</a>
+        <h1 class="text-2xl text-camp-gold font-bold">مشروع جديد</h1>
+    </div>
+
+    <div class="bg-camp-accent-grey p-6 rounded-xl border border-gray-700">
+        <form method="post" asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-red-400 mb-4 text-sm"></div>
+
+            <div class="mb-4">
+                <label asp-for="Name" class="block text-camp-gold mb-1 text-sm"></label>
+                <input asp-for="Name" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2.5 focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none" />
+                <span asp-validation-for="Name" class="text-red-400 text-xs"></span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label asp-for="StartDate" class="block text-camp-gold mb-1 text-sm"></label>
+                    <input asp-for="StartDate" type="date" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2.5 focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none" />
+                    <span asp-validation-for="StartDate" class="text-red-400 text-xs"></span>
+                </div>
+                <div>
+                    <label asp-for="EndDate" class="block text-camp-gold mb-1 text-sm"></label>
+                    <input asp-for="EndDate" type="date" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2.5 focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none" />
+                    <span asp-validation-for="EndDate" class="text-red-400 text-xs"></span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="RequiredCount" class="block text-camp-gold mb-1 text-sm"></label>
+                <input asp-for="RequiredCount" type="number" min="1" max="1000" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2.5 focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none" />
+                <span asp-validation-for="RequiredCount" class="text-red-400 text-xs"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Status" class="block text-camp-gold mb-1 text-sm"></label>
+                <select asp-for="Status" asp-items="Html.GetEnumSelectList<ProjectStatus>()" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2.5 focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none">
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Description" class="block text-camp-gold mb-1 text-sm">الوصف</label>
+                <textarea asp-for="Description" rows="3" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2.5 focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none"></textarea>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Notes" class="block text-camp-gold mb-1 text-sm"></label>
+                <textarea asp-for="Notes" rows="3" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2.5 focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none"></textarea>
+            </div>
+
+            <button type="submit" class="bg-camp-gold text-black font-bold px-6 py-2.5 rounded-lg hover:bg-yellow-500 transition w-full">
+                حفظ المشروع
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

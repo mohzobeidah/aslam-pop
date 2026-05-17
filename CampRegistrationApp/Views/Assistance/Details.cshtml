@@ -1,0 +1,142 @@
+@model Assistance
+@{
+    ViewData["Title"] = "تفاصيل المساعدة";
+    var isSuper = ViewBag.IsSuperAdmin as bool? ?? false;
+    var isViewer = ViewBag.IsViewer as bool? ?? false;
+}
+<div class="mb-6">
+    <a asp-action="Index" class="text-gray-400 hover:text-camp-gold transition">← العودة للمساعدات</a>
+</div>
+
+@if (TempData["Success"] is string sm) { <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@sm</div> }
+@if (TempData["Error"] is string em) { <div class="bg-red-900/50 text-red-300 p-3 rounded-lg mb-4 text-sm">@em</div> }
+
+<div class="bg-camp-accent-grey p-6 rounded-xl border border-gray-700 mb-6">
+    <div class="flex justify-between items-start">
+        <div>
+            <h1 class="text-2xl text-camp-gold font-bold">@Model.Name</h1>
+            <p class="text-gray-400 text-sm mt-1">@Model.AssistanceType · @Model.Source · @Model.Sector?.Name</p>
+        </div>
+        <div class="flex gap-2">
+            @if (!isViewer)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="bg-blue-700 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">تعديل</a>
+                @if (isSuper && Model.Status == AssistanceStatus.Draft)
+                {
+                    <form method="post" asp-action="Approve" asp-route-id="@Model.Id" class="inline">
+                        <button type="submit" class="bg-green-700 text-white px-3 py-1 rounded text-sm hover:bg-green-600">اعتماد</button>
+                    </form>
+                    <form method="post" asp-action="Cancel" asp-route-id="@Model.Id" class="inline">
+                        <button type="submit" class="bg-red-700 text-white px-3 py-1 rounded text-sm hover:bg-red-600">إلغاء</button>
+                    </form>
+                }
+            }
+            <a asp-action="ExportBeneficiaries" asp-route-id="@Model.Id" class="bg-camp-gold text-black px-3 py-1 rounded text-sm hover:bg-yellow-500">⬇ تصدير Excel</a>
+        </div>
+    </div>
+    <hr class="border-gray-700 my-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div><span class="text-gray-400">التاريخ:</span> <span class="text-white">@Model.AssistanceDate.ToString("yyyy/MM/dd")</span></div>
+        <div><span class="text-gray-400">الحالة:</span>
+            @if (Model.Status == AssistanceStatus.Approved) { <span class="text-green-400 font-bold">معتمدة</span> }
+            else if (Model.Status == AssistanceStatus.Cancelled) { <span class="text-red-400 font-bold">ملغية</span> }
+            else { <span class="text-yellow-400 font-bold">مسودة</span> }
+        </div>
+        <div><span class="text-gray-400">تاريخ الإضافة:</span> <span class="text-white">@Model.CreatedAt.ToString("yyyy/MM/dd")</span></div>
+        <div><span class="text-gray-400">المستخدم:</span> <span class="text-white">@Model.CreatedBy?.Name</span></div>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <div class="mt-4 text-sm"><span class="text-gray-400">الوصف:</span><p class="text-white mt-1">@Model.Description</p></div>
+    }
+</div>
+
+<!-- Beneficiaries -->
+<div class="bg-camp-accent-grey p-6 rounded-xl border border-gray-700">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl text-camp-gold font-bold">المستفيدون (@Model.Beneficiaries.Count)</h2>
+        <div class="flex gap-2">
+            @if (!isViewer)
+            {
+                <a asp-action="Import" asp-route-assistanceId="@Model.Id" class="bg-blue-700 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">📥 استيراد</a>
+            }
+        </div>
+    </div>
+
+    @if (!isViewer)
+    {
+        <form method="post" asp-action="AddBeneficiary" class="bg-camp-dark-grey p-4 rounded-lg border border-gray-700 mb-4">
+            <input type="hidden" name="AssistanceId" value="@Model.Id">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <input name="FullName" placeholder="الاسم الكامل" class="bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white outline-none focus:border-camp-gold" required>
+                <input name="NationalId" placeholder="رقم الهوية" class="bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white outline-none focus:border-camp-gold" required>
+                <input name="Phone" placeholder="الجوال" class="bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white outline-none focus:border-camp-gold">
+                <input name="FileNumber" placeholder="رقم الملف" class="bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white outline-none focus:border-camp-gold">
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                <input name="FamilyName" placeholder="اسم العائلة" class="bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white outline-none focus:border-camp-gold">
+                <input name="City" placeholder="المحافظة" class="bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white outline-none focus:border-camp-gold">
+                <input name="FamilyCount" type="number" placeholder="عدد الأسرة" class="bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white outline-none focus:border-camp-gold">
+                <select name="BenefitType" class="bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white outline-none focus:border-camp-gold">
+                    <option value="">نوع الاستفادة</option>
+                    <option value="غذائية">غذائية</option>
+                    <option value="طبية">طبية</option>
+                    <option value="نقدية">نقدية</option>
+                    <option value="ملابس">ملابس</option>
+                    <option value="إيواء">إيواء</option>
+                </select>
+            </div>
+            <div class="mt-3">
+                <textarea name="Notes" rows="1" placeholder="ملاحظات" class="w-full bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white outline-none focus:border-camp-gold"></textarea>
+            </div>
+            <button type="submit" class="bg-camp-gold text-black px-4 py-2 rounded font-bold text-sm hover:bg-yellow-500 transition mt-2">➕ إضافة مستفيد</button>
+        </form>
+    }
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-gray-700 text-camp-gold">
+                    <th class="p-2 text-right">الاسم</th>
+                    <th class="p-2 text-center">رقم الهوية</th>
+                    <th class="p-2 text-center">الجوال</th>
+                    <th class="p-2 text-center">رقم الملف</th>
+                    <th class="p-2 text-center">المحافظة</th>
+                    <th class="p-2 text-center">عدد الأسرة</th>
+                    <th class="p-2 text-center">نوع الاستفادة</th>
+                    <th class="p-2 text-center">تاريخ الإضافة</th>
+                    @if (!isViewer) { <th class="p-2 text-center">إجراءات</th> }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var b in Model.Beneficiaries.OrderByDescending(b => b.CreatedAt))
+                {
+                    <tr class="border-b border-gray-700 hover:bg-camp-dark-grey/50 transition">
+                        <td class="p-2 text-white font-bold">@b.FullName</td>
+                        <td class="p-2 text-center text-gray-300 font-mono" dir="ltr">@b.NationalId</td>
+                        <td class="p-2 text-center text-gray-300" dir="ltr">@b.Phone</td>
+                        <td class="p-2 text-center text-gray-300">@b.FileNumber</td>
+                        <td class="p-2 text-center text-gray-300">@b.City</td>
+                        <td class="p-2 text-center text-gray-300">@b.FamilyCount</td>
+                        <td class="p-2 text-center text-gray-300">@b.BenefitType</td>
+                        <td class="p-2 text-center text-gray-400 text-xs">@b.CreatedAt.ToString("yyyy/MM/dd")</td>
+                        @if (!isViewer)
+                        {
+                            <td class="p-2 text-center">
+                                <form method="post" asp-action="DeleteBeneficiary" class="inline" onsubmit="return confirm('حذف المستفيد؟')">
+                                    <input type="hidden" name="id" value="@b.Id">
+                                    <input type="hidden" name="assistanceId" value="@Model.Id">
+                                    <button type="submit" class="text-red-400 hover:text-red-300 transition text-xs">حذف</button>
+                                </form>
+                            </td>
+                        }
+                    </tr>
+                }
+                @if (!Model.Beneficiaries.Any())
+                {
+                    <tr><td colspan="@(isViewer ? 8 : 9)" class="p-4 text-center text-gray-500">لا يوجد مستفيدون بعد</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

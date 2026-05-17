@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet new mvc *)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet ef *)",
+      "Bash(dotnet run *)",
+      "Bash(curl -I http://localhost:5000)",
+      "Bash(curl -I http://localhost:5001)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :5292)",
+      "Bash(taskkill *)",
+      "PowerShell(Stop-Process *)",
+      "Bash(curl -I http://localhost:5292)",
+      "Bash(curl -I http://localhost:5292/Registration/Index)",
+      "Bash(curl -I http://localhost:5292/Record/Search)",
+      "Bash(curl *)",
+      "PowerShell(Get-NetTCPConnection *)",
+      "PowerShell(dotnet build *)",
+      "PowerShell(dotnet run *)"
+    ]
+  }
+}

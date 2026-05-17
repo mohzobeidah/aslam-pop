@@ -1,0 +1,102 @@
+@model List<Assistance>
+@{
+    ViewData["Title"] = "المساعدات";
+    var sectors = ViewBag.Sectors as List<string> ?? new();
+}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl text-camp-gold font-bold">المساعدات</h1>
+    <div class="flex gap-2">
+        @if (!ViewBag.IsViewer)
+        {
+            <a asp-action="Import" class="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition text-sm font-bold">📥 استيراد Excel</a>
+            <a asp-action="Create" class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-bold">➕ إضافة مساعدة</a>
+        }
+        <a asp-action="ImportHistory" class="bg-camp-accent-grey text-camp-gold px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">📋 سجل الاستيراد</a>
+    </div>
+</div>
+
+@if (TempData["Success"] is string sm) { <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@sm</div> }
+@if (TempData["Error"] is string em) { <div class="bg-red-900/50 text-red-300 p-3 rounded-lg mb-4 text-sm">@em</div> }
+
+<div class="bg-camp-accent-grey p-4 rounded-xl border border-gray-700 mb-6">
+    <form method="get" class="flex flex-wrap gap-4 items-end">
+        <div>
+            <label class="block text-xs text-gray-400 mb-1">بحث</label>
+            <input type="text" name="search" value="@ViewBag.CurrentSearch" placeholder="الاسم أو المصدر..." class="bg-camp-dark-grey border border-gray-600 rounded p-2 text-sm outline-none focus:border-camp-gold text-white">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-400 mb-1">القاطع</label>
+            <select name="sector" class="bg-camp-dark-grey border border-gray-600 rounded p-2 text-sm outline-none focus:border-camp-gold text-white">
+                <option value="">الكل</option>
+                @foreach (var s in sectors) { <option value="@s" selected="@(ViewBag.CurrentSector == s)">@s</option> }
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-400 mb-1">الحالة</label>
+            <select name="status" class="bg-camp-dark-grey border border-gray-600 rounded p-2 text-sm outline-none focus:border-camp-gold text-white">
+                <option value="">الكل</option>
+                <option value="Draft" selected="@(ViewBag.CurrentStatus == "Draft")">مسودة</option>
+                <option value="Approved" selected="@(ViewBag.CurrentStatus == "Approved")">معتمدة</option>
+                <option value="Cancelled" selected="@(ViewBag.CurrentStatus == "Cancelled")">ملغية</option>
+            </select>
+        </div>
+        <button type="submit" class="bg-camp-gold text-black px-4 py-2 rounded font-bold text-sm hover:bg-yellow-500 transition">بحث</button>
+        <a asp-action="Index" class="text-gray-400 hover:text-camp-gold text-sm px-3 py-2">إلغاء</a>
+    </form>
+</div>
+
+<div class="overflow-x-auto">
+    <table class="w-full bg-camp-accent-grey rounded-xl border border-gray-700 text-sm">
+        <thead>
+            <tr class="border-b border-gray-700 text-camp-gold">
+                <th class="p-3 text-right">الاسم</th>
+                <th class="p-3 text-right">النوع</th>
+                <th class="p-3 text-right">المصدر</th>
+                <th class="p-3 text-right">القاطع</th>
+                <th class="p-3 text-center">التاريخ</th>
+                <th class="p-3 text-center">الحالة</th>
+                <th class="p-3 text-center">تاريخ الإضافة</th>
+                <th class="p-3 text-center">إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in Model)
+            {
+                var statusColor = a.Status == AssistanceStatus.Approved ? "text-green-400" : a.Status == AssistanceStatus.Cancelled ? "text-red-400" : "text-yellow-400";
+                var statusText = a.Status == AssistanceStatus.Approved ? "معتمدة" : a.Status == AssistanceStatus.Cancelled ? "ملغية" : "مسودة";
+                <tr class="border-b border-gray-700 hover:bg-camp-dark-grey/50 transition">
+                    <td class="p-3 font-bold text-white">@a.Name</td>
+                    <td class="p-3 text-gray-300">@a.AssistanceType</td>
+                    <td class="p-3 text-gray-300">@a.Source</td>
+                    <td class="p-3 text-camp-gold">@a.Sector?.Name</td>
+                    <td class="p-3 text-center text-gray-400">@a.AssistanceDate.ToString("yyyy/MM/dd")</td>
+                    <td class="p-3 text-center"><span class="@statusColor font-bold">@statusText</span></td>
+                    <td class="p-3 text-center text-gray-400 text-xs">@a.CreatedAt.ToString("yyyy/MM/dd")</td>
+                    <td class="p-3 text-center">
+                        <a asp-action="Details" asp-route-id="@a.Id" class="text-camp-gold hover:text-yellow-500 transition text-sm ml-2">عرض</a>
+                        @if (!ViewBag.IsViewer)
+                        {
+                            <a asp-action="Edit" asp-route-id="@a.Id" class="text-blue-400 hover:text-blue-300 transition text-sm ml-2">تعديل</a>
+                            if (ViewBag.IsSuperAdmin && a.Status == AssistanceStatus.Draft)
+                            {
+                                <form method="post" asp-action="Approve" asp-route-id="@a.Id" class="inline">
+                                    <button type="submit" class="text-green-400 hover:text-green-300 transition text-sm ml-2">اعتماد</button>
+                                </form>
+                            }
+                            <form method="post" asp-action="Delete" asp-route-id="@a.Id" class="inline" onsubmit="return confirm('حذف المساعدة؟')">
+                                <button type="submit" class="text-red-400 hover:text-red-300 transition text-sm">حذف</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr><td colspan="8" class="p-6 text-center text-gray-500">لا توجد مساعدات بعد</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div class="mt-4">
+    <a asp-action="Index" asp-controller="Admin" asp-route-controller="Admin" class="text-gray-400 hover:text-camp-gold text-sm transition">← العودة للوحة التحكم</a>
+</div>

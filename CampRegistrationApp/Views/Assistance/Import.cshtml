@@ -1,0 +1,45 @@
+@{
+    ViewData["Title"] = "استيراد مستفيدين";
+    var assistances = ViewBag.Assistances as List<Assistance> ?? new();
+}
+<div class="max-w-2xl mx-auto">
+    <div class="flex items-center gap-4 mb-6">
+        <a asp-action="Index" class="text-gray-400 hover:text-camp-gold transition">← العودة</a>
+        <h1 class="text-2xl text-camp-gold font-bold">استيراد مستفيدين من Excel</h1>
+    </div>
+
+    @if (TempData["Success"] is string sm) { <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@sm</div> }
+    @if (TempData["Error"] is string em) { <div class="bg-red-900/50 text-red-300 p-3 rounded-lg mb-4 text-sm">@em</div> }
+
+    <div class="bg-camp-accent-grey p-6 rounded-xl border border-gray-700 mb-6">
+        <h2 class="text-lg text-camp-gold font-bold mb-3">تعليمات الاستيراد</h2>
+        <ul class="text-sm text-gray-400 space-y-1 list-disc pr-5">
+            <li>يجب أن يحتوي الملف على الأعمدة التالية: <span class="text-white">FullName, NationalId, Phone, FileNumber, FamilyName, Sector, City, FamilyCount</span></li>
+            <li>الملف بصيغة <span class="text-white">.xlsx</span> فقط</li>
+            <li>يتم التحقق من عدم تكرار رقم الهوية داخل نفس المساعدة</li>
+            <li>يتم تجاهل الصفوف الفارغة أو المكررة مع تسجيل الأخطاء</li>
+        </ul>
+        <div class="mt-4">
+            <a asp-action="DownloadTemplate" class="bg-camp-gold text-black px-4 py-2 rounded-lg text-sm font-bold hover:bg-yellow-500 transition">⬇ تحميل القالب</a>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="bg-camp-accent-grey p-6 rounded-xl border border-gray-700 space-y-4">
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">المساعدة</label>
+            <select name="assistanceId" class="w-full bg-camp-dark-grey border border-gray-600 rounded p-2 text-sm outline-none focus:border-camp-gold text-white" required>
+                <option value="">اختر المساعدة</option>
+                @foreach (var a in assistances) { <option value="@a.Id">@a.Name - @a.Sector?.Name</option> }
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">ملف Excel</label>
+            <input type="file" name="excelFile" accept=".xlsx" class="w-full bg-camp-dark-grey border border-gray-600 rounded p-2 text-sm text-white" required>
+        </div>
+        <button type="submit" class="bg-camp-gold text-black px-6 py-2 rounded-lg font-bold hover:bg-yellow-500 transition">رفع واستيراد</button>
+    </form>
+
+    <div class="mt-4">
+        <a asp-action="ImportHistory" class="text-camp-gold hover:text-yellow-500 transition text-sm">📋 عرض سجل الاستيراد</a>
+    </div>
+</div>

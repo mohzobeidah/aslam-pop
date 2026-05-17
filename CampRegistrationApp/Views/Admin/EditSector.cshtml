@@ -1,0 +1,119 @@
+@model Sector
+@{
+    ViewData["Title"] = "تعديل القاطع";
+    var mandoobs = ViewBag.AvailableMandoobs as List<Admin> ?? new();
+}
+
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-2xl text-camp-gold font-bold mb-6">تعديل القاطع: @Model.Name</h1>
+
+    @if (TempData["Success"] is string successMsg)
+    {
+        <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@successMsg</div>
+    }
+
+    <form method="post" asp-action="EditSector" class="bg-camp-accent-grey p-6 rounded-2xl border border-gray-700 space-y-4 mb-6">
+        <input type="hidden" asp-for="Id">
+
+        <div>
+            <label class="block text-gray-300 text-sm mb-1">اسم القاطع</label>
+            <input asp-for="Name" required
+                   class="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-4 py-2 focus:border-camp-gold focus:outline-none">
+            <span asp-validation-for="Name" class="text-red-400 text-xs"></span>
+        </div>
+        <div>
+            <label class="block text-gray-300 text-sm mb-1">المخيم</label>
+            <input asp-for="Camp"
+                   class="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-4 py-2 focus:border-camp-gold focus:outline-none">
+        </div>
+        <div>
+            <label class="block text-gray-300 text-sm mb-1">الإحداثيات</label>
+            <input asp-for="Coordinate"
+                   class="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-4 py-2 focus:border-camp-gold focus:outline-none">
+        </div>
+        <div>
+            <label class="block text-gray-300 text-sm mb-1">المنطقة</label>
+            <input asp-for="Area"
+                   class="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-4 py-2 focus:border-camp-gold focus:outline-none">
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+            <div>
+                <label class="block text-gray-300 text-sm mb-1">خيم تصنيع</label>
+                <input asp-for="ManufacturedTentsCount" type="number" min="0"
+                       class="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-4 py-2 focus:border-camp-gold focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-gray-300 text-sm mb-1">خيم يدوي</label>
+                <input asp-for="HandmadeTentsCount" type="number" min="0"
+                       class="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-4 py-2 focus:border-camp-gold focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-gray-300 text-sm mb-1">حمامات</label>
+                <input asp-for="BathroomsCount" type="number" min="0"
+                       class="w-full bg-gray-800 border border-gray-600 text-white rounded-lg px-4 py-2 focus:border-camp-gold focus:outline-none">
+            </div>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+            <button type="submit" class="bg-camp-gold text-black font-bold px-6 py-2 rounded-lg hover:bg-yellow-500 transition">حفظ التغييرات</button>
+            <a asp-action="Sectors" class="bg-gray-700 text-gray-300 px-6 py-2 rounded-lg hover:bg-gray-600 transition">إلغاء</a>
+        </div>
+    </form>
+
+    <!-- Mandoob Management -->
+    <div class="bg-camp-accent-grey p-6 rounded-2xl border border-gray-700">
+        <h2 class="text-lg text-camp-gold font-bold mb-4">المندوبون المسؤولون عن القاطع</h2>
+
+        @if (Model.Admins.Any())
+        {
+            <div class="space-y-2 mb-4">
+                @foreach (var m in Model.Admins)
+                {
+                    <div class="flex items-center justify-between bg-gray-800 p-3 rounded-lg border border-gray-700">
+                        <div>
+                            <span class="text-white font-bold">@m.Name</span>
+                            <span class="text-gray-400 text-sm mr-2">@m.NationalId</span>
+                            <span class="text-gray-500 text-xs mr-2">@m.Mobile</span>
+                        </div>
+                        <form method="post" asp-action="RemoveMandoob" class="inline"
+                              onsubmit="return confirm('إزالة @m.Name من القاطع @Model.Name؟')">
+                            <input type="hidden" name="sectorId" value="@Model.Id" />
+                            <input type="hidden" name="adminId" value="@m.Id" />
+                            <button type="submit" class="text-red-400 hover:text-red-300 transition text-sm">إزالة</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-gray-500 text-sm mb-4">لا يوجد مندوبون مسؤولون عن هذا القاطع</p>
+        }
+
+        @if (mandoobs.Any())
+        {
+            <form method="post" asp-action="AssignMandoob" class="flex gap-2 items-end border-t border-gray-700 pt-4">
+                <input type="hidden" name="sectorId" value="@Model.Id" />
+                <div class="flex-1">
+                    <label class="block text-camp-gold text-xs mb-1">إضافة مندوب</label>
+                    <select name="adminId" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none">
+                        <option value="">اختر مندوب...</option>
+                        @foreach (var a in mandoobs)
+                        {
+                            <option value="@a.Id">@a.Name - @a.NationalId</option>
+                        }
+                    </select>
+                </div>
+                <button type="submit" class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-bold">إضافة</button>
+            </form>
+        }
+        else
+        {
+            <p class="text-gray-500 text-xs border-t border-gray-700 pt-4">جميع المندوبين مسؤولون عن قواطع حالياً</p>
+        }
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Sectors" class="text-gray-400 hover:text-camp-gold text-sm transition">← العودة إلى القواطع</a>
+    </div>
+</div>

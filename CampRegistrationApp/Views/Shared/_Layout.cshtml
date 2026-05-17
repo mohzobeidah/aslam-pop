@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - نظام تسجيل العائلات</title>
+
+    <!-- Google Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'camp-gold': '#D4AF37',
+                        'camp-dark-grey': '#1A1A1A',
+                        'camp-accent-grey': '#2D2D2D',
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+    </style>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="bg-camp-dark-grey">
+    <header>
+        <nav class="bg-camp-accent-grey border-b border-camp-gold p-4 shadow-lg">
+            <div class="container mx-auto flex justify-between items-center">
+                <a class="text-2xl font-bold text-camp-gold" asp-area="" asp-controller="Home" asp-action="Index">
+                    نظام تسجيل العائلات
+                </a>
+                <div class="flex gap-4">
+                    @{
+                        var isLoggedIn = Context.Session.GetInt32("AdminId").HasValue;
+                    }
+                    <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded" asp-controller="Registration" asp-action="Index">تسجيل جديد</a>
+                    <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded" asp-controller="Record" asp-action="Login">تسجيل الدخول</a>
+                    @if (isLoggedIn)
+                    {
+                        <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded" asp-controller="Project" asp-action="Index">المشاريع</a>
+                        <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded" asp-controller="Assistance" asp-action="Index">المساعدات</a>
+                        <a class="relative text-camp-gold hover:text-yellow-500 transition-colors px-3 py-2 rounded font-bold" asp-controller="Admin" asp-action="Dashboard">
+                            لوحة التحكم
+                        </a>
+                        <a class="relative text-gray-300 hover:text-camp-gold transition-colors px-3 py-2 rounded" asp-controller="Admin" asp-action="Notifications" id="notificationBell">
+                            🔔
+                            <span id="notificationBadge" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center hidden" style="font-size:9px">0</span>
+                        </a>
+                        <a asp-controller="Admin" asp-action="Logout" method="post"
+                           class="text-red-400 hover:text-red-300 transition-colors px-3 py-2 rounded text-sm"
+                           onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
+                            تسجيل خروج
+                        </a>
+                        <form id="logoutForm" asp-controller="Admin" asp-action="Logout" method="post" class="hidden"></form>
+                    }
+                    else
+                    {
+                        <a class="text-camp-gold hover:text-yellow-500 transition-colors px-3 py-2 rounded font-bold" asp-controller="Admin" asp-action="Login">دخول المشرفين</a>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container mx-auto">
+        <main role="main" class="py-8">
+            @RenderBody()
+        </main>
+    </div>
+    <footer class="border-t border-gray-800 text-center py-6 text-gray-500 text-sm">
+        <div class="container mx-auto">
+            &copy; 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة
+        </div>
+    </footer>
+    <script>
+        async function updateNotificationBadge() {
+            try {
+                const res = await fetch('/Admin/GetNotificationCount');
+                const count = await res.json();
+                const badge = document.getElementById('notificationBadge');
+                if (badge) {
+                    if (count > 0) {
+                        badge.textContent = count > 99 ? '99+' : count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+            } catch {}
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNotificationBadge();
+            setInterval(updateNotificationBadge, 30000);
+        });
+    </script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

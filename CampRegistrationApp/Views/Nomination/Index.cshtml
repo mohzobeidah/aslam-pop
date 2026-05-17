@@ -1,0 +1,183 @@
+@model NominationPageViewModel
+@{
+    ViewData["Title"] = $"ترشيحات - {Model.ProjectName}";
+    var sectors = ViewBag.Sectors as List<Sector> ?? new();
+}
+
+<div class="mb-6">
+    <div class="flex justify-between items-start">
+        <div>
+            <a asp-controller="Project" asp-action="Index" class="text-gray-400 hover:text-camp-gold text-sm transition">← المشاريع</a>
+            <h1 class="text-2xl text-camp-gold font-bold mt-1">@Model.ProjectName</h1>
+            <p class="text-gray-400 text-sm">
+                العدد المطلوب: <span class="text-camp-gold font-bold">@Model.RequiredCount</span>
+                | الترشيحات الحالية: <span class="@(Model.ExistingCount >= Model.RequiredCount ? "text-green-400" : "text-camp-gold") font-bold">@Model.ExistingCount</span>
+            </p>
+        </div>
+        <div class="flex gap-2">
+            <span class="px-3 py-1 rounded text-sm @(Model.ProjectStatus == ProjectStatus.Active ? "bg-green-900/50 text-green-300" : Model.ProjectStatus == ProjectStatus.Draft ? "bg-yellow-900/50 text-yellow-300" : "bg-red-900/50 text-red-300")">
+                @(Model.ProjectStatus switch { ProjectStatus.Active => "نشط", ProjectStatus.Draft => "مسودة", ProjectStatus.Closed => "مغلق", _ => "" })
+            </span>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@successMsg</div>
+}
+@if (TempData["Error"] is string errorMsg)
+{
+    <div class="bg-red-900/50 text-red-300 p-3 rounded-lg mb-4 text-sm">@errorMsg</div>
+}
+
+@if (!Model.IsPastEndDate && Model.ExistingCount < Model.RequiredCount)
+{
+    <div class="bg-camp-accent-grey p-4 rounded-xl border border-gray-700 mb-6">
+        <h2 class="text-camp-gold font-bold mb-3">إضافة ترشيح</h2>
+        <div class="flex gap-2 mb-3">
+            <input type="text" id="personSearch" placeholder="ابحث برقم الهوية أو الاسم..." 
+                   class="flex-1 bg-gray-800 text-white border border-gray-600 rounded-lg p-2.5 focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none" />
+            <button onclick="searchPerson()" class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition font-bold text-sm">بحث</button>
+        </div>
+
+        <div id="searchResults" class="hidden">
+            <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+                    <div><span class="text-gray-400">الاسم:</span> <span id="resultName" class="text-white"></span></div>
+                    <div><span class="text-gray-400">رقم الهوية:</span> <span id="resultIdNumber" class="text-white"></span></div>
+                    <div><span class="text-gray-400">الهاتف:</span> <span id="resultPhone" class="text-white"></span></div>
+                </div>
+                <form method="post" asp-action="AddRow" class="flex gap-2 items-end">
+                    <input type="hidden" name="projectId" value="@Model.ProjectId" />
+                    <input type="hidden" name="personId" id="addPersonId" value="" />
+                    <div class="flex-1">
+                        <label class="block text-camp-gold mb-1 text-xs">القاطع</label>
+                        @if (ViewBag.IsSuperAdmin == true)
+                        {
+                            <select name="sectorId" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none">
+                                @foreach (var s in sectors)
+                                {
+                                    <option value="@s.Id">@s.Name</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            var delegateSector = sectors.FirstOrDefault(s => s.Id == ViewBag.DelegateSectorId);
+                            <input type="hidden" name="sectorId" value="@(delegateSector?.Id)" />
+                            <div class="bg-gray-700 text-gray-300 border border-gray-600 rounded-lg p-2 text-sm">@(delegateSector?.Name ?? "—")</div>
+                        }
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-camp-gold mb-1 text-xs">ملاحظات</label>
+                        <input name="notes" placeholder="اختياري" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none" />
+                    </div>
+                    <button type="submit" id="addBtn" disabled class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition font-bold text-sm disabled:opacity-50">
+                        إضافة
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div id="notFound" class="hidden bg-red-900/30 text-red-300 p-3 rounded-lg text-sm">لم يتم العثور على الشخص. يجب أن يكون مسجلاً في النظام أولاً.</div>
+    </div>
+}
+
+<div class="overflow-x-auto">
+    <table class="w-full bg-camp-accent-grey rounded-xl border border-gray-700">
+        <thead>
+            <tr class="border-b border-gray-700 text-camp-gold text-sm">
+                <th class="p-3 text-center">#</th>
+                <th class="p-3 text-right">الاسم</th>
+                <th class="p-3 text-center">رقم الهوية</th>
+                <th class="p-3 text-center">الهاتف</th>
+                <th class="p-3 text-center">القاطع</th>
+                <th class="p-3 text-center">ملاحظات</th>
+                <th class="p-3 text-center">إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model.Rows)
+            {
+                <tr class="border-b border-gray-700 hover:bg-gray-800/50 text-sm">
+                    <td class="p-3 text-center text-gray-400">@row.RowNumber</td>
+                    <td class="p-3 font-bold text-white">@row.PersonName</td>
+                    <td class="p-3 text-center text-gray-300">@row.IdNumber</td>
+                    <td class="p-3 text-center text-gray-300" dir="ltr">@row.Phone</td>
+                    <td class="p-3 text-center text-gray-300">@row.Sector</td>
+                    <td class="p-3 text-center text-gray-400 text-xs">@row.Notes</td>
+                    <td class="p-3 text-center">
+                        <form method="post" asp-action="DeleteRow" asp-route-id="@row.Id" asp-route-projectId="@Model.ProjectId" class="inline"
+                              onsubmit="return confirm('حذف ترشيح @row.PersonName؟')">
+                            <button type="submit" class="text-red-400 hover:text-red-300 transition text-sm">حذف</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Rows.Any())
+            {
+                <tr>
+                    <td colspan="7" class="p-6 text-center text-gray-500">لا توجد ترشيحات بعد</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        let lastSearchResult = null;
+
+        async function searchPerson() {
+            const query = document.getElementById('personSearch').value.trim();
+            if (!query) return;
+
+            const resultsDiv = document.getElementById('searchResults');
+            const notFoundDiv = document.getElementById('notFound');
+            const addBtn = document.getElementById('addBtn');
+
+            resultsDiv.classList.add('hidden');
+            notFoundDiv.classList.add('hidden');
+            addBtn.disabled = true;
+
+            try {
+                const res = await fetch(`/Nomination/SearchPerson?query=${encodeURIComponent(query)}`);
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    notFoundDiv.classList.remove('hidden');
+                    return;
+                }
+
+                const person = data[0];
+                document.getElementById('resultName').textContent = person.name;
+                document.getElementById('resultIdNumber').textContent = person.idNumber;
+                document.getElementById('resultPhone').textContent = person.phone || '—';
+                document.getElementById('addPersonId').value = person.id;
+
+                // Check if already nominated
+                const checkRes = await fetch(`/Nomination/CheckPersonInProject?projectId=@Model.ProjectId&personId=${person.id}`);
+                const checkData = await checkRes.json();
+
+                if (checkData.exists) {
+                    document.getElementById('resultName').innerHTML = person.name + ' <span class="text-yellow-400 text-xs">(مرشح مسبقاً)</span>';
+                    addBtn.disabled = true;
+                } else {
+                    addBtn.disabled = false;
+                }
+
+                resultsDiv.classList.remove('hidden');
+            } catch {
+                notFoundDiv.textContent = 'حدث خطأ في البحث';
+                notFoundDiv.classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('personSearch').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchPerson();
+            }
+        });
+    </script>
+}
