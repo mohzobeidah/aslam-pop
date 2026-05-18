@@ -1,0 +1,19 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.sln.docstates
+*.userprefs
+*.csproj.user
+**/Debug/
+**/Release/
+**/packages/
+*.nupkg
+
+## Node
+node_modules/
+
+## OS
+.DS_Store
+Thumbs.db
