@@ -45,6 +45,7 @@ namespace CampRegistrationApp.Models
         public string? NursingInfantID { get; set; }
         public bool IsPrisoner { get; set; }
         public string? Nationality { get; set; }
+        public string? Wallet { get; set; }
 
         public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
     }

@@ -29,6 +29,7 @@ This repository contains two versions of a Camp Family Registration application:
 - **Framework**: .NET 10 MVC with Razor runtime compilation.
 - **Structure**: Standard MVC pattern with `Controllers/`, `Models/`, and `Views/`.
 - **Database**: SQL Server (LocalDB via `localhost\SQLEXPRESS`) via Entity Framework Core 10.
+- **CI/CD**: GitHub Actions (`.github/workflows/publish.yml`) + Azure deployment (`.deployment`).
 - **Database Name**: `CampRegistrationDb` (auto-created via `EnsureCreated()` on startup).
 - **Static Assets**: Managed in `wwwroot/`, uploaded files stored under `wwwroot/uploads/registrations/`.
 - **Session**: Used for admin authentication (`AdminId`, `AdminName`, `AdminRole`), refugee edit access (`EditRegistrationId`), and multi-step registration flow.
@@ -45,8 +46,8 @@ Nomination >── (1) Sector, (1) Admin (Delegate), (1?) Admin (ApprovedBy)
 Admin (1) ──< (N) Notification
 Notification >── (0..1) Link (URL string)
 ```
-- **Person**: Shared entity for both Head of Family and Family Members. Fields include name (4 parts), ID, sector, DOB, gender, phone, governorate, nationality (الجنسية), marital/employment/education status, health info (diseases, disabilities, injuries), prisoner flag (أسير), optional maternity fields (pregnancy, nursing).
-- **FamilyRegistration**: Links to FamilyHead (Person), has list of Members, plus housing/special-case fields (tent, bathroom, child-headed, female-headed, external support, diaper needs, multiple families in tent). Has unique 8-char `RecordId`. Approval workflow with `ApprovalStatus` (Pending/Approved/Rejected).
+- **Person**: Shared entity for both Head of Family and Family Members. Fields include name (4 parts), ID, sector, DOB, gender, phone, governorate, nationality (الجنسية), **Wallet (المحفظة)**, marital/employment/education status, health info (diseases, disabilities, injuries), prisoner flag (أسير), optional maternity fields (pregnancy, nursing).
+- **FamilyRegistration**: Links to FamilyHead (Person), has list of Members, plus housing/special-case fields (tent, bathroom, child-headed, female-headed, external support, diaper needs, multiple families in tent) and **Refugee Needs** (NeedPriority enum for 7 aid items: Tents, Blankets, Mattresses, KitchenTools, Tarpaulins, Clothes, HygieneKit). Has unique 8-char `RecordId`. Approval workflow with `ApprovalStatus` (Pending/Approved/Rejected).
 - **FamilyMember**: Join table linking `FamilyRegistration` → `Person` with a `RelationshipToHead` string.
 - **Attachment**: File metadata linked to a Person (`MedicalReport` or `IDImage`), storing relative file paths.
 - **Admin**: Login system with `AdminRole` enum (`Admin`=super, `Mandoob`=sector-limited). Linked optionally to a `Sector`.
@@ -106,19 +107,25 @@ Notification >── (0..1) Link (URL string)
 ## Registration Flow (4 Steps + Submit)
 1. **Step 1**: Family Head info (personal, socio-economic, health, documents).
 2. **Step 2**: Family Members (dynamic add/remove, each with own health/maternity/docs).
-3. **Step 3**: Housing & Special Cases (tent, bathroom, child-headed, female-headed, external support).
+3. **Step 3**: Housing & Special Cases + **Refugee Needs** (طلب المساعدات): 7 aid categories with dropdown priority selectors (None/Low/Medium/High/Critical).
 4. **Step 4**: Review & Confirm.
 
 **Navigation**: Steps are sequential — user cannot skip ahead by clicking tabs. `tryGoToStep(step)` validates all prior steps before allowing forward navigation. Going back is always allowed. `nextStep()` delegates to `tryGoToStep()`.
 
-5. **Submit**: Wraps everything in a DB transaction — creates FamilyHead `Person`, then `FamilyRegistration`, then each Member `Person` + `FamilyMember`. On success, creates notifications for all sector mandoobs.
+**Submit**: Wraps everything in a DB transaction — creates FamilyHead `Person`, then `FamilyRegistration`, then each Member `Person` + `FamilyMember`. On success, creates notifications for all sector mandoobs.
 
 ## Registration ViewModel (`RegistrationViewModel`)
-- `Head` (PersonViewModel) + `Members` (List of MemberViewModel inheriting PersonViewModel) + housing/special-case fields.
+- `Head` (PersonViewModel) + `Members` (List of MemberViewModel inheriting PersonViewModel) + housing/special-case fields + **Refugee Needs** (7 `int` fields mapped to `NeedPriority` enum).
 - `MemberViewModel` adds `RelationshipToHead` to PersonViewModel.
 - `CurrentStep` (1-4) tracks wizard progress.
 - `UploadedFiles` (List<string>) tracks client-side uploaded file paths.
 - `Password` string — set in Step 4, hashed on server.
+
+## Refugee Needs (`NeedPriority` Enum)
+- `None = 0`, `Low = 1`, `Medium = 2`, `High = 3`, `Critical = 4`
+- Stored on `FamilyRegistration` entity: `NeedTents`, `NeedBlankets`, `NeedMattresses`, `NeedKitchenTools`, `NeedTarpaulins`, `NeedClothes`, `NeedHygieneKit`
+- ViewModel maps as `int` (0–4), rendered as `<select>` dropdowns in Step 3 with Arabic labels (خيم, اغطية, فرشات, ادوات مطبخ, شوادر, ملابس, طرد صحي).
+- Displayed in Step 4 review section, filtered to show only non-zero items.
 
 ## File Upload Pattern
 - **Registration form**: Uses AJAX POST to `/Registration/UploadFile` with `IFormFile`.
@@ -172,6 +179,8 @@ Notification >── (0..1) Link (URL string)
 - **No migrations**: `EnsureCreated()` won't update existing DB schema; uses raw SQL as workaround.
 - **Session-based auth**: Lost on server restart; no token/refresh mechanism.
 - **ID Validation**: Palestinian ID enforced as 9-digit string via `[RegularExpression(@"^\d{9}$")]` on ViewModel. Client-side validates on blur + on step navigation + on submit. Invalid IDs show red border + inline error message.
+- **Health validation**: If health status is "مريض" (sick), at least one chronic disease or disability must be selected (client-side only).
+- **Phone required**: Phone number is required in the registration form, validated both client-side and server-side with `[Required]`.
 - **No input sanitization**: User text inputs go directly to DB.
 - **No pagination**: Admin lists (admins, sectors) load all rows at once.
 - **No cascade deletes**: `FamilyHeadId` uses `Restrict` delete behavior — can't delete a Person that's a family head.

@@ -189,6 +189,7 @@ namespace CampRegistrationApp.Controllers
                 head.IsHouseDestroyed = model.Head.IsHouseDestroyed;
                 head.IsPrisoner = model.Head.IsPrisoner;
                 head.Nationality = model.Head.Nationality;
+                head.Wallet = model.Head.Wallet;
                 head.IsPregnant = model.Head.IsPregnant;
                 head.PregnancyMonth = model.Head.PregnancyMonth;
                 head.IsNursing = model.Head.IsNursing;
@@ -253,6 +254,7 @@ namespace CampRegistrationApp.Controllers
                         InjuryDetails = mViewModel.InjuryDetails,
                         IsPrisoner = mViewModel.IsPrisoner,
                         Nationality = mViewModel.Nationality,
+                        Wallet = mViewModel.Wallet,
                         IsPregnant = mViewModel.IsPregnant,
                         PregnancyMonth = mViewModel.PregnancyMonth,
                         IsNursing = mViewModel.IsNursing,
@@ -327,6 +329,7 @@ namespace CampRegistrationApp.Controllers
                     InjuryDetails = registration.FamilyHead.InjuryDetails,
                     IsPrisoner = registration.FamilyHead.IsPrisoner,
                     Nationality = registration.FamilyHead.Nationality,
+                    Wallet = registration.FamilyHead.Wallet,
                     IsHouseDestroyed = registration.FamilyHead.IsHouseDestroyed,
                     IsPregnant = registration.FamilyHead.IsPregnant,
                     PregnancyMonth = registration.FamilyHead.PregnancyMonth,

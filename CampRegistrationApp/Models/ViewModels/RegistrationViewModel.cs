@@ -31,6 +31,15 @@ namespace CampRegistrationApp.Models.ViewModels
         public string? DiaperDetails { get; set; }
         public bool HasMultipleFamiliesInTent { get; set; }
         public int? AdditionalFamiliesCount { get; set; }
+
+        // Refugee Needs (Orders) - Using int to map to NeedPriority enum
+        public int NeedTents { get; set; } = 0;
+        public int NeedBlankets { get; set; } = 0;
+        public int NeedMattresses { get; set; } = 0;
+        public int NeedKitchenTools { get; set; } = 0;
+        public int NeedTarpaulins { get; set; } = 0;
+        public int NeedClothes { get; set; } = 0;
+        public int NeedHygieneKit { get; set; } = 0;
     }
 
     public class PersonViewModel
@@ -55,6 +64,7 @@ namespace CampRegistrationApp.Models.ViewModels
         public DateTime DateOfBirth { get; set; } = DateTime.Today;
         [Required(ErrorMessage = "الجنس مطلوب")]
         public string Gender { get; set; } = "ذكر";
+        [Required(ErrorMessage = "رقم الهاتف مطلوب")]
         public string PhoneNumber { get; set; } = string.Empty;
         public string OriginalGovernorate { get; set; } = string.Empty;
         public string MaritalStatus { get; set; } = string.Empty;
@@ -76,6 +86,7 @@ namespace CampRegistrationApp.Models.ViewModels
         public string? NursingInfantID { get; set; }
         public bool IsPrisoner { get; set; }
         public string? Nationality { get; set; }
+        public string? Wallet { get; set; }
         public string? HeadIdImagePath { get; set; }
         public string? MedicalImagePath { get; set; }
         public List<string> UploadedFiles { get; set; } = new();

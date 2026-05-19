@@ -17,7 +17,8 @@
       "Bash(curl *)",
       "PowerShell(Get-NetTCPConnection *)",
       "PowerShell(dotnet build *)",
-      "PowerShell(dotnet run *)"
+      "PowerShell(dotnet run *)",
+      "Bash(dotnet test *)"
     ]
   }
 }

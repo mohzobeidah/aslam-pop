@@ -97,7 +97,11 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">رقم الهاتف</label>
-                            <input name="Head.PhoneNumber" data-ls="Head.PhoneNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                            <input name="Head.PhoneNumber" data-ls="Head.PhoneNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">المحفظة</label>
+                            <input name="Head.Wallet" data-ls="Head.Wallet" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
                         </div>
                         <div>
                             <label class="block text-sm mb-1">مكان السكن الأصلي</label>
@@ -409,6 +413,34 @@
                                 <option value="6">أكثر من 5</option>
                             </select>
                         </div>
+
+                        <!-- Refugee Needs (Orders) -->
+                        <div class="p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <h3 class="text-lg font-semibold text-camp-gold mb-4">الاحتياجات (طلب المساعدات)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                @foreach (var item in new[] {
+                                    new { Id = "NeedTents", Label = "خيم" },
+                                    new { Id = "NeedBlankets", Label = "اغطية" },
+                                    new { Id = "NeedMattresses", Label = "فرشات" },
+                                    new { Id = "NeedKitchenTools", Label = "ادوات مطبخ" },
+                                    new { Id = "NeedTarpaulins", Label = "شوادر" },
+                                    new { Id = "NeedClothes", Label = "ملابس" },
+                                    new { Id = "NeedHygieneKit", Label = "طرد صحي" }
+                                })
+                                {
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-sm text-gray-300">@item.Label</label>
+                                        <select name="@item.Id" data-ls="@item.Id" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none text-white">
+                                            <option value="0">لا يوجد</option>
+                                            <option value="1">منخفضة</option>
+                                            <option value="2">متوسطة</option>
+                                            <option value="3">عالية</option>
+                                            <option value="4">حرجة جداً</option>
+                                        </select>
+                                    </div>
+                                }
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -711,7 +743,7 @@
         function validateStep1() {
             const required = [
                 'Head.FirstName', 'Head.SecondName', 'Head.ThirdName', 'Head.LastName',
-                'Head.IdNumber', 'Head.Sector', 'Head.DateOfBirth'
+                'Head.IdNumber', 'Head.Sector', 'Head.DateOfBirth', 'Head.PhoneNumber'
             ];
             let valid = true;
             for (const key of required) {
@@ -728,6 +760,18 @@
             if (idEl && idEl.value && !validateIdField(idEl)) {
                 valid = false;
             }
+            // Validate: if sick, require at least one chronic disease or disability
+            const healthRadios = document.querySelectorAll('[name="Head.HealthStatus"]');
+            let isSick = false;
+            healthRadios.forEach(r => { if (r.checked && r.value !== 'سليم') isSick = true; });
+            if (isSick) {
+                const diseases = document.querySelectorAll('[name="Head.ChronicDiseases"]:checked');
+                const disabilities = document.querySelectorAll('[name="Head.DisabilityTypes"]:checked');
+                if (diseases.length === 0 && disabilities.length === 0) {
+                    alert('يرجى اختيار مرض مزمن أو نوع إعاقة على الأقل لأن الحالة الصحية مريض');
+                    valid = false;
+                }
+            }
             if (!valid) {
                 alert('يرجى تعبئة جميع الحقول المطلوبة في بيانات رب الأسرة بشكل صحيح');
             }
@@ -738,7 +782,7 @@
             const cards = document.querySelectorAll('.member-card');
             if (cards.length === 0) return true;
             let valid = true;
-            cards.forEach((card) => {
+            cards.forEach((card, idx) => {
                 const name = card.querySelector('[name$=".FirstName"]');
                 const idNum = card.querySelector('[name$=".IdNumber"]');
                 const relation = card.querySelector('[name$=".RelationshipToHead"]');
@@ -748,6 +792,18 @@
                 else { clearHighlight(idNum); if (!validateIdField(idNum)) valid = false; }
                 if (!relation || !relation.value) { highlightError(relation); valid = false; }
                 else { clearHighlight(relation); }
+                // Validate: if sick, require disease/disability
+                const healthRadios = card.querySelectorAll('[name$=".HealthStatus"]');
+                let isSick = false;
+                healthRadios.forEach(r => { if (r.checked && r.value !== 'سليم') isSick = true; });
+                if (isSick) {
+                    const diseases = card.querySelectorAll('[name$=".ChronicDiseases"]:checked');
+                    const disabilities = card.querySelectorAll('[name$=".DisabilityTypes"]:checked');
+                    if (diseases.length === 0 && disabilities.length === 0) {
+                        alert(`الفرد رقم ${idx + 1}: الحالة الصحية مريض، يرجى اختيار مرض مزمن أو نوع إعاقة على الأقل`);
+                        valid = false;
+                    }
+                }
             });
             if (!valid) alert('يرجى تعبئة الاسم ورقم الهوية وصلة القرابة لكل فرد بشكل صحيح');
             return valid;
@@ -775,6 +831,8 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                     <div><span class="text-gray-400">الاسم:</span> ${data['Head.FirstName'] || ''} ${data['Head.SecondName'] || ''} ${data['Head.ThirdName'] || ''} ${data['Head.LastName'] || ''}</div>
                     <div><span class="text-gray-400">رقم الهوية:</span> ${data['Head.IdNumber'] || ''}</div>
+                    <div><span class="text-gray-400">رقم الهاتف:</span> ${data['Head.PhoneNumber'] || ''}</div>
+                    <div><span class="text-gray-400">المحفظة:</span> ${data['Head.Wallet'] || '-'}</div>
                     <div><span class="text-gray-400">القاطع:</span> ${data['Head.Sector'] || ''}</div>
                     <div><span class="text-gray-400">تاريخ الميلاد:</span> ${data['Head.DateOfBirth'] || ''}</div>
                     <div><span class="text-gray-400">الجنس:</span> ${data['Head.Gender'] || ''}</div>
@@ -817,6 +875,19 @@
                     <div><span class="text-gray-400">حمام:</span> ${data['HasBathroom'] === 'true' ? 'نعم' : 'لا'}</div>
                     <div><span class="text-gray-400">حفائظ:</span> ${data['NeedsDiapers'] ? 'نعم' : 'لا'}</div>
                     <div><span class="text-gray-400">أسر بنفس الخيمة:</span> ${data['HasMultipleFamiliesInTent'] ? 'نعم' : 'لا'}</div>
+                    <div class="col-span-full mt-2 pt-2 border-t border-gray-600">
+                        <span class="text-gray-400">الاحتياجات:</span> ${
+                            Object.entries({
+                                'خيم': data['NeedTents'],
+                                'اغطية': data['NeedBlankets'],
+                                'فرشات': data['NeedMattresses'],
+                                'ادوات مطبخ': data['NeedKitchenTools'],
+                                'شوادر': data['NeedTarpaulins'],
+                                'ملابس': data['NeedClothes'],
+                                'طرد صحي': data['NeedHygieneKit']
+                            }).filter(([_, value]) => value && value !== '0').map(([name, value]) => `${name}(${['لا يوجد','منخفضة','متوسطة','عالية','حرجة جداً'][parseInt(value)]})`).join('، ') || 'لا يوجد'
+                        }
+                    </div>
                 </div>
             </div>`;
 

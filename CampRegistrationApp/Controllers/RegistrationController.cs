@@ -126,6 +126,7 @@ namespace CampRegistrationApp.Controllers
                     IsHouseDestroyed = model.Head.IsHouseDestroyed,
                     IsPrisoner = model.Head.IsPrisoner,
                     Nationality = model.Head.Nationality,
+                    Wallet = model.Head.Wallet,
                     IsPregnant = model.Head.IsPregnant,
                     PregnancyMonth = model.Head.PregnancyMonth,
                     IsNursing = model.Head.IsNursing,
@@ -176,7 +177,14 @@ namespace CampRegistrationApp.Controllers
                     NeedsDiapers = model.NeedsDiapers,
                     DiaperDetails = model.DiaperDetails,
                     HasMultipleFamiliesInTent = model.HasMultipleFamiliesInTent,
-                    AdditionalFamiliesCount = model.AdditionalFamiliesCount
+                    AdditionalFamiliesCount = model.AdditionalFamiliesCount,
+                    NeedTents = (NeedPriority)model.NeedTents,
+                    NeedBlankets = (NeedPriority)model.NeedBlankets,
+                    NeedMattresses = (NeedPriority)model.NeedMattresses,
+                    NeedKitchenTools = (NeedPriority)model.NeedKitchenTools,
+                    NeedTarpaulins = (NeedPriority)model.NeedTarpaulins,
+                    NeedClothes = (NeedPriority)model.NeedClothes,
+                    NeedHygieneKit = (NeedPriority)model.NeedHygieneKit
                 };
                 _context.FamilyRegistrations.Add(registration);
                 await _context.SaveChangesAsync();
@@ -205,6 +213,7 @@ namespace CampRegistrationApp.Controllers
                         InjuryDetails = mViewModel.InjuryDetails,
                         IsPrisoner = mViewModel.IsPrisoner,
                         Nationality = mViewModel.Nationality,
+                        Wallet = mViewModel.Wallet,
                         IsPregnant = mViewModel.IsPregnant,
                         PregnancyMonth = mViewModel.PregnancyMonth,
                         IsNursing = mViewModel.IsNursing,

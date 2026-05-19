@@ -1,43 +1,51 @@
-# AGENTS.md — Camp Registration Form (Google Apps Script)
+# AGENTS.md — Camp Registration (Google Apps Script + ASP.NET Core)
 
 ## Overview
-Google Apps Script web app for camp family registration. Two files:
-- `Code.gs` — server-side: serves HTML, writes to Google Sheets, uploads PDFs to Drive
-- `Index.html` — client-side: Arabic RTL form, Tailwind CSS via CDN
+Camp family registration system in two versions:
+- **Google Apps Script** (root `Code.gs` + `Index.html`): Serves HTML, writes to Google Sheets, uploads PDFs to Drive.
+- **ASP.NET Core MVC** (`CampRegistrationApp/`): .NET 10, SQL Server (LocalDB), Entity Framework Core, full admin/nomination/project system.
 
 ## How to run / deploy
-- **No local dev server.** Deploy via Google Apps Script editor (Extensions > Apps Script > Deploy > New deployment).
-- Test by opening the deployed web app URL or using the GAS editor's "Run" on `doGet()`.
-- There is no package manager, build step, test framework, linter, or typechecker.
+### GAS
+- Deploy via Google Apps Script editor (Extensions > Apps Script > Deploy > New deployment). No local dev server.
 
-## Architecture
-- `doGet()` in `Code.gs` serves `Index.html` as the web app entrypoint.
-- Client calls server functions via `google.script.run` (e.g. `google.script.run.processForm(data)`).
-- `processForm(data)` appends a row to sheet named `البيانات` in the bound spreadsheet.
-- `uploadFileToDrive(base64Data, fileName)` saves PDFs to a Drive folder named `التقارير الطبية`.
-- Record ID is the first 8 chars of `Utilities.getUuid()`.
+### ASP.NET Core
+- Build: `dotnet build`
+- Run: `dotnet run --project CampRegistrationApp/CampRegistrationApp.csproj`
+- Test: `dotnet test`
+- Ports: HTTP `localhost:5392`, HTTPS `localhost:7126`
+- Production: CI/CD via `.github/workflows/publish.yml`, Azure deploy via `.deployment`
 
-## Key conventions
-- All UI text is in Arabic; the form uses `dir="rtl"` and the Cairo font.
-- Dark theme (`#121212` background, `#d4af37` gold accent).
-- Dynamic family members are added client-side via `addMember()` which clones a `.member-card` template.
-- Female members get extra fields: pregnancy month, nursing status + baby details.
-- Health fields, tent fields, bathroom fields are toggled via radio buttons + `hidden` class.
-- Checkboxes for diseases, tent types, and disabilities are collected by name attribute and joined with `'، '` (Arabic comma + space).
+## ASP.NET Core Architecture
+### Data Model
+- **Person**: Shared entity for family head and members (4-part name, ID, sector, DOB, gender, phone, Wallet (المحفظة), nationality, health, maternity, prisoner flag, etc.).
+- **FamilyRegistration**: Links to head (Person), members (FamilyMembers), housing/special-case fields, approval workflow, and **Refugee Needs** (NeedPriority enum for 7 aid items: Tents, Blankets, Mattresses, KitchenTools, Tarpaulins, Clothes, HygieneKit).
+- **FamilyMember**: Join table `FamilyRegistration → Person` with `RelationshipToHead`.
+- **Attachment**: File metadata (`MedicalReport` or `IDImage`), stores relative paths.
+- **Admin**: Login with `AdminRole` (`Admin`=super, `Mandoob`=sector-limited), session-based auth, SHA256 password hashing.
+- **Sector**: Camp sector with name, camp, coordinates, area, tent/bathroom counts.
+- **Project/Nomination**: Campaign system for aid distribution with approval workflow, soft delete, rowversion concurrency.
+- **AuditLog**: Immutable audit trail with JSON old/new values.
+- **Notification**: Per-admin notification system with bell icon polling.
 
-## Data flow
-1. User fills form → `handleSubmit(e)` collects data into a plain object.
-2. Files are uploaded via `uploadFileAsync(file)` (wraps `google.script.run` in a Promise for `await`-based sequencing):
-   - Head of family medical report → `headReportLink`, ID image → `headIdImageLink`
-   - Per member: medical report → `reportUrl`, ID image → `idImageUrl`
-3. All files are base64-encoded and uploaded to Drive via `uploadFileToDrive`.
-4. `processForm(data)` sends everything as a single row to Google Sheets.
-5. On success, the page shows a record ID and reloads after 3 seconds.
+### Registration Flow (4 Steps + Submit)
+1. Step 1: Family Head info + health + documents
+2. Step 2: Family Members (dynamic add/remove)
+3. Step 3: Housing & Special Cases + **Refugee Needs** (7 aid items with None/Low/Medium/High/Critical priority selectors)
+4. Step 4: Review & Confirm
 
-## Limitations / gotchas
-- No input validation beyond HTML `required` attributes.
-- No error handling on the server side (no try/catch).
-- The `getSheet_()` function appends a header row every time the sheet is missing (not ideal for production).
-- The form does not sanitize user input before writing to sheets.
-- `uploadFileToDrive` in `Code.gs` hardcodes `MimeType.PDF` — ID images uploaded as images will still be stored as PDF.
-- Member health radio buttons use index-based naming (`m_health_${idx+1}`) which can break if members are removed.
+### Refugee Needs (`NeedPriority` enum)
+- `None=0`, `Low=1`, `Medium=2`, `High=3`, `Critical=4`
+- Fields: `NeedTents`, `NeedBlankets`, `NeedMattresses`, `NeedKitchenTools`, `NeedTarpaulins`, `NeedClothes`, `NeedHygieneKit`
+- Stored on `FamilyRegistration`, mapped via `int` in `RegistrationViewModel`
+
+## GAS Architecture
+- `doGet()` serves `Index.html`, `google.script.run` for server calls.
+- `processForm(data)` appends row to sheet `البيانات`.
+- `uploadFileToDrive(base64Data, fileName)` saves to Drive folder `التقارير الطبية`.
+- Record ID: first 8 chars of `Utilities.getUuid()`.
+
+## Key Conventions (both versions)
+- All UI text in Arabic, RTL layout, Cairo font, dark theme (`#121212` + `#d4af37` gold).
+- 8-char Record ID from charset `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`.
+- No input sanitization; no migrations (`EnsureCreated()` + raw SQL).

@@ -9,6 +9,15 @@ namespace CampRegistrationApp.Models
         Rejected
     }
 
+    public enum NeedPriority
+    {
+        None = 0,
+        Low = 1,
+        Medium = 2,
+        High = 3,
+        Critical = 4
+    }
+
     public class FamilyRegistration
     {
         public int Id { get; set; }
@@ -37,6 +46,15 @@ namespace CampRegistrationApp.Models
         public bool HasMultipleFamiliesInTent { get; set; }
         public int? AdditionalFamiliesCount { get; set; }
         public string? PasswordHash { get; set; }
+
+        // Refugee Needs (Orders)
+        public NeedPriority NeedTents { get; set; } = NeedPriority.None;
+        public NeedPriority NeedBlankets { get; set; } = NeedPriority.None;
+        public NeedPriority NeedMattresses { get; set; } = NeedPriority.None;
+        public NeedPriority NeedKitchenTools { get; set; } = NeedPriority.None;
+        public NeedPriority NeedTarpaulins { get; set; } = NeedPriority.None;
+        public NeedPriority NeedClothes { get; set; } = NeedPriority.None;
+        public NeedPriority NeedHygieneKit { get; set; } = NeedPriority.None;
 
         public RegistrationApprovalStatus ApprovalStatus { get; set; } = RegistrationApprovalStatus.Pending;
         public int? ApprovedById { get; set; }
