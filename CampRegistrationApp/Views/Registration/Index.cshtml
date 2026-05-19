@@ -117,22 +117,12 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm mb-1">الجنسية</label>
-                            <select name="Head.Nationality" data-ls="Head.Nationality" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
-                                <option value="">اختر الجنسية...</option>
-                                <option value="فلسطيني">فلسطيني</option>
-                                <option value="مصري">مصري</option>
-                                <option value="أردني">أردني</option>
-                                <option value="سوري">سوري</option>
-                                <option value="لبناني">لبناني</option>
-                                <option value="عراقي">عراقي</option>
-                                <option value="يمني">يمني</option>
-                                <option value="ليبي">ليبي</option>
-                                <option value="تونسي">تونسي</option>
-                                <option value="جزائري">جزائري</option>
-                                <option value="مغربي">مغربي</option>
-                                <option value="سوداني">سوداني</option>
-                                <option value="أخرى">أخرى</option>
+                            <label class="block text-sm mb-1">حمام</label>
+                            <select name="Head.BathroomStatus" data-ls="Head.BathroomStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                                <option value="">اختر...</option>
+                                <option value="جيد">جيد</option>
+                                <option value="متوسط">متوسط</option>
+                                <option value="سيء">سيء</option>
                             </select>
                         </div>
                         <div>
@@ -225,9 +215,13 @@
                                     }
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Injury Section (always visible) -->
+                        <div class="mt-6 border-t border-gray-700 pt-6">
                             <div class="flex items-center gap-2 mb-4">
                                 <input type="checkbox" name="Head.HasInjury" data-ls="Head.HasInjury" value="true" class="accent-camp-gold" onchange="toggleInjurySection(this, 'head-injury-details'); saveToLocalStorage()" />
-                                <label class="text-sm">هل تعرض لإصابة؟</label>
+                                <label class="text-lg">هل تعرض لإصابة؟</label>
                             </div>
                             <div id="head-injury-details" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -449,6 +443,12 @@
                     <h2 class="text-2xl font-semibold text-camp-gold mb-6">مراجعة البيانات وتأكيد التسجيل</h2>
                     <div id="review-content" class="space-y-6">
                         <!-- Filled by JS -->
+                    </div>
+
+                    <!-- Status Notes -->
+                    <div class="mt-6 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                        <label class="block text-sm mb-2 text-camp-gold font-semibold">ملاحظات حول الحالة</label>
+                        <textarea name="StatusNotes" data-ls="StatusNotes" class="w-full p-3 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="3" placeholder="أي ملاحظات إضافية عن حالة العائلة..."></textarea>
                     </div>
 
                     <div class="mt-8 border-t border-gray-700 pt-6 space-y-6">
@@ -805,6 +805,22 @@
                     }
                 }
             });
+
+            // Validate: if married, require a wife member
+            const maritalRadios = document.querySelectorAll('[name="Head.MaritalStatus"]');
+            let isMarried = false;
+            maritalRadios.forEach(r => { if (r.checked && r.value === 'متزوج') isMarried = true; });
+            if (isMarried) {
+                const hasWife = Array.from(cards).some(card => {
+                    const rel = card.querySelector('[name$=".RelationshipToHead"]');
+                    return rel && rel.value === 'زوجة';
+                });
+                if (!hasWife) {
+                    alert('بما أن الحالة الاجتماعية متزوج، يجب إضافة فرد بصفة زوجة');
+                    valid = false;
+                }
+            }
+
             if (!valid) alert('يرجى تعبئة الاسم ورقم الهوية وصلة القرابة لكل فرد بشكل صحيح');
             return valid;
         }
@@ -838,7 +854,7 @@
                     <div><span class="text-gray-400">الجنس:</span> ${data['Head.Gender'] || ''}</div>
                     <div><span class="text-gray-400">الحالة الاجتماعية:</span> ${data['Head.MaritalStatus'] || ''}</div>
                     <div><span class="text-gray-400">الحالة الصحية:</span> ${data['Head.HealthStatus'] || ''}</div>
-                    <div><span class="text-gray-400">الجنسية:</span> ${data['Head.Nationality'] || ''}</div>
+                    <div><span class="text-gray-400">حمام:</span> ${data['Head.BathroomStatus'] || '-'}</div>
                     <div><span class="text-gray-400">المنزل مدمر:</span> ${data['Head.IsHouseDestroyed'] ? 'نعم' : 'لا'}</div>
                     <div><span class="text-gray-400">أسير:</span> ${data['Head.IsPrisoner'] ? 'نعم' : 'لا'}</div>
                 </div>
@@ -854,7 +870,6 @@
                             <div><span class="text-gray-400">الاسم:</span> ${m.FirstName || ''} ${m.LastName || ''}</div>
                             <div><span class="text-gray-400">رقم الهوية:</span> ${m.IdNumber || ''}</div>
                             <div><span class="text-gray-400">صلة القرابة:</span> ${m.RelationshipToHead || ''}</div>
-                            <div><span class="text-gray-400">الجنسية:</span> ${m.Nationality || ''}</div>
                             <div><span class="text-gray-400">أسير:</span> ${m.IsPrisoner === true || m.IsPrisoner === 'true' ? 'نعم' : 'لا'}</div>
                             <div><span class="text-gray-400">الحالة الصحية:</span> ${m.HealthStatus || ''}</div>
                         </div>
@@ -890,6 +905,14 @@
                     </div>
                 </div>
             </div>`;
+
+            // Status Notes
+            if (data['StatusNotes']) {
+                html += `<div class="bg-camp-dark-grey p-4 rounded border border-gray-700">
+                    <h3 class="text-lg font-semibold text-camp-gold mb-3">ملاحظات حول الحالة</h3>
+                    <p class="text-sm text-white whitespace-pre-wrap">${data['StatusNotes']}</p>
+                </div>`;
+            }
 
             container.innerHTML = html;
         }
@@ -940,39 +963,18 @@
                     </div>
                     <div>
                         <label class="block text-xs mb-1">صلة القرابة</label>
-                        <select name="Members[${idx}].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
-                            <option value="">اختر صلة القرابة...</option>
-                            <option value="زوج/زوجة" ${data?.RelationshipToHead === 'زوج/زوجة' ? 'selected' : ''}>زوج/زوجة</option>
-                            <option value="ابن" ${data?.RelationshipToHead === 'ابن' ? 'selected' : ''}>ابن</option>
-                            <option value="ابنة" ${data?.RelationshipToHead === 'ابنة' ? 'selected' : ''}>ابنة</option>
-                            <option value="أم" ${data?.RelationshipToHead === 'أم' ? 'selected' : ''}>أم</option>
-                            <option value="أب" ${data?.RelationshipToHead === 'أب' ? 'selected' : ''}>أب</option>
-                            <option value="أخ" ${data?.RelationshipToHead === 'أخ' ? 'selected' : ''}>أخ</option>
-                            <option value="أخت" ${data?.RelationshipToHead === 'أخت' ? 'selected' : ''}>أخت</option>
-                            <option value="جدة/جد" ${data?.RelationshipToHead === 'جدة/جد' ? 'selected' : ''}>جدة/جد</option>
-                            <option value="حفيد/حفيدة" ${data?.RelationshipToHead === 'حفيد/حفيدة' ? 'selected' : ''}>حفيد/حفيدة</option>
-                            <option value="أخ غير شقيق" ${data?.RelationshipToHead === 'أخ غير شقيق' ? 'selected' : ''}>أخ غير شقيق</option>
-                            <option value="أخت غير شقيقة" ${data?.RelationshipToHead === 'أخت غير شقيقة' ? 'selected' : ''}>أخت غير شقيقة</option>
-                            <option value="Other" ${data?.RelationshipToHead === 'Other' ? 'selected' : ''}>أخرى</option>
-                        </select>
+                <select name="Members[${idx}].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                    <option value="">اختر...</option>
+                    ${['زوج','زوجة','ابن','ابنة','أم','أب','أخ','أخت','جدة/جد','حفيد/حفيدة','أخ غير شقيق','أخت غير شقيقة','Other'].map(r => '<option value="'+r+'">'+r+'</option>').join('')}
+                </select>
                     </div>
                     <div>
-                        <label class="block text-xs mb-1">الجنسية</label>
-                        <select name="Members[${idx}].Nationality" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
-                            <option value="">اختر الجنسية...</option>
-                            <option value="فلسطيني" ${data?.Nationality === 'فلسطيني' ? 'selected' : ''}>فلسطيني</option>
-                            <option value="مصري" ${data?.Nationality === 'مصري' ? 'selected' : ''}>مصري</option>
-                            <option value="أردني" ${data?.Nationality === 'أردني' ? 'selected' : ''}>أردني</option>
-                            <option value="سوري" ${data?.Nationality === 'سوري' ? 'selected' : ''}>سوري</option>
-                            <option value="لبناني" ${data?.Nationality === 'لبناني' ? 'selected' : ''}>لبناني</option>
-                            <option value="عراقي" ${data?.Nationality === 'عراقي' ? 'selected' : ''}>عراقي</option>
-                            <option value="يمني" ${data?.Nationality === 'يمني' ? 'selected' : ''}>يمني</option>
-                            <option value="ليبي" ${data?.Nationality === 'ليبي' ? 'selected' : ''}>ليبي</option>
-                            <option value="تونسي" ${data?.Nationality === 'تونسي' ? 'selected' : ''}>تونسي</option>
-                            <option value="جزائري" ${data?.Nationality === 'جزائري' ? 'selected' : ''}>جزائري</option>
-                            <option value="مغربي" ${data?.Nationality === 'مغربي' ? 'selected' : ''}>مغربي</option>
-                            <option value="سوداني" ${data?.Nationality === 'سوداني' ? 'selected' : ''}>سوداني</option>
-                            <option value="أخرى" ${data?.Nationality === 'أخرى' ? 'selected' : ''}>أخرى</option>
+                        <label class="block text-xs mb-1">حمام</label>
+                        <select name="Members[${idx}].BathroomStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                            <option value="">اختر...</option>
+                            <option value="جيد" ${data?.BathroomStatus === 'جيد' ? 'selected' : ''}>جيد</option>
+                            <option value="متوسط" ${data?.BathroomStatus === 'متوسط' ? 'selected' : ''}>متوسط</option>
+                            <option value="سيء" ${data?.BathroomStatus === 'سيء' ? 'selected' : ''}>سيء</option>
                         </select>
                     </div>
                     <div class="flex items-center gap-2">
@@ -1022,21 +1024,6 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-2">
-                            <input type="checkbox" name="Members[${idx}].HasInjury" value="true" class="accent-camp-gold" ${data?.HasInjury === true || data?.HasInjury === 'true' ? 'checked' : ''} onchange="toggleMemberInjury(${idx})" />
-                            <label class="text-xs">تعرض لإصابة</label>
-                        </div>
-                        <div id="member-injury-${idx}" class="${data?.HasInjury === true || data?.HasInjury === 'true' ? '' : 'hidden'} grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs mb-1">تاريخ الإصابة</label>
-                                <input type="date" name="Members[${idx}].InjuryDate" value="${data?.InjuryDate || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
-                            </div>
-                            <div>
-                                <label class="block text-xs mb-1">تفاصيل الإصابة</label>
-                                <textarea name="Members[${idx}].InjuryDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2">${data?.InjuryDetails || ''}</textarea>
-                            </div>
-                        </div>
-
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="flex items-center gap-2">
                                 <input type="checkbox" name="Members[${idx}].IsPregnant" value="true" class="accent-camp-gold" ${data?.IsPregnant === true || data?.IsPregnant === 'true' ? 'checked' : ''} onchange="toggleMemberSection(${idx}, 'pregnancy')" />
@@ -1071,6 +1058,24 @@
                                     <label class="block text-xs mb-1">رقم هوية الطفل</label>
                                     <input name="Members[${idx}].NursingInfantID" value="${data?.NursingInfantID || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Injury Section (always visible for member) -->
+                    <div class="border-t border-gray-700 pt-4 mt-4">
+                        <div class="flex items-center gap-2 mb-4">
+                            <input type="checkbox" name="Members[${idx}].HasInjury" value="true" class="accent-camp-gold" ${data?.HasInjury === true || data?.HasInjury === 'true' ? 'checked' : ''} onchange="toggleMemberInjury(${idx})" />
+                            <label class="text-lg">هل تعرض لإصابة؟</label>
+                        </div>
+                        <div id="member-injury-${idx}" class="${data?.HasInjury === true || data?.HasInjury === 'true' ? '' : 'hidden'} grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs mb-1">تاريخ الإصابة</label>
+                                <input type="date" name="Members[${idx}].InjuryDate" value="${data?.InjuryDate || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-xs mb-1">تفاصيل الإصابة</label>
+                                <textarea name="Members[${idx}].InjuryDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2">${data?.InjuryDetails || ''}</textarea>
                             </div>
                         </div>
                     </div>

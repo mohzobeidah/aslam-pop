@@ -46,7 +46,7 @@ Nomination >── (1) Sector, (1) Admin (Delegate), (1?) Admin (ApprovedBy)
 Admin (1) ──< (N) Notification
 Notification >── (0..1) Link (URL string)
 ```
-- **Person**: Shared entity for both Head of Family and Family Members. Fields include name (4 parts), ID, sector, DOB, gender, phone, governorate, nationality (الجنسية), **Wallet (المحفظة)**, marital/employment/education status, health info (diseases, disabilities, injuries), prisoner flag (أسير), optional maternity fields (pregnancy, nursing).
+- **Person**: Shared entity for both Head of Family and Family Members. Fields include name (4 parts), ID, sector, DOB, gender, phone, governorate, **Wallet (المحفظة)**, **BathroomStatus (جيد/متوسط/سيء)**, marital/employment/education status, health info (diseases, disabilities, injuries), prisoner flag (أسير), optional maternity fields (pregnancy, nursing).
 - **FamilyRegistration**: Links to FamilyHead (Person), has list of Members, plus housing/special-case fields (tent, bathroom, child-headed, female-headed, external support, diaper needs, multiple families in tent) and **Refugee Needs** (NeedPriority enum for 7 aid items: Tents, Blankets, Mattresses, KitchenTools, Tarpaulins, Clothes, HygieneKit). Has unique 8-char `RecordId`. Approval workflow with `ApprovalStatus` (Pending/Approved/Rejected).
 - **FamilyMember**: Join table linking `FamilyRegistration` → `Person` with a `RelationshipToHead` string.
 - **Attachment**: File metadata linked to a Person (`MedicalReport` or `IDImage`), storing relative file paths.
@@ -105,17 +105,17 @@ Notification >── (0..1) Link (URL string)
 | `/File/Download` | `FileController.Download` | Serve uploaded files (by relative path) |
 
 ## Registration Flow (4 Steps + Submit)
-1. **Step 1**: Family Head info (personal, socio-economic, health, documents).
-2. **Step 2**: Family Members (dynamic add/remove, each with own health/maternity/docs).
+1. **Step 1**: Family Head info (personal, socio-economic, health, injury, BathroomStatus, documents).
+2. **Step 2**: Family Members (dynamic add/remove). Validation: if MaritalStatus=متزوج, at least one member must have RelationshipToHead=زوجة. Each member has own health/injury/maternity/docs.
 3. **Step 3**: Housing & Special Cases + **Refugee Needs** (طلب المساعدات): 7 aid categories with dropdown priority selectors (None/Low/Medium/High/Critical).
-4. **Step 4**: Review & Confirm.
+4. **Step 4**: Review & Confirm + **StatusNotes** textarea for additional notes.
 
 **Navigation**: Steps are sequential — user cannot skip ahead by clicking tabs. `tryGoToStep(step)` validates all prior steps before allowing forward navigation. Going back is always allowed. `nextStep()` delegates to `tryGoToStep()`.
 
 **Submit**: Wraps everything in a DB transaction — creates FamilyHead `Person`, then `FamilyRegistration`, then each Member `Person` + `FamilyMember`. On success, creates notifications for all sector mandoobs.
 
 ## Registration ViewModel (`RegistrationViewModel`)
-- `Head` (PersonViewModel) + `Members` (List of MemberViewModel inheriting PersonViewModel) + housing/special-case fields + **Refugee Needs** (7 `int` fields mapped to `NeedPriority` enum).
+- `Head` (PersonViewModel) + `Members` (List of MemberViewModel inheriting PersonViewModel) + housing/special-case fields + `StatusNotes` (string) + **Refugee Needs** (7 `int` fields mapped to `NeedPriority` enum).
 - `MemberViewModel` adds `RelationshipToHead` to PersonViewModel.
 - `CurrentStep` (1-4) tracks wizard progress.
 - `UploadedFiles` (List<string>) tracks client-side uploaded file paths.
@@ -179,7 +179,7 @@ Notification >── (0..1) Link (URL string)
 - **No migrations**: `EnsureCreated()` won't update existing DB schema; uses raw SQL as workaround.
 - **Session-based auth**: Lost on server restart; no token/refresh mechanism.
 - **ID Validation**: Palestinian ID enforced as 9-digit string via `[RegularExpression(@"^\d{9}$")]` on ViewModel. Client-side validates on blur + on step navigation + on submit. Invalid IDs show red border + inline error message.
-- **Health validation**: If health status is "مريض" (sick), at least one chronic disease or disability must be selected (client-side only).
+- **Health validation**: If health status is "مريض" (sick), at least one chronic disease or disability must be selected (client-side in validateStep1/validateStep2, server-side in RegistrationController.Submit and RecordController.Update).
 - **Phone required**: Phone number is required in the registration form, validated both client-side and server-side with `[Required]`.
 - **No input sanitization**: User text inputs go directly to DB.
 - **No pagination**: Admin lists (admins, sectors) load all rows at once.

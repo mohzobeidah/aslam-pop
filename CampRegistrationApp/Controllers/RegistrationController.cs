@@ -91,6 +91,31 @@ namespace CampRegistrationApp.Controllers
             await PopulateLookupViewBags();
             if (!ModelState.IsValid) return View("Index", model);
 
+            // Server-side validation: married requires wife member
+            if (model.Head.MaritalStatus == "متزوج" && !model.Members.Any(m => m.RelationshipToHead == "زوجة"))
+            {
+                ModelState.AddModelError("", "بما أن الحالة الاجتماعية متزوج، يجب إضافة فرد بصفة زوجة");
+                return View("Index", model);
+            }
+
+            // Server-side validation: sick requires disease or disability for head
+            if (model.Head.HealthStatus == "مريض" && string.IsNullOrEmpty(model.Head.ChronicDiseases) && string.IsNullOrEmpty(model.Head.DisabilityTypes))
+            {
+                ModelState.AddModelError("", "بما أن الحالة الصحية مريض، يجب اختيار مرض مزمن أو نوع إعاقة على الأقل لرب الأسرة");
+                return View("Index", model);
+            }
+
+            // Server-side validation: sick requires disease or disability for each member
+            for (int i = 0; i < model.Members.Count; i++)
+            {
+                var m = model.Members[i];
+                if (m.HealthStatus == "مريض" && string.IsNullOrEmpty(m.ChronicDiseases) && string.IsNullOrEmpty(m.DisabilityTypes))
+                {
+                    ModelState.AddModelError("", $"الفرد رقم {i + 1}: بما أن الحالة الصحية مريض، يجب اختيار مرض مزمن أو نوع إعاقة على الأقل");
+                    return View("Index", model);
+                }
+            }
+
             // Check for duplicate ID
             if (await _context.Persons.AnyAsync(p => p.IdNumber == model.Head.IdNumber))
             {
@@ -125,8 +150,8 @@ namespace CampRegistrationApp.Controllers
                     InjuryDetails = model.Head.InjuryDetails,
                     IsHouseDestroyed = model.Head.IsHouseDestroyed,
                     IsPrisoner = model.Head.IsPrisoner,
-                    Nationality = model.Head.Nationality,
                     Wallet = model.Head.Wallet,
+                    BathroomStatus = model.Head.BathroomStatus,
                     IsPregnant = model.Head.IsPregnant,
                     PregnancyMonth = model.Head.PregnancyMonth,
                     IsNursing = model.Head.IsNursing,
@@ -178,6 +203,7 @@ namespace CampRegistrationApp.Controllers
                     DiaperDetails = model.DiaperDetails,
                     HasMultipleFamiliesInTent = model.HasMultipleFamiliesInTent,
                     AdditionalFamiliesCount = model.AdditionalFamiliesCount,
+                    StatusNotes = model.StatusNotes,
                     NeedTents = (NeedPriority)model.NeedTents,
                     NeedBlankets = (NeedPriority)model.NeedBlankets,
                     NeedMattresses = (NeedPriority)model.NeedMattresses,
@@ -212,8 +238,8 @@ namespace CampRegistrationApp.Controllers
                         InjuryDate = mViewModel.InjuryDate,
                         InjuryDetails = mViewModel.InjuryDetails,
                         IsPrisoner = mViewModel.IsPrisoner,
-                        Nationality = mViewModel.Nationality,
                         Wallet = mViewModel.Wallet,
+                        BathroomStatus = mViewModel.BathroomStatus,
                         IsPregnant = mViewModel.IsPregnant,
                         PregnancyMonth = mViewModel.PregnancyMonth,
                         IsNursing = mViewModel.IsNursing,

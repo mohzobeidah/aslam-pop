@@ -25,8 +25,7 @@ namespace CampRegistrationApp.Services
         private readonly string[] _lastNames = { "العبيدي", "منصور", "القاسم", "الزهراني", "العتيبي", "الشمري", "المطيري", "الدوسري", "الغامدي", "القحطاني", "سالم", "حسين", "علي", "حسن", "إبراهيم" };
         private readonly string[] _sectors = { "A", "B", "C", "D" };
         private readonly string[] _healthStatuses = { "سليم", "مريض" };
-        private readonly string[] _nationalities = { "فلسطينية", "سورية", "أردنية", "مصرية" };
-
+        private readonly string[] _bathroomStatuses = { "جيد", "متوسط", "سيء" };
         public async Task SeedDummyDataAsync()
         {
             // Skip seeding if there are already many registrations to avoid duplicates
@@ -92,7 +91,8 @@ namespace CampRegistrationApp.Services
                     EmploymentStatus = "عاطل",
                     EducationLevel = "جامعي",
                     HealthStatus = _healthStatuses[_random.Next(_healthStatuses.Length)],
-                    Nationality = _nationalities[_random.Next(_nationalities.Length)],
+                    BathroomStatus = _bathroomStatuses[_random.Next(_bathroomStatuses.Length)],
+                    Wallet = _random.Next(0, 2) == 0 ? "" : _random.Next(100, 999).ToString(),
                     IsPrisoner = _random.Next(0, 10) == 0
                 };
                 _context.Persons.Add(head);
@@ -132,7 +132,6 @@ namespace CampRegistrationApp.Services
                         EmploymentStatus = "طالب",
                         EducationLevel = "مدرسة",
                         HealthStatus = _healthStatuses[_random.Next(_healthStatuses.Length)],
-                        Nationality = head.Nationality,
                         IsPrisoner = false
                     };
                     _context.Persons.Add(member);

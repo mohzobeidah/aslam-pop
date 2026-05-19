@@ -105,13 +105,12 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm mb-1">الجنسية</label>
-                            <select name="Head.Nationality" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
-                                <option value="">اختر الجنسية...</option>
-                                @foreach (var n in new[] { "فلسطيني", "مصري", "أردني", "سوري", "لبناني", "عراقي", "يمني", "ليبي", "تونسي", "جزائري", "مغربي", "سوداني", "أخرى" })
-                                {
-                                    <option value="@n" selected="@(Model.Head.Nationality == n )">@n</option>
-                                }
+                            <label class="block text-sm mb-1">حمام</label>
+                            <select name="Head.BathroomStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                                <option value="">اختر...</option>
+                                <option value="جيد" selected="@(Model.Head.BathroomStatus == "جيد")">جيد</option>
+                                <option value="متوسط" selected="@(Model.Head.BathroomStatus == "متوسط")">متوسط</option>
+                                <option value="سيء" selected="@(Model.Head.BathroomStatus == "سيء")">سيء</option>
                             </select>
                         </div>
                         <div>
@@ -185,9 +184,13 @@
                                     }
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Injury Section (always visible) -->
+                        <div class="border-t border-gray-700 pt-6 mt-6">
                             <div class="flex items-center gap-2 mb-4">
                                 <input type="checkbox" name="Head.HasInjury" value="true" class="accent-camp-gold" @(Model.Head.HasInjury ? "checked" : "") onchange="toggleSection(this, 'head-injury-details')" />
-                                <label class="text-sm">هل تعرض لإصابة؟</label>
+                                <label class="text-lg">هل تعرض لإصابة؟</label>
                             </div>
                             <div id="head-injury-details" class="@(Model.Head.HasInjury ? "" : "hidden") grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -293,22 +296,21 @@
                                     </div>
                                     <div>
                                         <label class="block text-xs mb-1">صلة القرابة</label>
-                                        <select name="Members[@i].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
-                                            <option value="">اختر...</option>
-                                            @foreach (var rel in new[] { "زوج/زوجة", "ابن", "ابنة", "أم", "أب", "أخ", "أخت", "جدة/جد", "حفيد/حفيدة", "أخ غير شقيق", "أخت غير شقيقة", "Other" })
-                                            {
-                                                <option value="@rel" selected="@(m.RelationshipToHead == rel )">@rel</option>
-                                            }
-                                        </select>
+                    <select name="Members[@i].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                        <option value="">اختر...</option>
+                        @foreach (var rel in new[] { "زوج", "زوجة", "ابن", "ابنة", "أم", "أب", "أخ", "أخت", "جدة/جد", "حفيد/حفيدة", "أخ غير شقيق", "أخت غير شقيقة", "Other" })
+                        {
+                            <option value="@rel" selected="@(m.RelationshipToHead == rel )">@rel</option>
+                        }
+                    </select>
                                     </div>
                                     <div>
-                                        <label class="block text-xs mb-1">الجنسية</label>
-                                        <select name="Members[@i].Nationality" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                        <label class="block text-xs mb-1">حمام</label>
+                                        <select name="Members[@i].BathroomStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
                                             <option value="">اختر...</option>
-                                            @foreach (var n in new[] { "فلسطيني", "مصري", "أردني", "سوري", "لبناني", "عراقي", "يمني", "ليبي", "تونسي", "جزائري", "مغربي", "سوداني", "أخرى" })
-                                            {
-                                                <option value="@n" selected="@(m.Nationality == n )">@n</option>
-                                            }
+                                            <option value="جيد" selected="@(m.BathroomStatus == "جيد")">جيد</option>
+                                            <option value="متوسط" selected="@(m.BathroomStatus == "متوسط")">متوسط</option>
+                                            <option value="سيء" selected="@(m.BathroomStatus == "سيء")">سيء</option>
                                         </select>
                                     </div>
                                     <div class="flex items-center gap-2">
@@ -354,20 +356,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            <input type="checkbox" name="Members[@i].HasInjury" value="true" class="accent-camp-gold" @(m.HasInjury ? "checked" : "") onchange="toggleMemberInjury(@i)" />
-                                            <label class="text-xs">تعرض لإصابة</label>
-                                        </div>
-                                        <div id="member-injury-@i" class="@(m.HasInjury ? "" : "hidden") grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-xs mb-1">تاريخ الإصابة</label>
-                                                <input type="date" name="Members[@i].InjuryDate" value="@(m.InjuryDate?.ToString("yyyy-MM-dd"))" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs mb-1">تفاصيل الإصابة</label>
-                                                <textarea name="Members[@i].InjuryDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2">@m.InjuryDetails</textarea>
-                                            </div>
-                                        </div>
                                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             <div class="flex items-center gap-2">
                                                 <input type="checkbox" name="Members[@i].IsPregnant" value="true" class="accent-camp-gold" @(m.IsPregnant == true ? "checked" : "") onchange="toggleMemberSection(@i, 'pregnancy')" />
@@ -402,6 +390,24 @@
                                                     <label class="block text-xs mb-1">رقم هوية الطفل</label>
                                                     <input name="Members[@i].NursingInfantID" value="@m.NursingInfantID" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Injury Section (always visible for member) -->
+                                    <div class="border-t border-gray-700 pt-4 mt-4">
+                                        <div class="flex items-center gap-2 mb-4">
+                                            <input type="checkbox" name="Members[@i].HasInjury" value="true" class="accent-camp-gold" @(m.HasInjury ? "checked" : "") onchange="toggleMemberInjury(@i)" />
+                                            <label class="text-lg">هل تعرض لإصابة؟</label>
+                                        </div>
+                                        <div id="member-injury-@i" class="@(m.HasInjury ? "" : "hidden") grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-xs mb-1">تاريخ الإصابة</label>
+                                                <input type="date" name="Members[@i].InjuryDate" value="@(m.InjuryDate?.ToString("yyyy-MM-dd"))" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs mb-1">تفاصيل الإصابة</label>
+                                                <textarea name="Members[@i].InjuryDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2">@m.InjuryDetails</textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -509,11 +515,17 @@
                                 <option value="6" selected="@(Model.AdditionalFamiliesCount == 6 )">أكثر من 5</option>
                             </select>
                         </div>
-                    </div>
                 </div>
+            </div>
 
-                <!-- Submit -->
-                <div class="flex gap-4 justify-center pt-4">
+            <!-- Status Notes -->
+            <div class="mt-6 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                <label class="block text-sm mb-2 text-camp-gold font-semibold">ملاحظات حول الحالة</label>
+                <textarea name="StatusNotes" class="w-full p-3 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="3" placeholder="أي ملاحظات إضافية عن حالة العائلة...">@Model.StatusNotes</textarea>
+            </div>
+
+            <!-- Submit -->
+            <div class="flex gap-4 justify-center pt-4">
                     <button type="submit" onclick="return submitEditForm()" class="px-10 py-3 rounded bg-green-600 text-white font-bold hover:bg-green-700 transition-colors text-lg">
                         حفظ التعديلات
                     </button>
@@ -601,15 +613,17 @@
                         </select>
                     </div>
                     <div><label class="block text-xs mb-1">صلة القرابة</label>
-                        <select name="Members[\${idx}].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
-                            <option value="">اختر...</option>
-                            ${['زوج/زوجة','ابن','ابنة','أم','أب','أخ','أخت','جدة/جد','حفيد/حفيدة','أخ غير شقيق','أخت غير شقيقة','Other'].map(r => '<option value="'+r+'">'+r+'</option>').join('')}
-                        </select>
+                <select name="Members[\${idx}].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                    <option value="">اختر...</option>
+                    ${['زوج','زوجة','ابن','ابنة','أم','أب','أخ','أخت','جدة/جد','حفيد/حفيدة','أخ غير شقيق','أخت غير شقيقة','Other'].map(r => '<option value="'+r+'">'+r+'</option>').join('')}
+                </select>
                     </div>
-                    <div><label class="block text-xs mb-1">الجنسية</label>
-                        <select name="Members[\${idx}].Nationality" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                    <div><label class="block text-xs mb-1">حمام</label>
+                        <select name="Members[\${idx}].BathroomStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
                             <option value="">اختر...</option>
-                            ${['فلسطيني','مصري','أردني','سوري','لبناني','عراقي','يمني','ليبي','تونسي','جزائري','مغربي','سوداني','أخرى'].map(n => '<option value="'+n+'">'+n+'</option>').join('')}
+                            <option value="جيد">جيد</option>
+                            <option value="متوسط">متوسط</option>
+                            <option value="سيء">سيء</option>
                         </select>
                     </div>
                     <div class="flex items-center gap-2">
@@ -716,6 +730,47 @@
                 alert('يرجى تعبئة جميع الحقول المطلوبة بشكل صحيح');
                 return false;
             }
+
+            // Validate: if married, require a wife member
+            const maritalStatus = document.querySelector('[name="Head.MaritalStatus"]');
+            if (maritalStatus && maritalStatus.value === 'متزوج') {
+                const hasWife = Array.from(document.querySelectorAll('.member-card')).some(card => {
+                    const rel = card.querySelector('[name$=".RelationshipToHead"]');
+                    return rel && rel.value === 'زوجة';
+                });
+                if (!hasWife) {
+                    alert('بما أن الحالة الاجتماعية متزوج، يجب إضافة فرد بصفة زوجة');
+                    return false;
+                }
+            }
+
+            // Validate: if head is sick, require disease/disability
+            const headHealth = document.querySelector('[name="Head.HealthStatus"]:checked');
+            if (headHealth && headHealth.value !== 'سليم') {
+                const diseases = document.querySelectorAll('[name="Head.ChronicDiseases"]:checked');
+                const disabilities = document.querySelectorAll('[name="Head.DisabilityTypes"]:checked');
+                if (diseases.length === 0 && disabilities.length === 0) {
+                    alert('بما أن الحالة الصحية مريض، يجب اختيار مرض مزمن أو نوع إعاقة على الأقل لرب الأسرة');
+                    return false;
+                }
+            }
+
+            // Validate: if member is sick, require disease/disability
+            document.querySelectorAll('.member-card').forEach((card, idx) => {
+                const healthRadios = card.querySelectorAll('[name$=".HealthStatus"]');
+                let isSick = false;
+                healthRadios.forEach(r => { if (r.checked && r.value !== 'سليم') isSick = true; });
+                if (isSick) {
+                    const diseases = card.querySelectorAll('[name$=".ChronicDiseases"]:checked');
+                    const disabilities = card.querySelectorAll('[name$=".DisabilityTypes"]:checked');
+                    if (diseases.length === 0 && disabilities.length === 0) {
+                        alert(`الفرد رقم ${idx + 1}: الحالة الصحية مريض، يرجى اختيار مرض مزمن أو نوع إعاقة على الأقل`);
+                        valid = false;
+                    }
+                }
+            });
+
+            if (!valid) return false;
 
             const form = document.querySelector('form');
 

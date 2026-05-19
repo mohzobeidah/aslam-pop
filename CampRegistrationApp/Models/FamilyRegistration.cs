@@ -46,6 +46,7 @@ namespace CampRegistrationApp.Models
         public bool HasMultipleFamiliesInTent { get; set; }
         public int? AdditionalFamiliesCount { get; set; }
         public string? PasswordHash { get; set; }
+        public string? StatusNotes { get; set; }
 
         // Refugee Needs (Orders)
         public NeedPriority NeedTents { get; set; } = NeedPriority.None;

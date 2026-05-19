@@ -32,6 +32,8 @@ namespace CampRegistrationApp.Models.ViewModels
         public bool HasMultipleFamiliesInTent { get; set; }
         public int? AdditionalFamiliesCount { get; set; }
 
+        public string? StatusNotes { get; set; }
+
         // Refugee Needs (Orders) - Using int to map to NeedPriority enum
         public int NeedTents { get; set; } = 0;
         public int NeedBlankets { get; set; } = 0;
@@ -85,8 +87,8 @@ namespace CampRegistrationApp.Models.ViewModels
         public DateTime? NursingInfantDOB { get; set; }
         public string? NursingInfantID { get; set; }
         public bool IsPrisoner { get; set; }
-        public string? Nationality { get; set; }
         public string? Wallet { get; set; }
+        public string? BathroomStatus { get; set; }
         public string? HeadIdImagePath { get; set; }
         public string? MedicalImagePath { get; set; }
         public List<string> UploadedFiles { get; set; } = new();

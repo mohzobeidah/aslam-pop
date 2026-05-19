@@ -504,7 +504,6 @@ namespace CampRegistrationApp.Controllers
                     Sector = f.FamilyHead.Sector,
                     Gender = f.FamilyHead.Gender,
                     MaritalStatus = f.FamilyHead.MaritalStatus,
-                    Nationality = f.FamilyHead.Nationality,
                     HealthStatus = f.FamilyHead.HealthStatus,
                     MemberCount = f.Members.Count,
                     RegistrationDate = f.RegistrationTimestamp,
@@ -574,7 +573,6 @@ namespace CampRegistrationApp.Controllers
                 ["Sector"] = "القاطع",
                 ["Gender"] = "الجنس",
                 ["MaritalStatus"] = "الحالة الاجتماعية",
-                ["Nationality"] = "الجنسية",
                 ["HealthStatus"] = "الحالة الصحية",
                 ["ChronicDiseases"] = "الأمراض المزمنة",
                 ["DisabilityTypes"] = "الإعاقات",
@@ -613,28 +611,27 @@ namespace CampRegistrationApp.Controllers
                 ws.Cell(row, 5).Value = head.Sector;
                 ws.Cell(row, 6).Value = head.Gender == "male" ? "ذكر" : head.Gender == "female" ? "أنثى" : head.Gender;
                 ws.Cell(row, 7).Value = head.MaritalStatus;
-                ws.Cell(row, 8).Value = head.Nationality ?? "";
-                ws.Cell(row, 9).Value = head.HealthStatus;
-                ws.Cell(row, 10).Value = head.ChronicDiseases ?? "";
-                ws.Cell(row, 11).Value = head.DisabilityTypes ?? "";
-                ws.Cell(row, 12).Value = reg.Members.Count;
-                ws.Cell(row, 13).Value = reg.RegistrationTimestamp.ToString("yyyy-MM-dd");
-                ws.Cell(row, 14).Value = reg.ApprovalStatus switch
+                ws.Cell(row, 8).Value = head.HealthStatus;
+                ws.Cell(row, 9).Value = head.ChronicDiseases ?? "";
+                ws.Cell(row, 10).Value = head.DisabilityTypes ?? "";
+                ws.Cell(row, 11).Value = reg.Members.Count;
+                ws.Cell(row, 12).Value = reg.RegistrationTimestamp.ToString("yyyy-MM-dd");
+                ws.Cell(row, 13).Value = reg.ApprovalStatus switch
                 {
                     RegistrationApprovalStatus.Approved => "مقبول",
                     RegistrationApprovalStatus.Rejected => "مرفوض",
                     _ => "قيد المراجعة"
                 };
-                ws.Cell(row, 15).Value = head.OriginalGovernorate;
-                ws.Cell(row, 16).Value = head.DateOfBirth.ToString("yyyy-MM-dd");
-                ws.Cell(row, 17).Value = reg.LivesInTent ? "نعم" : "لا";
-                ws.Cell(row, 18).Value = reg.TentType ?? "";
-                ws.Cell(row, 19).Value = reg.HasBathroom ? "نعم" : "لا";
-                ws.Cell(row, 20).Value = reg.BathroomType ?? "";
-                ws.Cell(row, 21).Value = reg.IsChildHeaded ? "نعم" : "لا";
-                ws.Cell(row, 22).Value = reg.IsFemaleHeaded ? "نعم" : "لا";
-                ws.Cell(row, 23).Value = reg.SupportsOutsidePerson ? "نعم" : "لا";
-                ws.Cell(row, 24).Value = reg.PasswordHash ?? "";
+                ws.Cell(row, 14).Value = head.OriginalGovernorate;
+                ws.Cell(row, 15).Value = head.DateOfBirth.ToString("yyyy-MM-dd");
+                ws.Cell(row, 16).Value = reg.LivesInTent ? "نعم" : "لا";
+                ws.Cell(row, 17).Value = reg.TentType ?? "";
+                ws.Cell(row, 18).Value = reg.HasBathroom ? "نعم" : "لا";
+                ws.Cell(row, 19).Value = reg.BathroomType ?? "";
+                ws.Cell(row, 20).Value = reg.IsChildHeaded ? "نعم" : "لا";
+                ws.Cell(row, 21).Value = reg.IsFemaleHeaded ? "نعم" : "لا";
+                ws.Cell(row, 22).Value = reg.SupportsOutsidePerson ? "نعم" : "لا";
+                ws.Cell(row, 23).Value = reg.PasswordHash ?? "";
 
                 foreach (int c in Enumerable.Range(1, arabicHeaders.Count))
                 {

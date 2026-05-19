@@ -18,7 +18,7 @@ Camp family registration system in two versions:
 
 ## ASP.NET Core Architecture
 ### Data Model
-- **Person**: Shared entity for family head and members (4-part name, ID, sector, DOB, gender, phone, Wallet (المحفظة), nationality, health, maternity, prisoner flag, etc.).
+- **Person**: Shared entity for family head and members (4-part name, ID, sector, DOB, gender, phone, Wallet (المحفظة), BathroomStatus (جيد/متوسط/سيء), health, maternity, prisoner flag, etc.).
 - **FamilyRegistration**: Links to head (Person), members (FamilyMembers), housing/special-case fields, approval workflow, and **Refugee Needs** (NeedPriority enum for 7 aid items: Tents, Blankets, Mattresses, KitchenTools, Tarpaulins, Clothes, HygieneKit).
 - **FamilyMember**: Join table `FamilyRegistration → Person` with `RelationshipToHead`.
 - **Attachment**: File metadata (`MedicalReport` or `IDImage`), stores relative paths.
@@ -29,10 +29,10 @@ Camp family registration system in two versions:
 - **Notification**: Per-admin notification system with bell icon polling.
 
 ### Registration Flow (4 Steps + Submit)
-1. Step 1: Family Head info + health + documents
-2. Step 2: Family Members (dynamic add/remove)
+1. Step 1: Family Head info + health + documents + injury (always visible) + BathroomStatus
+2. Step 2: Family Members (dynamic add/remove). Validation: if MaritalStatus=متزوج, at least one member must have RelationshipToHead=زوجة.
 3. Step 3: Housing & Special Cases + **Refugee Needs** (7 aid items with None/Low/Medium/High/Critical priority selectors)
-4. Step 4: Review & Confirm
+4. Step 4: Review & Confirm + **StatusNotes** textarea for additional notes
 
 ### Refugee Needs (`NeedPriority` enum)
 - `None=0`, `Low=1`, `Medium=2`, `High=3`, `Critical=4`

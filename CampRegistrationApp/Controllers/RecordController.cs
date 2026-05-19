@@ -145,6 +145,31 @@ namespace CampRegistrationApp.Controllers
                 return View("Edit", model);
             }
 
+            // Server-side validation: married requires wife member
+            if (model.Head.MaritalStatus == "متزوج" && !model.Members.Any(m => m.RelationshipToHead == "زوجة"))
+            {
+                ModelState.AddModelError("", "بما أن الحالة الاجتماعية متزوج، يجب إضافة فرد بصفة زوجة");
+                return View("Edit", model);
+            }
+
+            // Server-side validation: sick requires disease or disability for head
+            if (model.Head.HealthStatus == "مريض" && string.IsNullOrEmpty(model.Head.ChronicDiseases) && string.IsNullOrEmpty(model.Head.DisabilityTypes))
+            {
+                ModelState.AddModelError("", "بما أن الحالة الصحية مريض، يجب اختيار مرض مزمن أو نوع إعاقة على الأقل لرب الأسرة");
+                return View("Edit", model);
+            }
+
+            // Server-side validation: sick requires disease or disability for each member
+            for (int i = 0; i < model.Members.Count; i++)
+            {
+                var m = model.Members[i];
+                if (m.HealthStatus == "مريض" && string.IsNullOrEmpty(m.ChronicDiseases) && string.IsNullOrEmpty(m.DisabilityTypes))
+                {
+                    ModelState.AddModelError("", $"الفرد رقم {i + 1}: بما أن الحالة الصحية مريض، يجب اختيار مرض مزمن أو نوع إعاقة على الأقل");
+                    return View("Edit", model);
+                }
+            }
+
             var regId = HttpContext.Session.GetInt32("EditRegistrationId");
             if (regId == null) return RedirectToAction("Login");
 
@@ -188,8 +213,8 @@ namespace CampRegistrationApp.Controllers
                 head.InjuryDetails = model.Head.InjuryDetails;
                 head.IsHouseDestroyed = model.Head.IsHouseDestroyed;
                 head.IsPrisoner = model.Head.IsPrisoner;
-                head.Nationality = model.Head.Nationality;
                 head.Wallet = model.Head.Wallet;
+                head.BathroomStatus = model.Head.BathroomStatus;
                 head.IsPregnant = model.Head.IsPregnant;
                 head.PregnancyMonth = model.Head.PregnancyMonth;
                 head.IsNursing = model.Head.IsNursing;
@@ -214,6 +239,7 @@ namespace CampRegistrationApp.Controllers
                 registration.DiaperDetails = model.DiaperDetails;
                 registration.HasMultipleFamiliesInTent = model.HasMultipleFamiliesInTent;
                 registration.AdditionalFamiliesCount = model.AdditionalFamiliesCount;
+                registration.StatusNotes = model.StatusNotes;
 
                 // Get old member person IDs BEFORE removing
                 var oldPersonIds = registration.Members.Select(m => m.PersonId).ToList();
@@ -253,8 +279,8 @@ namespace CampRegistrationApp.Controllers
                         InjuryDate = mViewModel.InjuryDate,
                         InjuryDetails = mViewModel.InjuryDetails,
                         IsPrisoner = mViewModel.IsPrisoner,
-                        Nationality = mViewModel.Nationality,
                         Wallet = mViewModel.Wallet,
+                        BathroomStatus = mViewModel.BathroomStatus,
                         IsPregnant = mViewModel.IsPregnant,
                         PregnancyMonth = mViewModel.PregnancyMonth,
                         IsNursing = mViewModel.IsNursing,
@@ -328,8 +354,8 @@ namespace CampRegistrationApp.Controllers
                     InjuryDate = registration.FamilyHead.InjuryDate,
                     InjuryDetails = registration.FamilyHead.InjuryDetails,
                     IsPrisoner = registration.FamilyHead.IsPrisoner,
-                    Nationality = registration.FamilyHead.Nationality,
                     Wallet = registration.FamilyHead.Wallet,
+                    BathroomStatus = registration.FamilyHead.BathroomStatus,
                     IsHouseDestroyed = registration.FamilyHead.IsHouseDestroyed,
                     IsPregnant = registration.FamilyHead.IsPregnant,
                     PregnancyMonth = registration.FamilyHead.PregnancyMonth,
@@ -360,7 +386,6 @@ namespace CampRegistrationApp.Controllers
                     InjuryDate = m.Person.InjuryDate,
                     InjuryDetails = m.Person.InjuryDetails,
                     IsPrisoner = m.Person.IsPrisoner,
-                    Nationality = m.Person.Nationality,
                     IsPregnant = m.Person.IsPregnant,
                     PregnancyMonth = m.Person.PregnancyMonth,
                     IsNursing = m.Person.IsNursing,
@@ -384,7 +409,8 @@ namespace CampRegistrationApp.Controllers
                 NeedsDiapers = registration.NeedsDiapers,
                 DiaperDetails = registration.DiaperDetails,
                 HasMultipleFamiliesInTent = registration.HasMultipleFamiliesInTent,
-                AdditionalFamiliesCount = registration.AdditionalFamiliesCount
+                AdditionalFamiliesCount = registration.AdditionalFamiliesCount,
+                StatusNotes = registration.StatusNotes
             };
         }
     }

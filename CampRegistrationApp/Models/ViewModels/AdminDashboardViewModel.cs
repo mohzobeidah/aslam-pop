@@ -43,7 +43,6 @@ namespace CampRegistrationApp.Models.ViewModels
         public string Sector { get; set; } = string.Empty;
         public string? Gender { get; set; }
         public string? MaritalStatus { get; set; }
-        public string? Nationality { get; set; }
         public string? HealthStatus { get; set; }
         public int MemberCount { get; set; }
         public DateTime RegistrationDate { get; set; }

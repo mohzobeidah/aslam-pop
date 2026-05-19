@@ -26,7 +26,7 @@
             <div><span class="text-gray-400">تاريخ الميلاد:</span> <span class="text-white">@head.DateOfBirth.ToString("yyyy/MM/dd")</span></div>
             <div><span class="text-gray-400">الجنس:</span> <span class="text-white">@head.Gender</span></div>
             <div><span class="text-gray-400">الهاتف:</span> <span class="text-white" dir="ltr">@head.PhoneNumber</span></div>
-            <div><span class="text-gray-400">الجنسية:</span> <span class="text-white">@head.Nationality</span></div>
+            <div><span class="text-gray-400">حمام:</span> <span class="text-white">@head.BathroomStatus</span></div>
             <div><span class="text-gray-400">الحالة الاجتماعية:</span> <span class="text-white">@head.MaritalStatus</span></div>
             <div><span class="text-gray-400">الوظيفة:</span> <span class="text-white">@head.EmploymentStatus</span></div>
             <div><span class="text-gray-400">المستوى التعليمي:</span> <span class="text-white">@head.EducationLevel</span></div>
@@ -79,6 +79,15 @@
         </div>
     </div>
 
+    <!-- Status Notes -->
+    @if (!string.IsNullOrEmpty(Model.StatusNotes))
+    {
+        <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700">
+            <h2 class="text-lg text-camp-gold font-bold mb-4">ملاحظات حول الحالة</h2>
+            <p class="text-sm text-white whitespace-pre-wrap">@Model.StatusNotes</p>
+        </div>
+    }
+
     <!-- Status -->
     <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700">
         <h2 class="text-lg text-camp-gold font-bold mb-4">حالة التسجيل</h2>
@@ -113,7 +122,6 @@
                         <th class="p-2 text-center">صلة القرابة</th>
                         <th class="p-2 text-center">الجنس</th>
                         <th class="p-2 text-center">تاريخ الميلاد</th>
-                        <th class="p-2 text-center">الجنسية</th>
                         <th class="p-2 text-center">الحالة الصحية</th>
                     </tr>
                 </thead>
@@ -127,7 +135,6 @@
                             <td class="p-2 text-center text-gray-300">@m.RelationshipToHead</td>
                             <td class="p-2 text-center text-gray-300">@p.Gender</td>
                             <td class="p-2 text-center text-gray-300">@p.DateOfBirth.ToString("yyyy/MM/dd")</td>
-                            <td class="p-2 text-center text-gray-300">@p.Nationality</td>
                             <td class="p-2 text-center text-gray-300">@p.HealthStatus</td>
                         </tr>
                     }
