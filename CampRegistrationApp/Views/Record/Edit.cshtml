@@ -88,11 +88,13 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">رقم الهاتف</label>
-                            <input name="Head.PhoneNumber" value="@Model.Head.PhoneNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                            <input name="Head.PhoneNumber" value="@Model.Head.PhoneNumber" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearPhoneError(this)" />
+                            <span class="phone-error text-red-500 text-xs hidden">رقم الهاتف يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056</span>
                         </div>
                         <div>
                             <label class="block text-sm mb-1">المحفظة</label>
-                            <input name="Head.Wallet" value="@Model.Head.Wallet" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                            <input name="Head.Wallet" value="@Model.Head.Wallet" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" oninput="clearWalletError(this)" />
+                            <span class="wallet-error text-red-500 text-xs hidden">رقم المحفظة يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056</span>
                         </div>
                         <div>
                             <label class="block text-sm mb-1">مكان السكن الأصلي</label>
@@ -102,15 +104,6 @@
                                 {
                                     <option value="@g" selected="@(Model.Head.OriginalGovernorate == g )">@g</option>
                                 }
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm mb-1">حمام</label>
-                            <select name="Head.BathroomStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
-                                <option value="">اختر...</option>
-                                <option value="جيد" selected="@(Model.Head.BathroomStatus == "جيد")">جيد</option>
-                                <option value="متوسط" selected="@(Model.Head.BathroomStatus == "متوسط")">متوسط</option>
-                                <option value="سيء" selected="@(Model.Head.BathroomStatus == "سيء")">سيء</option>
                             </select>
                         </div>
                         <div>
@@ -304,15 +297,6 @@
                         }
                     </select>
                                     </div>
-                                    <div>
-                                        <label class="block text-xs mb-1">حمام</label>
-                                        <select name="Members[@i].BathroomStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
-                                            <option value="">اختر...</option>
-                                            <option value="جيد" selected="@(m.BathroomStatus == "جيد")">جيد</option>
-                                            <option value="متوسط" selected="@(m.BathroomStatus == "متوسط")">متوسط</option>
-                                            <option value="سيء" selected="@(m.BathroomStatus == "سيء")">سيء</option>
-                                        </select>
-                                    </div>
                                     <div class="flex items-center gap-2">
                                         <input type="checkbox" name="Members[@i].IsPrisoner" value="true" class="accent-camp-gold" @(m.IsPrisoner ? "checked" : "") />
                                         <label class="text-xs">أسير</label>
@@ -472,28 +456,6 @@
                         </div>
 
                         <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
-                            <label>هل يوجد حمام؟</label>
-                            <div class="flex gap-4">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="HasBathroom" value="true" class="accent-camp-gold" @(Model.HasBathroom ? "checked" : "") onchange="toggleSection(this, 'bathroom-details')" /> نعم
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="HasBathroom" value="false" class="accent-camp-gold" @(!Model.HasBathroom ? "checked" : "") onchange="toggleSection(this, 'bathroom-details')" /> لا
-                                </label>
-                            </div>
-                        </div>
-                        <div id="bathroom-details" class="@(Model.HasBathroom ? "" : "hidden") p-4 bg-camp-dark-grey rounded border border-gray-700">
-                            <div class="flex gap-4">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="BathroomType" value="Private" class="accent-camp-gold" @(Model.BathroomType == "Private" ? "checked" : "") /> خاص
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="BathroomType" value="Shared" class="accent-camp-gold" @(Model.BathroomType == "Shared" ? "checked" : "") /> مشترك
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
                             <input type="checkbox" name="NeedsDiapers" value="true" class="accent-camp-gold" @(Model.NeedsDiapers ? "checked" : "") onchange="toggleSection(this, 'diaper-details')" />
                             <label>هل تحتاج العائلة حفائظ (لكبار السن أو آخرين)؟</label>
                         </div>
@@ -515,6 +477,44 @@
                                 <option value="6" selected="@(Model.AdditionalFamiliesCount == 6 )">أكثر من 5</option>
                             </select>
                         </div>
+                </div>
+            </div>
+
+            <!-- Bathroom -->
+            <div class="mt-6 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                <h3 class="text-lg font-semibold text-camp-gold mb-3">الحمام</h3>
+                <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                    <label>هل يوجد حمام؟</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="HasBathroom" value="true" class="accent-camp-gold" @(Model.HasBathroom ? "checked" : "") onchange="toggleSection(this, 'bathroom-details-edit')" /> نعم
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="HasBathroom" value="false" class="accent-camp-gold" @(!Model.HasBathroom ? "checked" : "") onchange="toggleSection(this, 'bathroom-details-edit')" /> لا
+                        </label>
+                    </div>
+                </div>
+                <div id="bathroom-details-edit" class="@(Model.HasBathroom ? "" : "hidden") space-y-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                    <div>
+                        <label class="block text-sm mb-1">نوع الحمام</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="BathroomType" value="Private" class="accent-camp-gold" @(Model.BathroomType == "Private" ? "checked" : "") /> خاص
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="BathroomType" value="Shared" class="accent-camp-gold" @(Model.BathroomType == "Shared" ? "checked" : "") /> مشترك
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">حالة الحمام</label>
+                        <select name="Head.BathroomStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                            <option value="">اختر...</option>
+                            <option value="جيد" selected="@(Model.Head.BathroomStatus == "جيد")">جيد</option>
+                            <option value="متوسط" selected="@(Model.Head.BathroomStatus == "متوسط")">متوسط</option>
+                            <option value="سيء" selected="@(Model.Head.BathroomStatus == "سيء")">سيء</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -542,6 +542,10 @@
         .field-error:focus { border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3); }
         .id-error { display: block; margin-top: 4px; }
         .id-error.hidden { display: none; }
+        .phone-error { display: block; margin-top: 4px; }
+        .phone-error.hidden { display: none; }
+        .wallet-error { display: block; margin-top: 4px; }
+        .wallet-error.hidden { display: none; }
     </style>
 
     <script>
@@ -575,6 +579,55 @@
             if (!errorSpan) return;
             errorSpan.classList.add('hidden');
             el.classList.remove('field-error');
+        }
+
+        function clearPhoneError(el) {
+            const errorSpan = el.parentElement.querySelector('.phone-error');
+            if (!errorSpan) return;
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+        }
+
+        function clearWalletError(el) {
+            const errorSpan = el.parentElement.querySelector('.wallet-error');
+            if (!errorSpan) return;
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+        }
+
+        function validatePhoneField(el) {
+            const val = el.value.trim();
+            const errorSpan = el.parentElement.querySelector('.phone-error');
+            if (!errorSpan) return true;
+            const pattern = /^(059|056)\d{7}$/;
+            if (!pattern.test(val)) {
+                errorSpan.classList.remove('hidden');
+                el.classList.add('field-error');
+                return false;
+            }
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+            return true;
+        }
+
+        function validateWalletField(el) {
+            const val = el.value.trim();
+            const errorSpan = el.parentElement.querySelector('.wallet-error');
+            if (!errorSpan) return true;
+            if (!val) {
+                errorSpan.classList.add('hidden');
+                el.classList.remove('field-error');
+                return true;
+            }
+            const pattern = /^(059|056)\d{7}$/;
+            if (!pattern.test(val)) {
+                errorSpan.classList.remove('hidden');
+                el.classList.add('field-error');
+                return false;
+            }
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+            return true;
         }
 
         function toggleHealth(el, sectionId) {
@@ -617,14 +670,6 @@
                     <option value="">اختر...</option>
                     ${['زوج','زوجة','ابن','ابنة','أم','أب','أخ','أخت','جدة/جد','حفيد/حفيدة','أخ غير شقيق','أخت غير شقيقة','Other'].map(r => '<option value="'+r+'">'+r+'</option>').join('')}
                 </select>
-                    </div>
-                    <div><label class="block text-xs mb-1">حمام</label>
-                        <select name="Members[\${idx}].BathroomStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
-                            <option value="">اختر...</option>
-                            <option value="جيد">جيد</option>
-                            <option value="متوسط">متوسط</option>
-                            <option value="سيء">سيء</option>
-                        </select>
                     </div>
                     <div class="flex items-center gap-2">
                         <input type="checkbox" name="Members[\${idx}].IsPrisoner" value="true" class="accent-camp-gold" />
@@ -714,6 +759,14 @@
             document.querySelectorAll('[name$=".IdNumber"], [name="Head.IdNumber"]').forEach(el => {
                 if (!validateIdField(el)) valid = false;
             });
+
+            // Validate phone
+            const phoneEl = document.querySelector('[name="Head.PhoneNumber"]');
+            if (phoneEl && !validatePhoneField(phoneEl)) valid = false;
+
+            // Validate wallet if provided
+            const walletEl = document.querySelector('[name="Head.Wallet"]');
+            if (walletEl && walletEl.value.trim() && !validateWalletField(walletEl)) valid = false;
 
             const required = ['Head.FirstName', 'Head.SecondName', 'Head.ThirdName', 'Head.LastName', 'Head.IdNumber', 'Head.Sector'];
             required.forEach(key => {

@@ -26,7 +26,6 @@
             <div><span class="text-gray-400">تاريخ الميلاد:</span> <span class="text-white">@head.DateOfBirth.ToString("yyyy/MM/dd")</span></div>
             <div><span class="text-gray-400">الجنس:</span> <span class="text-white">@head.Gender</span></div>
             <div><span class="text-gray-400">الهاتف:</span> <span class="text-white" dir="ltr">@head.PhoneNumber</span></div>
-            <div><span class="text-gray-400">حمام:</span> <span class="text-white">@head.BathroomStatus</span></div>
             <div><span class="text-gray-400">الحالة الاجتماعية:</span> <span class="text-white">@head.MaritalStatus</span></div>
             <div><span class="text-gray-400">الوظيفة:</span> <span class="text-white">@head.EmploymentStatus</span></div>
             <div><span class="text-gray-400">المستوى التعليمي:</span> <span class="text-white">@head.EducationLevel</span></div>
@@ -74,6 +73,7 @@
             @if (Model.LivesInTent) { <div><span class="text-gray-400">نوع الخيمة:</span> <span class="text-white">@Model.TentType @(!string.IsNullOrEmpty(Model.OtherTentType) ? "(" + Model.OtherTentType + ")" : "")</span></div> }
             <div><span class="text-gray-400">حمام:</span> <span class="text-white">@(Model.HasBathroom ? "نعم" : "لا")</span></div>
             @if (Model.HasBathroom) { <div><span class="text-gray-400">نوع الحمام:</span> <span class="text-white">@(Model.BathroomType == "Private" ? "خاص" : Model.BathroomType == "Shared" ? "مشترك" : Model.BathroomType)</span></div> }
+            @if (Model.HasBathroom && !string.IsNullOrEmpty(head.BathroomStatus)) { <div><span class="text-gray-400">حالة الحمام:</span> <span class="text-white">@head.BathroomStatus</span></div> }
             <div><span class="text-gray-400">حفائظ:</span> <span class="text-white">@(Model.NeedsDiapers ? "نعم" : "لا")</span></div>
             <div><span class="text-gray-400">أسر بنفس الخيمة:</span> <span class="text-white">@(Model.HasMultipleFamiliesInTent ? "نعم" : "لا")</span></div>
         </div>

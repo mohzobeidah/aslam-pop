@@ -67,6 +67,7 @@ namespace CampRegistrationApp.Models.ViewModels
         [Required(ErrorMessage = "الجنس مطلوب")]
         public string Gender { get; set; } = "ذكر";
         [Required(ErrorMessage = "رقم الهاتف مطلوب")]
+        [RegularExpression(@"^(059|056)\d{7}$", ErrorMessage = "رقم الهاتف يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056")]
         public string PhoneNumber { get; set; } = string.Empty;
         public string OriginalGovernorate { get; set; } = string.Empty;
         public string MaritalStatus { get; set; } = string.Empty;
@@ -87,6 +88,7 @@ namespace CampRegistrationApp.Models.ViewModels
         public DateTime? NursingInfantDOB { get; set; }
         public string? NursingInfantID { get; set; }
         public bool IsPrisoner { get; set; }
+        [RegularExpression(@"^(059|056)\d{7}$", ErrorMessage = "رقم المحفظة يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056")]
         public string? Wallet { get; set; }
         public string? BathroomStatus { get; set; }
         public string? HeadIdImagePath { get; set; }
