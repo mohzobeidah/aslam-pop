@@ -11,6 +11,27 @@
         </header>
 
         <div class="max-w-4xl mx-auto">
+            <!-- Messages -->
+            @if (TempData["Success"] is string successMsg)
+            {
+                <div class="bg-green-900/50 text-green-300 p-4 rounded-lg mb-4 text-sm border border-green-700">@Html.Raw(successMsg)</div>
+            }
+            @if (TempData["Error"] is string errorMsg)
+            {
+                <div class="bg-red-900/50 text-red-300 p-4 rounded-lg mb-4 text-sm border border-red-700">@Html.Raw(errorMsg)</div>
+            }
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="bg-red-900/50 text-red-300 p-4 rounded-lg mb-4 text-sm border border-red-700">
+                    <ul class="list-disc list-inside">
+                        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@Html.Raw(err.ErrorMessage)</li>
+                        }
+                    </ul>
+                </div>
+            }
+
             <!-- Stepper -->
             <div class="flex justify-between mb-8">
                 <div class="flex flex-col items-center flex-1 cursor-pointer" onclick="tryGoToStep(1)">
@@ -306,6 +327,12 @@
                             <textarea name="FemaleHeadedDetails" data-ls="FemaleHeadedDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2"></textarea>
                         </div>
 
+                        <!-- Husband Abroad -->
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" name="IsHusbandAbroad" data-ls="IsHusbandAbroad" value="true" class="accent-camp-gold" onchange="saveToLocalStorage()" />
+                            <label class="text-lg">الزوج خارج البلاد</label>
+                        </div>
+
                         <!-- Outside Person -->
                         <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
                             <input type="checkbox" name="SupportsOutsidePerson" data-ls="SupportsOutsidePerson" value="true" class="accent-camp-gold" onchange="toggleSectionCheckbox(this, 'outside-person-details'); saveToLocalStorage()" />
@@ -376,32 +403,52 @@
                             </select>
                         </div>
 
-                        <!-- Refugee Needs (Orders) -->
+                        <!-- Bathroom Section -->
                         <div class="p-4 bg-camp-dark-grey rounded border border-gray-700">
-                            <h3 class="text-lg font-semibold text-camp-gold mb-4">الاحتياجات (طلب المساعدات)</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                @foreach (var item in new[] {
-                                    new { Id = "NeedTents", Label = "خيم" },
-                                    new { Id = "NeedBlankets", Label = "اغطية" },
-                                    new { Id = "NeedMattresses", Label = "فرشات" },
-                                    new { Id = "NeedKitchenTools", Label = "ادوات مطبخ" },
-                                    new { Id = "NeedTarpaulins", Label = "شوادر" },
-                                    new { Id = "NeedClothes", Label = "ملابس" },
-                                    new { Id = "NeedHygieneKit", Label = "طرد صحي" }
-                                })
-                                {
-                                    <div class="flex flex-col gap-2">
-                                        <label class="text-sm text-gray-300">@item.Label</label>
-                                        <select name="@item.Id" data-ls="@item.Id" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none text-white">
-                                            <option value="0">لا يوجد</option>
-                                            <option value="1">منخفضة</option>
-                                            <option value="2">متوسطة</option>
-                                            <option value="3">عالية</option>
-                                            <option value="4">حرجة جداً</option>
-                                        </select>
-                                    </div>
-                                }
+                            <h3 class="text-lg font-semibold text-camp-gold mb-3">الحمام</h3>
+                            <div class="flex items-center gap-4">
+                                <label class="text-lg">هل يوجد حمام؟</label>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="HasBathroom" data-ls="HasBathroom" value="true" class="accent-camp-gold" onchange="toggleSection(this, 'bathroom-details'); saveToLocalStorage()" /> نعم
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="HasBathroom" data-ls="HasBathroom" value="false" checked class="accent-camp-gold" onchange="toggleSection(this, 'bathroom-details'); saveToLocalStorage()" /> لا
+                                    </label>
+                                </div>
                             </div>
+
+                            <div id="bathroom-details" class="hidden space-y-4 p-4 bg-camp-dark-grey rounded border border-gray-700 mt-4">
+                                <div>
+                                    <label class="block text-sm mb-1">نوع الحمام</label>
+                                    <div class="flex gap-4">
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="BathroomType" data-ls="BathroomType" value="Private" class="accent-camp-gold" onchange="saveToLocalStorage()" /> خاص
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="BathroomType" data-ls="BathroomType" value="Shared" class="accent-camp-gold" onchange="saveToLocalStorage()" /> مشترك
+                                        </label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">حالة الحمام</label>
+                                    <select name="Head.BathroomStatus" data-ls="Head.BathroomStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                        <option value="">اختر...</option>
+                                        <option value="جيد">جيد</option>
+                                        <option value="متوسط">متوسط</option>
+                                        <option value="سيء">سيء</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Refugee Desires (رتب احتياجاتك) -->
+                        <div class="p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <h3 class="text-lg font-semibold text-camp-gold mb-4">الرغبات (رتب احتياجاتك حسب الأهمية)</h3>
+                            <div id="desires-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <!-- Filled by JS -->
+                            </div>
+                            <input type="hidden" name="DesireIds" id="desireIdsInput" value="" />
                         </div>
                     </div>
                 </div>
@@ -411,45 +458,6 @@
                     <h2 class="text-2xl font-semibold text-camp-gold mb-6">مراجعة البيانات وتأكيد التسجيل</h2>
                     <div id="review-content" class="space-y-6">
                         <!-- Filled by JS -->
-                    </div>
-
-                    <!-- Bathroom Section (Last Page) -->
-                    <div class="mt-6 space-y-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
-                        <h3 class="text-lg font-semibold text-camp-gold mb-3">الحمام</h3>
-                        <div class="flex items-center gap-4">
-                            <label class="text-lg">هل يوجد حمام؟</label>
-                            <div class="flex gap-4">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="HasBathroom" data-ls="HasBathroom" value="true" class="accent-camp-gold" onchange="toggleSection(this, 'bathroom-details-step4'); saveToLocalStorage()" /> نعم
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="HasBathroom" data-ls="HasBathroom" value="false" checked class="accent-camp-gold" onchange="toggleSection(this, 'bathroom-details-step4'); saveToLocalStorage()" /> لا
-                                </label>
-                            </div>
-                        </div>
-
-                        <div id="bathroom-details-step4" class="hidden space-y-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
-                            <div>
-                                <label class="block text-sm mb-1">نوع الحمام</label>
-                                <div class="flex gap-4">
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="BathroomType" data-ls="BathroomType" value="Private" class="accent-camp-gold" onchange="saveToLocalStorage()" /> خاص
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="BathroomType" data-ls="BathroomType" value="Shared" class="accent-camp-gold" onchange="saveToLocalStorage()" /> مشترك
-                                    </label>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm mb-1">حالة الحمام</label>
-                                <select name="Head.BathroomStatus" data-ls="Head.BathroomStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
-                                    <option value="">اختر...</option>
-                                    <option value="جيد">جيد</option>
-                                    <option value="متوسط">متوسط</option>
-                                    <option value="سيء">سيء</option>
-                                </select>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Status Notes -->
@@ -516,183 +524,12 @@
         const HEALTH_STATUSES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.HealthStatus>)ViewBag.HealthStatuses).Select(h => h.Name)));
         const CHRONIC_DISEASES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.ChronicDisease>)ViewBag.ChronicDiseases).Select(c => c.Name)));
         const DISABILITY_TYPES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.DisabilityType>)ViewBag.DisabilityTypes).Select(d => d.Name)));
+        const DESIRES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.Desire>)ViewBag.Desires).Select(d => new { d.Id, d.Name })));
 
         // ========== LOCALSTORAGE ==========
         const STORAGE_KEY = 'campRegistration';
 
-        function saveToLocalStorage() {
-            // Collect all form data into the hidden members container first
-            collectMembersToHidden();
-
-            const form = document.getElementById('registrationForm');
-            const data = {};
-
-            // Collect regular inputs/selects/textareas with data-ls attribute
-            form.querySelectorAll('[data-ls]').forEach(el => {
-                if (el.type === 'radio') {
-                    if (el.checked) {
-                        data[el.getAttribute('data-ls')] = el.value;
-                    }
-                } else if (el.type === 'checkbox') {
-                    if (el.name.endsWith('ChronicDiseases') || el.name.endsWith('DisabilityTypes')) {
-                        const key = el.getAttribute('data-ls');
-                        if (!data[key]) data[key] = [];
-                        if (el.checked) data[key].push(el.value);
-                    } else {
-                        data[el.getAttribute('data-ls')] = el.checked;
-                    }
-                } else {
-                    data[el.getAttribute('data-ls')] = el.value;
-                }
-            });
-
-            // Collect members from member cards
-            const memberCards = document.querySelectorAll('.member-card');
-            const members = [];
-            memberCards.forEach((card, idx) => {
-                const m = {};
-                card.querySelectorAll('[name]').forEach(el => {
-                    const name = el.getAttribute('name');
-                    const key = name.replace(`Members[${idx}].`, '');
-                    if (el.type === 'radio') {
-                        if (el.checked) m[key] = el.value;
-                    } else if (el.type === 'checkbox' && !el.name.includes('ChronicDiseases') && !el.name.includes('DisabilityTypes')) {
-                        m[key] = el.checked;
-                    } else if (el.type === 'checkbox' && (el.name.includes('ChronicDiseases') || el.name.includes('DisabilityTypes'))) {
-                        const arrKey = key;
-                        if (!m[arrKey]) m[arrKey] = [];
-                        if (el.checked) m[arrKey].push(el.value);
-                    } else {
-                        m[key] = el.value;
-                    }
-                });
-                members.push(m);
-            });
-            data['Members'] = members;
-
-            // Save file paths separately (not serializable easily, but we keep the hidden field values)
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }
-
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (!saved) return;
-
-            let data;
-            try { data = JSON.parse(saved); } catch { return; }
-
-            // Restore regular fields
-            Object.keys(data).forEach(key => {
-                if (key === 'Members') return;
-                const el = document.querySelector(`[data-ls="${key}"]`);
-                if (!el) return;
-
-                const val = data[key];
-                if (el.type === 'radio') {
-                    const radio = document.querySelector(`[data-ls="${key}"][value="${val}"]`);
-                    if (radio) radio.checked = true;
-                    if (key.includes('HealthStatus')) triggerEvent(radio, 'change');
-                    if (key.includes('LivesInTent')) triggerEvent(radio, 'change');
-                    if (key.includes('HasBathroom')) triggerEvent(radio, 'change');
-                } else if (el.type === 'checkbox') {
-                    if (Array.isArray(val)) {
-                        val.forEach(v => {
-                            const cb = document.querySelector(`[data-ls="${key}"][value="${v}"]`);
-                            if (cb) cb.checked = true;
-                        });
-                    } else {
-                        el.checked = val === true || val === 'true';
-                        if (key.includes('HasInjury')) triggerEvent(el, 'change');
-                        if (key.includes('IsPregnant')) triggerEvent(el, 'change');
-                        if (key.includes('IsNursing')) triggerEvent(el, 'change');
-                        if (key.includes('IsChildHeaded')) triggerEvent(el, 'change');
-                        if (key.includes('IsFemaleHeaded')) triggerEvent(el, 'change');
-                        if (key.includes('SupportsOutsidePerson')) triggerEvent(el, 'change');
-                        if (key.includes('IsHouseDestroyed')) triggerEvent(el, 'change');
-                    }
-                } else {
-                    el.value = val || '';
-                }
-            });
-
-            // Restore members
-            if (data.Members && Array.isArray(data.Members)) {
-                data.Members.forEach((m, i) => {
-                    addMemberWithData(m);
-                });
-            }
-
-            // Step indicator
-            restoreStepUI();
-        }
-
-        function triggerEvent(el, eventName) {
-            if (el) {
-                const event = new Event(eventName, { bubbles: true });
-                el.dispatchEvent(event);
-            }
-        }
-
-        // ========== STEP NAVIGATION ==========
-        let currentStep = 1;
-
-        function goToStep(step) {
-            if (step < 1 || step > 4) return;
-            currentStep = step;
-
-            document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`step-${step}`).classList.remove('hidden');
-
-            for (let i = 1; i <= 4; i++) {
-                const indicator = document.getElementById(`step-indicator-${i}`);
-                const label = document.getElementById(`step-label-${i}`);
-                if (i === step) {
-                    indicator.className = 'w-10 h-10 rounded-full flex items-center justify-center border-2 border-camp-gold bg-camp-gold text-camp-dark-grey transition-colors';
-                    label.className = 'text-xs mt-2 text-camp-gold';
-                } else if (i < step) {
-                    indicator.className = 'w-10 h-10 rounded-full flex items-center justify-center border-2 border-green-500 bg-green-500 text-white transition-colors';
-                    label.className = 'text-xs mt-2 text-green-500';
-                } else {
-                    indicator.className = 'w-10 h-10 rounded-full flex items-center justify-center border-2 border-gray-600 text-gray-500 transition-colors';
-                    label.className = 'text-xs mt-2 text-gray-500';
-                }
-            }
-
-            document.getElementById('prevBtn').classList.toggle('hidden', step === 1);
-            document.getElementById('nextBtn').classList.toggle('hidden', step === 4);
-            document.getElementById('submitBtn').classList.toggle('hidden', step !== 4);
-
-            if (step === 4) renderReview();
-        }
-
-        function nextStep() {
-            tryGoToStep(currentStep + 1);
-        }
-
-        function prevStep() {
-            saveToLocalStorage();
-            goToStep(currentStep - 1);
-        }
-
-        function tryGoToStep(step) {
-            if (step === currentStep) return;
-            if (step > currentStep) {
-                for (let s = currentStep; s < step; s++) {
-                    if (s === 1 && !validateStep1()) { goToStep(1); return false; }
-                    if (s === 2 && !validateStep2()) { goToStep(2); return false; }
-                }
-            }
-            saveToLocalStorage();
-            goToStep(step);
-            return true;
-        }
-
-        function restoreStepUI() {
-            // Default to step 1 on fresh load
-            goToStep(1);
-        }
-
-        // ========== VALIDATION ==========
+        // ========== VALIDATION HELPERS (early definition for on* handlers in HTML) ==========
 
         function validatePalestinianId(id) {
             return /^\d{9}$/.test(id);
@@ -745,8 +582,7 @@
             const val = el.value.trim();
             const errorSpan = el.parentElement.querySelector('.phone-error');
             if (!errorSpan) return true;
-            const pattern = /^(059|056)\d{7}$/;
-            if (!pattern.test(val)) {
+            if (val && !/^(\+972|05|00972)\d{8,9}$/.test(val)) {
                 errorSpan.classList.remove('hidden');
                 el.classList.add('field-error');
                 return false;
@@ -760,13 +596,7 @@
             const val = el.value.trim();
             const errorSpan = el.parentElement.querySelector('.wallet-error');
             if (!errorSpan) return true;
-            if (!val) {
-                errorSpan.classList.add('hidden');
-                el.classList.remove('field-error');
-                return true;
-            }
-            const pattern = /^(059|056)\d{7}$/;
-            if (!pattern.test(val)) {
+            if (val && !/^\d{8,15}$/.test(val)) {
                 errorSpan.classList.remove('hidden');
                 el.classList.add('field-error');
                 return false;
@@ -778,27 +608,326 @@
 
         function checkDuplicateId(el) {
             const val = el.value.trim();
-            const warnSpan = el.parentElement.querySelector('.dup-warning');
-            if (!warnSpan) return;
-            // Only check if 9-digit ID
-            if (!validatePalestinianId(val)) {
-                warnSpan.classList.add('hidden');
-                warnSpan.innerHTML = '';
-                return;
-            }
-            fetch(`/Registration/CheckId?idNumber=${encodeURIComponent(val)}`)
+            const warningSpan = el.parentElement.querySelector('.dup-warning');
+            if (!val || val.length !== 9 || !warningSpan) return;
+            fetch(`/Registration/CheckId?id=${encodeURIComponent(val)}`)
                 .then(r => r.json())
                 .then(data => {
                     if (data.exists) {
-                        warnSpan.innerHTML = '⚠ هذا الرقم مسجل مسبقاً. <a href="/Record/Login" class="text-camp-gold underline">تسجيل الدخول</a> لتعديل بياناتك.';
-                        warnSpan.classList.remove('hidden');
+                        warningSpan.textContent = '⚠ هذا الرقم مسجل مسبقاً. تسجيل الدخول لتعديل بياناتك';
+                        warningSpan.classList.remove('hidden');
                     } else {
-                        warnSpan.classList.add('hidden');
-                        warnSpan.innerHTML = '';
+                        warningSpan.classList.add('hidden');
+                        warningSpan.innerHTML = '';
                     }
                 })
                 .catch(() => {});
         }
+
+        function saveToLocalStorage() {
+            // Collect all form data into the hidden members container first
+            collectMembersToHidden();
+
+            const form = document.getElementById('registrationForm');
+            const data = {};
+
+            // Collect regular inputs/selects/textareas with data-ls attribute
+            form.querySelectorAll('[data-ls]').forEach(el => {
+                if (el.type === 'radio') {
+                    if (el.checked) {
+                        data[el.getAttribute('data-ls')] = el.value;
+                    }
+                } else if (el.type === 'checkbox') {
+                    if (el.name.endsWith('ChronicDiseases') || el.name.endsWith('DisabilityTypes')) {
+                        const key = el.getAttribute('data-ls');
+                        if (!data[key]) data[key] = [];
+                        if (el.checked) data[key].push(el.value);
+                    } else {
+                        data[el.getAttribute('data-ls')] = el.checked;
+                    }
+                } else {
+                    data[el.getAttribute('data-ls')] = el.value;
+                }
+            });
+
+            // Collect members from member cards
+            const memberCards = document.querySelectorAll('.member-card');
+            const members = [];
+            memberCards.forEach((card, idx) => {
+                const m = {};
+                card.querySelectorAll('[name]').forEach(el => {
+                    const name = el.getAttribute('name');
+                    const key = name.replace(`Members[${idx}].`, '');
+                    if (el.type === 'radio') {
+                        if (el.checked) m[key] = el.value;
+                    } else if (el.type === 'checkbox' && !el.name.includes('ChronicDiseases') && !el.name.includes('DisabilityTypes')) {
+                        m[key] = el.checked;
+                    } else if (el.type === 'checkbox' && (el.name.includes('ChronicDiseases') || el.name.includes('DisabilityTypes'))) {
+                        const arrKey = key;
+                        if (!m[arrKey]) m[arrKey] = [];
+                        if (el.checked) m[arrKey].push(el.value);
+                    } else {
+                        m[key] = el.value;
+                    }
+                });
+                members.push(m);
+            });
+            data['Members'] = members;
+
+            // Save desire IDs from the hidden input
+            const desireInput = document.getElementById('desireIdsInput');
+            if (desireInput && desireInput.value) {
+                data['DesireIds'] = desireInput.value;
+            }
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+
+            let data;
+            try { data = JSON.parse(saved); } catch { return; }
+
+            // Restore regular fields
+            Object.keys(data).forEach(key => {
+                if (key === 'Members') return;
+                const el = document.querySelector(`[data-ls="${key}"]`);
+                if (!el) return;
+
+                const val = data[key];
+                if (el.type === 'radio') {
+                    const radio = document.querySelector(`[data-ls="${key}"][value="${val}"]`);
+                    if (radio) radio.checked = true;
+                    if (key.includes('HealthStatus')) triggerEvent(radio, 'change');
+                    if (key.includes('LivesInTent')) triggerEvent(radio, 'change');
+                    if (key.includes('HasBathroom')) triggerEvent(radio, 'change');
+                } else if (el.type === 'checkbox') {
+                    if (Array.isArray(val)) {
+                        val.forEach(v => {
+                            const cb = document.querySelector(`[data-ls="${key}"][value="${v}"]`);
+                            if (cb) cb.checked = true;
+                        });
+                    } else {
+                        el.checked = val === true || val === 'true';
+                        if (key.includes('HasInjury')) triggerEvent(el, 'change');
+                        if (key.includes('IsPregnant')) triggerEvent(el, 'change');
+                        if (key.includes('IsNursing')) triggerEvent(el, 'change');
+                        if (key.includes('IsChildHeaded')) triggerEvent(el, 'change');
+                        if (key.includes('IsFemaleHeaded')) triggerEvent(el, 'change');
+                        if (key.includes('SupportsOutsidePerson')) triggerEvent(el, 'change');
+                        if (key.includes('IsHouseDestroyed')) triggerEvent(el, 'change');
+                    }
+                } else {
+                    el.value = val || '';
+                }
+            });
+
+            // Restore members
+            if (data.Members && Array.isArray(data.Members)) {
+                data.Members.forEach((m, i) => {
+                    addMemberWithData(m);
+                });
+            }
+
+            // Restore desires
+            if (data.DesireIds) {
+                const desireInput = document.getElementById('desireIdsInput');
+                if (desireInput) desireInput.value = data.DesireIds;
+            }
+
+            // Step indicator
+            restoreStepUI();
+        }
+
+        function triggerEvent(el, eventName) {
+            if (el) {
+                const event = new Event(eventName, { bubbles: true });
+                el.dispatchEvent(event);
+            }
+        }
+
+        // ========== STEP NAVIGATION ==========
+        let currentStep = 1;
+
+        function goToStep(step) {
+            if (step < 1 || step > 4) return;
+            currentStep = step;
+
+            document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+
+            for (let i = 1; i <= 4; i++) {
+                const indicator = document.getElementById(`step-indicator-${i}`);
+                const label = document.getElementById(`step-label-${i}`);
+                if (i === step) {
+                    indicator.className = 'w-10 h-10 rounded-full flex items-center justify-center border-2 border-camp-gold bg-camp-gold text-camp-dark-grey transition-colors';
+                    label.className = 'text-xs mt-2 text-camp-gold';
+                } else if (i < step) {
+                    indicator.className = 'w-10 h-10 rounded-full flex items-center justify-center border-2 border-green-500 bg-green-500 text-white transition-colors';
+                    label.className = 'text-xs mt-2 text-green-500';
+                } else {
+                    indicator.className = 'w-10 h-10 rounded-full flex items-center justify-center border-2 border-gray-600 text-gray-500 transition-colors';
+                    label.className = 'text-xs mt-2 text-gray-500';
+                }
+            }
+
+            document.getElementById('prevBtn').classList.toggle('hidden', step === 1);
+            document.getElementById('nextBtn').classList.toggle('hidden', step === 4);
+            document.getElementById('submitBtn').classList.toggle('hidden', step !== 4);
+
+            if (step === 3) renderDesires();
+            if (step === 4) renderReview();
+        }
+
+        // ========== DESIRES (DYNAMIC RANKING) ==========
+        function renderDesires() {
+            const container = document.getElementById('desires-container');
+            if (!container) return;
+
+            // Clear container to allow re-rendering
+            container.innerHTML = '';
+
+            console.log('Rendering desires with data:', DESIRES);
+
+            const selected = getSavedDesireIds();
+            const RANK_COUNT = 5;
+
+            if (!DESIRES || DESIRES.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center col-span-full">لا توجد رغبات متاحة حالياً</p>';
+                return;
+            }
+
+            for (let i = 1; i <= RANK_COUNT; i++) {
+                const order = i;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex items-center gap-3 p-2 bg-camp-dark-grey/50 rounded border border-gray-700';
+                wrapper.id = `desire-wrapper-${order}`;
+
+                const label = document.createElement('label');
+                label.className = 'text-sm text-gray-300 min-w-fit';
+                label.textContent = `الرغبة ${order}:`;
+                wrapper.appendChild(label);
+
+                const select = document.createElement('select');
+                select.className = 'w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none text-white desire-select';
+                select.setAttribute('data-order', order);
+                select.name = `Desires[${i-1}]`;
+
+                const blank = document.createElement('option');
+                blank.value = '';
+                blank.textContent = 'اختر الرغبة...';
+                select.appendChild(blank);
+
+                DESIRES.forEach(d2 => {
+                    const id = d2.Id !== undefined ? d2.Id : d2.id;
+                    const name = d2.Name !== undefined ? d2.Name : d2.name;
+
+                    const opt = document.createElement('option');
+                    opt.value = id;
+                    opt.textContent = name;
+                    select.appendChild(opt);
+                });
+
+                // Restore saved selection
+                if (selected.length >= i && selected[i-1]) {
+                    select.value = selected[i-1];
+                }
+
+                select.addEventListener('change', function () {
+                    updateDesireOptions();
+                    saveDesireIds();
+                });
+
+                wrapper.appendChild(select);
+                container.appendChild(wrapper);
+            }
+
+            updateDesireOptions();
+        }
+
+        function updateDesireOptions() {
+            const selects = document.querySelectorAll('.desire-select');
+
+            selects.forEach((sel, index) => {
+                const curOrder = parseInt(sel.getAttribute('data-order'));
+
+                // First, check if the current value is already selected in an earlier rank
+                // If so, reset this select to blank to prevent duplicates
+                if (sel.value !== '') {
+                    const duplicateInEarlier = Array.from(selects).some(s => {
+                        const sOrder = parseInt(s.getAttribute('data-order'));
+                        return sOrder < curOrder && s.value === sel.value;
+                    });
+                    if (duplicateInEarlier) {
+                        sel.value = '';
+                    }
+                }
+
+                // Then, update all options based on earlier selections
+                Array.from(sel.options).forEach(opt => {
+                    if (opt.value === '') return;
+
+                    const isSelectedInEarlier = Array.from(selects).some(s => {
+                        const sOrder = parseInt(s.getAttribute('data-order'));
+                        return sOrder < curOrder && s.value === opt.value;
+                    });
+
+                    opt.disabled = isSelectedInEarlier;
+                    opt.hidden = isSelectedInEarlier;
+                });
+            });
+        }
+
+        function getSavedDesireIds() {
+            const input = document.getElementById('desireIdsInput');
+            if (input && input.value) {
+                return input.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0);
+            }
+            return [];
+        }
+
+        function saveDesireIds() {
+            const selects = document.querySelectorAll('.desire-select');
+            const ids = [];
+            selects.forEach(sel => {
+                if (sel.value) ids.push(sel.value);
+            });
+            const input = document.getElementById('desireIdsInput');
+            if (input) input.value = ids.join(',');
+            saveToLocalStorage();
+        }
+
+        function nextStep() {
+            tryGoToStep(currentStep + 1);
+        }
+
+        function prevStep() {
+            saveToLocalStorage();
+            goToStep(currentStep - 1);
+        }
+
+        function tryGoToStep(step) {
+            if (step === currentStep) return;
+            if (step > currentStep) {
+                for (let s = currentStep; s < step; s++) {
+                    if (s === 1 && !validateStep1()) { goToStep(1); return false; }
+                    if (s === 2 && !validateStep2()) { goToStep(2); return false; }
+                    if (s === 3 && !validateStep3()) { goToStep(3); return false; }
+                }
+            }
+            saveToLocalStorage();
+            goToStep(step);
+            return true;
+        }
+
+        function restoreStepUI() {
+            // Default to step 1 on fresh load
+            goToStep(1);
+        }
+
+        // ========== VALIDATION ==========
 
         function validateStep1() {
             const required = [
@@ -905,6 +1034,19 @@
             el.classList.remove('field-error');
         }
 
+        function validateStep3() {
+            const selects = document.querySelectorAll('.desire-select');
+            let allSelected = true;
+            selects.forEach(sel => {
+                if (!sel.value) allSelected = false;
+            });
+            if (!allSelected) {
+                alert('يرجى ترتيب جميع الرغبات (اختيار قيمة لكل رغبة)');
+                return false;
+            }
+            return true;
+        }
+
         // ========== REVIEW ==========
         function renderReview() {
             const container = document.getElementById('review-content');
@@ -953,22 +1095,24 @@
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                     <div><span class="text-gray-400">رب أسرة طفل:</span> ${data['IsChildHeaded'] ? 'نعم' : 'لا'}</div>
                     <div><span class="text-gray-400">ربة أسرة امرأة:</span> ${data['IsFemaleHeaded'] ? 'نعم' : 'لا'}</div>
+                    <div><span class="text-gray-400">الزوج خارج البلاد:</span> ${data['IsHusbandAbroad'] ? 'نعم' : 'لا'}</div>
                     <div><span class="text-gray-400">شخص خارجي:</span> ${data['SupportsOutsidePerson'] ? 'نعم' : 'لا'}</div>
                     <div><span class="text-gray-400">يسكن في خيمة:</span> ${data['LivesInTent'] === 'true' ? 'نعم' : 'لا'}</div>
                     <div><span class="text-gray-400">نوع الخيمة:</span> ${data['TentType'] || '-'}</div>
                     <div><span class="text-gray-400">حفائظ:</span> ${data['NeedsDiapers'] ? 'نعم' : 'لا'}</div>
                     <div><span class="text-gray-400">أسر بنفس الخيمة:</span> ${data['HasMultipleFamiliesInTent'] ? 'نعم' : 'لا'}</div>
                     <div class="col-span-full mt-2 pt-2 border-t border-gray-600">
-                        <span class="text-gray-400">الاحتياجات:</span> ${
-                            Object.entries({
-                                'خيم': data['NeedTents'],
-                                'اغطية': data['NeedBlankets'],
-                                'فرشات': data['NeedMattresses'],
-                                'ادوات مطبخ': data['NeedKitchenTools'],
-                                'شوادر': data['NeedTarpaulins'],
-                                'ملابس': data['NeedClothes'],
-                                'طرد صحي': data['NeedHygieneKit']
-                            }).filter(([_, value]) => value && value !== '0').map(([name, value]) => `${name}(${['لا يوجد','منخفضة','متوسطة','عالية','حرجة جداً'][parseInt(value)]})`).join('، ') || 'لا يوجد'
+                        <span class="text-gray-400">الرغبات (حسب الأهمية):</span> ${
+                            (function() {
+                                const ids = data['DesireIds'];
+                                if (!ids) return 'لم يتم الاختيار';
+                                const idArr = ids.split(',').filter(Boolean);
+                                if (idArr.length === 0) return 'لم يتم الاختيار';
+                                const desireMap = {};
+                                DESIRES.forEach(d => desireMap[d.Id] = d.Name);
+                                const labels = ['الأولى', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة', 'السادسة', 'السابعة', 'الثامنة', 'التاسعة', 'العاشرة'];
+                                return idArr.map((id, i) => `${labels[i] || (i+1)}: ${desireMap[parseInt(id)] || '?'}`).join(' ، ');
+                            })()
                         }
                     </div>
                 </div>
@@ -1040,11 +1184,38 @@
                         </select>
                     </div>
                     <div>
+                        <label class="block text-xs mb-1">رقم هوية الأم</label>
+                        <input name="Members[${idx}].MotherIdNumber" value="${data?.MotherIdNumber || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                    </div>
+                    <div>
                         <label class="block text-xs mb-1">صلة القرابة</label>
                 <select name="Members[${idx}].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
                     <option value="">اختر...</option>
                     ${['زوج','زوجة','ابن','ابنة','أم','أب','أخ','أخت','جدة/جد','حفيد/حفيدة','أخ غير شقيق','أخت غير شقيقة','Other'].map(r => '<option value="'+r+'">'+r+'</option>').join('')}
                 </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1">الحالة الاجتماعية</label>
+                        <select name="Members[${idx}].MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                            <option value="">اختر...</option>
+                            <option value="متزوج" ${data?.MaritalStatus === 'متزوج' ? 'selected' : ''}>متزوج</option>
+                            <option value="أعزب" ${data?.MaritalStatus === 'أعزب' ? 'selected' : ''}>أعزب</option>
+                            <option value="أرمل" ${data?.MaritalStatus === 'أرمل' ? 'selected' : ''}>أرمل</option>
+                            <option value="مطلق" ${data?.MaritalStatus === 'مطلق' ? 'selected' : ''}>مطلق</option>
+                            <option value="منفصل" ${data?.MaritalStatus === 'منفصل' ? 'selected' : ''}>منفصل</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1">المستوى التعليمي</label>
+                        <select name="Members[${idx}].EducationLevel" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                            <option value="">اختر...</option>
+                            <option value="بدون" ${data?.EducationLevel === 'بدون' ? 'selected' : ''}>بدون</option>
+                            <option value="ابتدائي" ${data?.EducationLevel === 'ابتدائي' ? 'selected' : ''}>ابتدائي</option>
+                            <option value="إعدادي" ${data?.EducationLevel === 'إعدادي' ? 'selected' : ''}>إعدادي</option>
+                            <option value="ثانوي" ${data?.EducationLevel === 'ثانوي' ? 'selected' : ''}>ثانوي</option>
+                            <option value="جامعي" ${data?.EducationLevel === 'جامعي' ? 'selected' : ''}>جامعي</option>
+                            <option value="دراسات عليا" ${data?.EducationLevel === 'دراسات عليا' ? 'selected' : ''}>دراسات عليا</option>
+                        </select>
                     </div>
                     <div class="flex items-center gap-2">
                         <input type="checkbox" name="Members[${idx}].IsPrisoner" value="true" class="accent-camp-gold" ${data?.IsPrisoner === true || data?.IsPrisoner === 'true' ? 'checked' : ''} />
@@ -1052,7 +1223,47 @@
                     </div>
                 </div>
 
-                <!-- Health section like رب الأسرة -->
+                <!-- Pregnancy / Nursing (always visible, outside health section) -->
+                <div class="border-t border-gray-700 pt-4 mt-2">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" name="Members[${idx}].IsPregnant" value="true" class="accent-camp-gold" ${data?.IsPregnant === true || data?.IsPregnant === 'true' ? 'checked' : ''} onchange="toggleMemberSection(${idx}, 'pregnancy')" />
+                            <label class="text-sm">حامل</label>
+                        </div>
+                        <div id="member-pregnancy-${idx}" class="${data?.IsPregnant === true || data?.IsPregnant === 'true' ? '' : 'hidden'} md:col-span-2">
+                            <label class="block text-xs mb-1">شهر الحمل</label>
+                            <select name="Members[${idx}].PregnancyMonth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                <option value="">اختر الشهر...</option>
+                                ${Array.from({length: 9}, (_, i) => i + 1).map(m =>
+                                    `<option value="${m}" ${data?.PregnancyMonth == m ? 'selected' : ''}>${m}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" name="Members[${idx}].IsNursing" value="true" class="accent-camp-gold" ${data?.IsNursing === true || data?.IsNursing === 'true' ? 'checked' : ''} onchange="toggleMemberSection(${idx}, 'nursing')" />
+                            <label class="text-sm">مرضع</label>
+                        </div>
+                        <div id="member-nursing-${idx}" class="${data?.IsNursing === true || data?.IsNursing === 'true' ? '' : 'hidden'} md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs mb-1">اسم الطفل</label>
+                                <input name="Members[${idx}].NursingInfantName" value="${data?.NursingInfantName || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-xs mb-1">تاريخ ميلاد الطفل</label>
+                                <input type="date" name="Members[${idx}].NursingInfantDOB" value="${data?.NursingInfantDOB || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-xs mb-1">رقم هوية الطفل</label>
+                                <input name="Members[${idx}].NursingInfantID" value="${data?.NursingInfantID || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health section -->
                 <div class="border-t border-gray-700 pt-4 mt-2">
                     <h4 class="text-md font-semibold text-camp-gold mb-3">الحالة الصحية</h4>
                     <div class="flex gap-4 mb-4">
@@ -1089,43 +1300,6 @@
                                             <input type="checkbox" name="Members[${idx}].DisabilityTypes" value="${d}" class="accent-camp-gold" ${(data?.DisabilityTypes || []).includes(d) ? 'checked' : ''} /> ${d}
                                         </label>`
                                     ).join('')}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" name="Members[${idx}].IsPregnant" value="true" class="accent-camp-gold" ${data?.IsPregnant === true || data?.IsPregnant === 'true' ? 'checked' : ''} onchange="toggleMemberSection(${idx}, 'pregnancy')" />
-                                <label class="text-xs">حامل</label>
-                            </div>
-                            <div id="member-pregnancy-${idx}" class="${data?.IsPregnant === true || data?.IsPregnant === 'true' ? '' : 'hidden'} md:col-span-2">
-                                <label class="block text-xs mb-1">شهر الحمل</label>
-                                <select name="Members[${idx}].PregnancyMonth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
-                                    <option value="">اختر الشهر...</option>
-                                    ${Array.from({length: 9}, (_, i) => i + 1).map(m =>
-                                        `<option value="${m}" ${data?.PregnancyMonth == m ? 'selected' : ''}>${m}</option>`
-                                    ).join('')}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" name="Members[${idx}].IsNursing" value="true" class="accent-camp-gold" ${data?.IsNursing === true || data?.IsNursing === 'true' ? 'checked' : ''} onchange="toggleMemberSection(${idx}, 'nursing')" />
-                                <label class="text-xs">مرضع</label>
-                            </div>
-                            <div id="member-nursing-${idx}" class="${data?.IsNursing === true || data?.IsNursing === 'true' ? '' : 'hidden'} md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <div>
-                                    <label class="block text-xs mb-1">اسم الطفل</label>
-                                    <input name="Members[${idx}].NursingInfantName" value="${data?.NursingInfantName || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
-                                </div>
-                                <div>
-                                    <label class="block text-xs mb-1">تاريخ ميلاد الطفل</label>
-                                    <input type="date" name="Members[${idx}].NursingInfantDOB" value="${data?.NursingInfantDOB || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
-                                </div>
-                                <div>
-                                    <label class="block text-xs mb-1">رقم هوية الطفل</label>
-                                    <input name="Members[${idx}].NursingInfantID" value="${data?.NursingInfantID || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
                                 </div>
                             </div>
                         </div>
@@ -1356,15 +1530,29 @@
                 });
             });
 
+            // Sync desires from dropdowns to hidden input before submission
+            saveDesireIds();
+
+            // Convert single comma-separated DesireIds input to indexed inputs for model binding
+            const desireInput = document.getElementById('desireIdsInput');
+            if (desireInput && desireInput.value) {
+                const ids = desireInput.value.split(',').filter(Boolean);
+                desireInput.remove();
+                ids.forEach((id, i) => {
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = `DesireIds[${i}]`;
+                    hidden.value = id.trim();
+                    form.appendChild(hidden);
+                });
+            }
+
             // Block if any duplicate ID warnings exist
             const dupWarnings = document.querySelectorAll('.dup-warning:not(.hidden)');
             if (dupWarnings.length > 0) {
                 dupWarnings[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return false;
             }
-
-            // Clear localStorage after successful submission
-            localStorage.removeItem(STORAGE_KEY);
 
             return true;
         }

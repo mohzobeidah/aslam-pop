@@ -9,15 +9,6 @@ namespace CampRegistrationApp.Models
         Rejected
     }
 
-    public enum NeedPriority
-    {
-        None = 0,
-        Low = 1,
-        Medium = 2,
-        High = 3,
-        Critical = 4
-    }
-
     public class FamilyRegistration
     {
         public int Id { get; set; }
@@ -33,6 +24,7 @@ namespace CampRegistrationApp.Models
         public string? ChildHeadedDetails { get; set; }
         public bool IsFemaleHeaded { get; set; }
         public string? FemaleHeadedDetails { get; set; }
+        public bool IsHusbandAbroad { get; set; }
         public bool SupportsOutsidePerson { get; set; }
         public string? OutsidePersonName { get; set; }
         public string? OutsidePersonRelation { get; set; }
@@ -48,20 +40,17 @@ namespace CampRegistrationApp.Models
         public string? PasswordHash { get; set; }
         public string? StatusNotes { get; set; }
 
-        // Refugee Needs (Orders)
-        public NeedPriority NeedTents { get; set; } = NeedPriority.None;
-        public NeedPriority NeedBlankets { get; set; } = NeedPriority.None;
-        public NeedPriority NeedMattresses { get; set; } = NeedPriority.None;
-        public NeedPriority NeedKitchenTools { get; set; } = NeedPriority.None;
-        public NeedPriority NeedTarpaulins { get; set; } = NeedPriority.None;
-        public NeedPriority NeedClothes { get; set; } = NeedPriority.None;
-        public NeedPriority NeedHygieneKit { get; set; } = NeedPriority.None;
-
         public RegistrationApprovalStatus ApprovalStatus { get; set; } = RegistrationApprovalStatus.Pending;
         public int? ApprovedById { get; set; }
         public virtual Admin? ApprovedBy { get; set; }
         public DateTime? ApprovedAt { get; set; }
 
+        public bool IsDeleted { get; set; }
+        public int? DeletedById { get; set; }
+        public virtual Admin? DeletedBy { get; set; }
+        public DateTime? DeletedAt { get; set; }
+
         public virtual ICollection<FamilyMember> Members { get; set; } = new List<FamilyMember>();
+        public virtual ICollection<FamilyDesire> FamilyDesires { get; set; } = new List<FamilyDesire>();
     }
 }

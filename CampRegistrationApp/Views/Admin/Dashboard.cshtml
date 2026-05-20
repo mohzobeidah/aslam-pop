@@ -38,6 +38,9 @@
             <a asp-action="Sectors" class="bg-camp-accent-grey text-camp-gold px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
                 إدارة القواطع
             </a>
+            <a asp-action="AuditLogs" class="bg-camp-accent-grey text-camp-gold px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
+                سجل التدقيق
+            </a>
         }
         <form method="post" asp-action="Logout" class="inline">
             <button type="submit" class="bg-red-900/50 text-red-300 px-4 py-2 rounded-lg hover:bg-red-800/50 transition text-sm">
@@ -66,6 +69,25 @@
         <div class="text-gray-400 text-sm mt-1">عدد القواطع</div>
     </div>
 </div>
+
+@if (isSuper)
+{
+    <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl text-camp-gold font-bold">عدد الأسر النازحة حسب القاطع</h2>
+            <div class="text-3xl font-bold text-camp-gold">@Model.TotalApprovedRefugees</div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            @foreach (var s in Model.Sectors)
+            {
+                <div class="bg-gray-800/50 p-3 rounded-lg border border-gray-700">
+                    <div class="text-camp-gold font-bold text-lg">@s.SectorName</div>
+                    <div class="text-gray-400 text-sm"><span class="text-white font-bold text-xl">@s.ApprovedFamilyCount</span> أسرة</div>
+                </div>
+            }
+        </div>
+    </div>
+}
 
 <h2 class="text-xl text-camp-gold font-bold mb-4">إحصائيات القواطع</h2>
 

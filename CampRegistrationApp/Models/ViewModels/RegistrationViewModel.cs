@@ -19,6 +19,7 @@ namespace CampRegistrationApp.Models.ViewModels
         public string? ChildHeadedDetails { get; set; }
         public bool IsFemaleHeaded { get; set; }
         public string? FemaleHeadedDetails { get; set; }
+        public bool IsHusbandAbroad { get; set; }
         public bool SupportsOutsidePerson { get; set; }
         public string? OutsidePersonName { get; set; }
         public string? OutsidePersonRelation { get; set; }
@@ -34,14 +35,10 @@ namespace CampRegistrationApp.Models.ViewModels
 
         public string? StatusNotes { get; set; }
 
-        // Refugee Needs (Orders) - Using int to map to NeedPriority enum
-        public int NeedTents { get; set; } = 0;
-        public int NeedBlankets { get; set; } = 0;
-        public int NeedMattresses { get; set; } = 0;
-        public int NeedKitchenTools { get; set; } = 0;
-        public int NeedTarpaulins { get; set; } = 0;
-        public int NeedClothes { get; set; } = 0;
-        public int NeedHygieneKit { get; set; } = 0;
+        // Refugee Desires - ordered list of selected desire IDs (1st choice = index 0, etc.)
+        public List<int> DesireIds { get; set; } = new();
+
+        public string? Password { get; set; }
     }
 
     public class PersonViewModel
@@ -91,6 +88,7 @@ namespace CampRegistrationApp.Models.ViewModels
         [RegularExpression(@"^(059|056)\d{7}$", ErrorMessage = "رقم المحفظة يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056")]
         public string? Wallet { get; set; }
         public string? BathroomStatus { get; set; }
+        public string? MotherIdNumber { get; set; }
         public string? HeadIdImagePath { get; set; }
         public string? MedicalImagePath { get; set; }
         public List<string> UploadedFiles { get; set; } = new();

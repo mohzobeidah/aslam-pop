@@ -19,7 +19,7 @@ Camp family registration system in two versions:
 ## ASP.NET Core Architecture
 ### Data Model
 - **Person**: Shared entity for family head and members (4-part name, ID, sector, DOB, gender, phone, Wallet (المحفظة), BathroomStatus (جيد/متوسط/سيء), health, maternity, prisoner flag, etc.).
-- **FamilyRegistration**: Links to head (Person), members (FamilyMembers), housing/special-case fields, approval workflow, and **Refugee Needs** (NeedPriority enum for 7 aid items: Tents, Blankets, Mattresses, KitchenTools, Tarpaulins, Clothes, HygieneKit).
+- **FamilyRegistration**: Links to head (Person), members (FamilyMembers), housing/special-case fields (HasBathroom, BathroomType), approval workflow, and **Refugee Needs** (NeedPriority enum for 7 aid items: Tents, Blankets, Mattresses, KitchenTools, Tarpaulins, Clothes, HygieneKit).
 - **FamilyMember**: Join table `FamilyRegistration → Person` with `RelationshipToHead`.
 - **Attachment**: File metadata (`MedicalReport` or `IDImage`), stores relative paths.
 - **Admin**: Login with `AdminRole` (`Admin`=super, `Mandoob`=sector-limited), session-based auth, SHA256 password hashing.
@@ -31,13 +31,20 @@ Camp family registration system in two versions:
 ### Registration Flow (4 Steps + Submit)
 1. Step 1: Family Head info + health + documents + injury (always visible) + BathroomStatus
 2. Step 2: Family Members (dynamic add/remove). Validation: if MaritalStatus=متزوج, at least one member must have RelationshipToHead=زوجة.
-3. Step 3: Housing & Special Cases + **Refugee Needs** (7 aid items with None/Low/Medium/High/Critical priority selectors)
-4. Step 4: Review & Confirm + **StatusNotes** textarea for additional notes
+3. Step 3: Housing & Special Cases + **Bathroom section** (HasBathroom, BathroomType, BathroomStatus) + **Refugee Desires** (الرغبات — ranked dropdowns)
+4. Step 4: Review & Confirm + **StatusNotes** textarea for additional notes + password creation
 
-### Refugee Needs (`NeedPriority` enum)
-- `None=0`, `Low=1`, `Medium=2`, `High=3`, `Critical=4`
-- Fields: `NeedTents`, `NeedBlankets`, `NeedMattresses`, `NeedKitchenTools`, `NeedTarpaulins`, `NeedClothes`, `NeedHygieneKit`
-- Stored on `FamilyRegistration`, mapped via `int` in `RegistrationViewModel`
+### Admin Edit (only before acceptance)
+- **AdminEditRegistration** GET: loads Pending registration, reuses `Record/Edit.cshtml` view
+- **AdminUpdateRegistration** POST: saves changes (head, members, desires) with audit log + mandoob notification
+- Only accessible when `ApprovalStatus == Pending` — blocked for Approved/Rejected
+- Edit button shown in `RefugeeDetails` page and `Registrations` list for Pending items
+
+### Refugee Desires
+- Ranked dropdowns (الرغبة رقم 1, 2, ...) populated from `Desires` DB table
+- Each select corresponds to a rank position; selections are mutually exclusive per rank
+- Stored as `FamilyDesire` join records with Order (rank position) and DesireId
+- **Model binding**: Before submit, comma-separated hidden input is converted to indexed inputs (`DesireIds[0]`, `DesireIds[1]`, ...) for proper `List<int>` binding
 
 ## GAS Architecture
 - `doGet()` serves `Index.html`, `google.script.run` for server calls.

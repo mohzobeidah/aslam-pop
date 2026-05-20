@@ -23,6 +23,15 @@ public class ProjectViewModel
     public ProjectStatus Status { get; set; } = ProjectStatus.Draft;
     public string? Description { get; set; }
     public string? Notes { get; set; }
+
+    public List<SectorQuotaViewModel> SectorQuotas { get; set; } = new();
+}
+
+public class SectorQuotaViewModel
+{
+    public int SectorId { get; set; }
+    public string SectorName { get; set; } = string.Empty;
+    public int MaxCount { get; set; }
 }
 
 public class ProjectListViewModel

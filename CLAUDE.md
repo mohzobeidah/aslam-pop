@@ -88,6 +88,8 @@ Notification >── (0..1) Link (URL string)
 | `/Admin/RejectRegistration/{id}` | `AdminController.RejectRegistration` | POST — reject registration |
 | `/Admin/Refugees` | `AdminController.Refugees` | Refugee list page with sector/search filters |
 | `/Admin/RefugeeDetails/{id}` | `AdminController.RefugeeDetails` | Full refugee detail page with family member table |
+| `/Admin/AdminEditRegistration/{id}` | `AdminController.AdminEditRegistration` | Admin edit refugee profile (only Pending status) |
+| `/Admin/AdminUpdateRegistration` | `AdminController.AdminUpdateRegistration` | POST — save admin edits; audit log + mandoob notification |
 | `/Admin/Notifications` | `AdminController.Notifications` | Notification list (last 50) |
 | `/Admin/MarkNotificationRead/{id}` | `AdminController.MarkNotificationRead` | POST — mark single notification read |
 | `/Admin/MarkAllNotificationsRead` | `AdminController.MarkAllNotificationsRead` | POST — mark all notifications read |
@@ -107,8 +109,8 @@ Notification >── (0..1) Link (URL string)
 ## Registration Flow (4 Steps + Submit)
 1. **Step 1**: Family Head info (personal, socio-economic, health, injury, BathroomStatus, documents).
 2. **Step 2**: Family Members (dynamic add/remove). Validation: if MaritalStatus=متزوج, at least one member must have RelationshipToHead=زوجة. Each member has own health/injury/maternity/docs.
-3. **Step 3**: Housing & Special Cases + **Refugee Needs** (طلب المساعدات): 7 aid categories with dropdown priority selectors (None/Low/Medium/High/Critical).
-4. **Step 4**: Review & Confirm + **StatusNotes** textarea for additional notes.
+3. **Step 3**: Housing & Special Cases + **Bathroom section** (HasBathroom, BathroomType, BathroomStatus) + **Refugee Desires** (الرغبات — ranked dropdowns populated from `Desires` DB table, mutual exclusivity per rank).
+4. **Step 4**: Review & Confirm + **StatusNotes** textarea + **password creation**.
 
 **Navigation**: Steps are sequential — user cannot skip ahead by clicking tabs. `tryGoToStep(step)` validates all prior steps before allowing forward navigation. Going back is always allowed. `nextStep()` delegates to `tryGoToStep()`.
 
@@ -121,11 +123,11 @@ Notification >── (0..1) Link (URL string)
 - `UploadedFiles` (List<string>) tracks client-side uploaded file paths.
 - `Password` string — set in Step 4, hashed on server.
 
-## Refugee Needs (`NeedPriority` Enum)
-- `None = 0`, `Low = 1`, `Medium = 2`, `High = 3`, `Critical = 4`
-- Stored on `FamilyRegistration` entity: `NeedTents`, `NeedBlankets`, `NeedMattresses`, `NeedKitchenTools`, `NeedTarpaulins`, `NeedClothes`, `NeedHygieneKit`
-- ViewModel maps as `int` (0–4), rendered as `<select>` dropdowns in Step 3 with Arabic labels (خيم, اغطية, فرشات, ادوات مطبخ, شوادر, ملابس, طرد صحي).
-- Displayed in Step 4 review section, filtered to show only non-zero items.
+## Refugee Desires (الرغبات)
+- **Featured** instead of the old Refugee Needs: ranked `<select>` dropdowns (الرغبة رقم 1, 2, ...) populated from `Desires` DB table.
+- Stored as `FamilyDesire` join records with `Order` (rank position) and `DesireId`.
+- **Mutual exclusivity**: Once a desire is selected for rank N, it is hidden/disabled in all later ranks via `updateDesireOptions()`.
+- **Model binding**: The form uses a single hidden input `desireIdsInput` with comma-separated IDs. Before submission, `submitForm()` / `submitEditForm()` replaces it with indexed hidden inputs (`DesireIds[0]`, `DesireIds[1]`, ...) for proper `List<int>` binding on the server.
 
 ## File Upload Pattern
 - **Registration form**: Uses AJAX POST to `/Registration/UploadFile` with `IFormFile`.
@@ -179,7 +181,7 @@ Notification >── (0..1) Link (URL string)
 - **No migrations**: `EnsureCreated()` won't update existing DB schema; uses raw SQL as workaround.
 - **Session-based auth**: Lost on server restart; no token/refresh mechanism.
 - **ID Validation**: Palestinian ID enforced as 9-digit string via `[RegularExpression(@"^\d{9}$")]` on ViewModel. Client-side validates on blur + on step navigation + on submit. Invalid IDs show red border + inline error message.
-- **Health validation**: If health status is "مريض" (sick), at least one chronic disease or disability must be selected (client-side in validateStep1/validateStep2, server-side in RegistrationController.Submit and RecordController.Update).
+- **Health validation**: If health status is "مريض" (sick), at least one chronic disease or disability must be selected (client-side in validateStep1/validateStep2, server-side in RegistrationController.Submit, RecordController.Update, and AdminController.AdminUpdateRegistration).
 - **Phone required**: Phone number is required in the registration form, validated both client-side and server-side with `[Required]`.
 - **No input sanitization**: User text inputs go directly to DB.
 - **No pagination**: Admin lists (admins, sectors) load all rows at once.

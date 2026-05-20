@@ -1,0 +1,142 @@
+@model AuditLogListViewModel
+@{
+    ViewData["Title"] = "سجل التدقيق";
+}
+
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+    <div>
+        <h1 class="text-2xl text-camp-gold font-bold">سجل التدقيق</h1>
+        <p class="text-gray-400 text-sm">إجمالي السجلات: <span class="text-white font-bold">@Model.TotalCount</span></p>
+    </div>
+    <a asp-action="Dashboard" class="bg-camp-accent-grey text-camp-gold px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm whitespace-nowrap">
+        ← العودة للوحة التحكم
+    </a>
+</div>
+
+<form method="get" class="flex flex-col sm:flex-row gap-3 mb-6">
+    <input type="text" name="actionFilter" value="@Model.ActionFilter" placeholder="بحث حسب الإجراء..."
+           class="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm w-full sm:w-48" />
+    <input type="text" name="tableFilter" value="@Model.TableFilter" placeholder="بحث حسب الجدول..."
+           class="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm w-full sm:w-48" />
+    <div class="flex gap-2">
+        <button type="submit" class="bg-camp-accent-grey text-camp-gold px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
+            بحث
+        </button>
+        <a asp-action="AuditLogs" class="text-gray-400 hover:text-white px-4 py-2 text-sm transition">
+            إعادة تعيين
+        </a>
+    </div>
+</form>
+
+<div class="overflow-x-auto rounded-xl border border-gray-700">
+    <table class="w-full bg-camp-accent-grey min-w-[700px]">
+        <thead>
+            <tr class="border-b border-gray-700 text-camp-gold text-sm">
+                <th class="p-3 text-right whitespace-nowrap">التاريخ</th>
+                <th class="p-3 text-right whitespace-nowrap">المستخدم</th>
+                <th class="p-3 text-right whitespace-nowrap">الإجراء</th>
+                <th class="p-3 text-right whitespace-nowrap">الجدول</th>
+                <th class="p-3 text-right whitespace-nowrap">معرف السجل</th>
+                <th class="p-3 text-right whitespace-nowrap">المصدر</th>
+                <th class="p-3 text-right whitespace-nowrap">IP</th>
+                <th class="p-3 text-center whitespace-nowrap">تفاصيل</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var log in Model.Logs)
+            {
+                <tr class="border-b border-gray-700 hover:bg-gray-800/50 text-sm @(log.Action == "Exception" ? "bg-red-900/20" : "")">
+                    <td class="p-3 text-gray-300 whitespace-nowrap dir-ltr" dir="ltr">@log.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td class="p-3 text-white whitespace-nowrap">
+                        @log.UserId
+                        @if (!string.IsNullOrEmpty(log.Role))
+                        {
+                            <span class="text-xs text-gray-400">(@log.Role)</span>
+                        }
+                    </td>
+                    <td class="p-3">
+                        @if (log.Action == "Exception")
+                        {
+                            <span class="text-red-400 font-bold">@log.Action</span>
+                        }
+                        else
+                        {
+                            <span class="text-camp-gold">@log.Action</span>
+                        }
+                    </td>
+                    <td class="p-3 text-gray-300">@log.TableName</td>
+                    <td class="p-3 text-gray-300 dir-ltr" dir="ltr">@(log.RecordId ?? "-")</td>
+                    <td class="p-3 text-gray-400 text-xs">@log.Source</td>
+                    <td class="p-3 text-gray-400 text-xs dir-ltr" dir="ltr">@(log.IPAddress ?? "-")</td>
+                    <td class="p-3 text-center">
+                        <button type="button" onclick="toggleDetails(@log.Id)" class="text-camp-gold hover:text-yellow-500 transition text-sm">
+                            عرض
+                        </button>
+                    </td>
+                </tr>
+                <tr id="details-@log.Id" class="hidden">
+                    <td colspan="8" class="p-3 sm:p-4 bg-gray-800/70 border-b border-gray-700">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                            @if (!string.IsNullOrEmpty(log.OldValues))
+                            {
+                                <div class="min-w-0">
+                                    <h4 class="text-camp-gold font-bold mb-1 text-xs sm:text-sm">القيم القديمة</h4>
+                                    <pre class="json-viewer bg-gray-950 text-green-300 p-3 rounded-lg text-xs leading-relaxed overflow-x-auto max-h-60" data-json="@log.OldValues"></pre>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(log.NewValues))
+                            {
+                                <div class="min-w-0">
+                                    <h4 class="text-camp-gold font-bold mb-1 text-xs sm:text-sm">القيم الجديدة</h4>
+                                    <pre class="json-viewer bg-gray-950 text-green-300 p-3 rounded-lg text-xs leading-relaxed overflow-x-auto max-h-60" data-json="@log.NewValues"></pre>
+                                </div>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Logs.Any())
+            {
+                <tr>
+                    <td colspan="8" class="p-6 text-center text-gray-500">لا توجد سجلات</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (Model.TotalCount > Model.PageSize)
+{
+    var totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize);
+    <div class="flex justify-center gap-2 mt-6 flex-wrap">
+        @for (int i = 1; i <= totalPages; i++)
+        {
+            <a asp-action="AuditLogs" asp-route-page="@i" asp-route-actionFilter="@Model.ActionFilter" asp-route-tableFilter="@Model.TableFilter"
+               class="px-3 py-1 rounded @(i == Model.Page ? "bg-camp-gold text-black" : "bg-gray-800 text-gray-300 hover:bg-gray-700") transition text-sm">
+                @i
+            </a>
+        }
+    </div>
+}
+
+<script>
+    function toggleDetails(id) {
+        var row = document.getElementById('details-' + id);
+        row.classList.toggle('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.json-viewer').forEach(function (pre) {
+            var raw = pre.getAttribute('data-json');
+            if (!raw) return;
+            try {
+                var parsed = JSON.parse(raw);
+                pre.textContent = JSON.stringify(parsed, null, 2);
+                pre.classList.remove('text-green-300');
+                pre.classList.add('text-gray-200');
+            } catch (e) {
+                pre.textContent = raw;
+            }
+        });
+    });
+</script>

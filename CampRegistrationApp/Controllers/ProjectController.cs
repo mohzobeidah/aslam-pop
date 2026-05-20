@@ -61,7 +61,7 @@ public class ProjectController : Controller
     }
 
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
         if (!IsAuthenticated()) return RedirectToAction("Login", "Admin");
         if (!IsSuperAdmin())
@@ -70,7 +70,18 @@ public class ProjectController : Controller
             return RedirectToAction("Index");
         }
 
-        return View(new ProjectViewModel());
+        var sectors = await _context.Sectors.AsNoTracking().OrderBy(s => s.Name).ToListAsync();
+        var model = new ProjectViewModel
+        {
+            SectorQuotas = sectors.Select(s => new SectorQuotaViewModel
+            {
+                SectorId = s.Id,
+                SectorName = s.Name,
+                MaxCount = 0
+            }).ToList()
+        };
+
+        return View(model);
     }
 
     [HttpPost]
@@ -102,6 +113,20 @@ public class ProjectController : Controller
         _context.Projects.Add(project);
         await _context.SaveChangesAsync();
 
+        if (model.SectorQuotas?.Any(q => q.MaxCount > 0) == true)
+        {
+            foreach (var q in model.SectorQuotas.Where(q => q.MaxCount > 0))
+            {
+                _context.ProjectSectorQuotas.Add(new ProjectSectorQuota
+                {
+                    ProjectId = project.Id,
+                    SectorId = q.SectorId,
+                    MaxCount = q.MaxCount
+                });
+            }
+            await _context.SaveChangesAsync();
+        }
+
         await _audit.LogAsync(GetCurrentAdminId(), "Create", "Projects", project.Id.ToString(), null, project);
 
         TempData["Success"] = "تم إنشاء المشروع بنجاح";
@@ -125,6 +150,13 @@ public class ProjectController : Controller
         if (project == null)
             return NotFound();
 
+        var existingQuotas = await _context.ProjectSectorQuotas
+            .AsNoTracking()
+            .Where(q => q.ProjectId == id)
+            .ToListAsync();
+
+        var sectors = await _context.Sectors.AsNoTracking().OrderBy(s => s.Name).ToListAsync();
+
         var model = new ProjectViewModel
         {
             Id = project.Id,
@@ -134,7 +166,13 @@ public class ProjectController : Controller
             RequiredCount = project.RequiredCount,
             Status = project.Status,
             Description = project.Description,
-            Notes = project.Notes
+            Notes = project.Notes,
+            SectorQuotas = sectors.Select(s => new SectorQuotaViewModel
+            {
+                SectorId = s.Id,
+                SectorName = s.Name,
+                MaxCount = existingQuotas.FirstOrDefault(q => q.SectorId == s.Id)?.MaxCount ?? 0
+            }).ToList()
         };
 
         return View(model);
@@ -170,6 +208,32 @@ public class ProjectController : Controller
         project.Description = model.Description;
         project.Notes = model.Notes;
 
+        await _context.SaveChangesAsync();
+
+        var existingQuotas = await _context.ProjectSectorQuotas
+            .Where(q => q.ProjectId == project.Id)
+            .ToListAsync();
+
+        foreach (var q in model.SectorQuotas ?? new())
+        {
+            var existing = existingQuotas.FirstOrDefault(e => e.SectorId == q.SectorId);
+            if (existing != null)
+            {
+                if (q.MaxCount > 0)
+                    existing.MaxCount = q.MaxCount;
+                else
+                    _context.ProjectSectorQuotas.Remove(existing);
+            }
+            else if (q.MaxCount > 0)
+            {
+                _context.ProjectSectorQuotas.Add(new ProjectSectorQuota
+                {
+                    ProjectId = project.Id,
+                    SectorId = q.SectorId,
+                    MaxCount = q.MaxCount
+                });
+            }
+        }
         await _context.SaveChangesAsync();
 
         await _audit.LogAsync(GetCurrentAdminId(), "Update", "Projects", project.Id.ToString(), old, project);
@@ -210,8 +274,18 @@ public class ProjectController : Controller
         var isAdmin = IsSuperAdmin();
         var delegateId = GetCurrentAdminId();
 
-        var vm = await service.GetNominationPageAsync(id, delegateId, isAdmin);
         ViewBag.Sectors = await _context.Sectors.AsNoTracking().ToListAsync();
+        ViewBag.IsSuperAdmin = isAdmin;
+
+        if (!isAdmin)
+        {
+            var admin = await _context.Admins
+                .Include(a => a.Sector)
+                .FirstOrDefaultAsync(a => a.Id == delegateId);
+            ViewBag.DelegateSectorId = admin?.SectorId;
+        }
+
+        var vm = await service.GetNominationPageAsync(id, delegateId, isAdmin);
         return View("~/Views/Nomination/Index.cshtml", vm);
     }
 }

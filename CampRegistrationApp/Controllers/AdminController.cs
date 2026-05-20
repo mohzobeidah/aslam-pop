@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using CampRegistrationApp.Data;
 using CampRegistrationApp.Models;
 using CampRegistrationApp.Models.ViewModels;
+using CampRegistrationApp.Services;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -13,10 +14,14 @@ namespace CampRegistrationApp.Controllers
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAuditService _audit;
+        private readonly INotificationService _notificationService;
 
-        public AdminController(ApplicationDbContext context)
+        public AdminController(ApplicationDbContext context, IAuditService audit, INotificationService notificationService)
         {
             _context = context;
+            _audit = audit;
+            _notificationService = notificationService;
         }
 
         private static string HashPassword(string password)
@@ -113,7 +118,9 @@ namespace CampRegistrationApp.Controllers
                         ManufacturedTents = s.ManufacturedTentsCount,
                         HandmadeTents = s.HandmadeTentsCount,
                         Bathrooms = s.BathroomsCount,
-                        RegistrationCount = _context.Persons.Count(p => p.Sector == s.Name)
+                        RegistrationCount = _context.Persons.Count(p => p.Sector == s.Name),
+                        ApprovedFamilyCount = _context.FamilyRegistrations
+                            .Count(f => f.FamilyHead.Sector == s.Name && f.ApprovalStatus == RegistrationApprovalStatus.Approved)
                     })
                     .ToListAsync();
                 totalRegistrations = await _context.FamilyRegistrations.CountAsync();
@@ -131,7 +138,9 @@ namespace CampRegistrationApp.Controllers
                         ManufacturedTents = s.ManufacturedTentsCount,
                         HandmadeTents = s.HandmadeTentsCount,
                         Bathrooms = s.BathroomsCount,
-                        RegistrationCount = _context.Persons.Count(p => p.Sector == s.Name)
+                        RegistrationCount = _context.Persons.Count(p => p.Sector == s.Name),
+                        ApprovedFamilyCount = _context.FamilyRegistrations
+                            .Count(f => f.FamilyHead.Sector == s.Name && f.ApprovalStatus == RegistrationApprovalStatus.Approved)
                     })
                     .ToListAsync();
                 totalRegistrations = await _context.Persons
@@ -143,11 +152,51 @@ namespace CampRegistrationApp.Controllers
                 Sectors = sectors,
                 TotalRegistrations = totalRegistrations,
                 TotalAdmins = isAdmin ? await _context.Admins.CountAsync() : 0,
-                TotalSectors = isAdmin ? await _context.Sectors.CountAsync() : 0
+                TotalSectors = isAdmin ? await _context.Sectors.CountAsync() : 0,
+                TotalApprovedRefugees = sectors.Sum(s => s.ApprovedFamilyCount)
             };
 
             ViewBag.IsMandoob = !isAdmin;
             return View(model);
+        }
+
+        // ──────────────────────────────────────
+        //  Audit Logs (Super Admin only)
+        // ──────────────────────────────────────
+
+        [HttpGet]
+        public async Task<IActionResult> AuditLogs(int page = 1, string? actionFilter = null, string? tableFilter = null)
+        {
+            if (!IsAuthenticated() || !IsSuperAdmin()) return RedirectToAction("Dashboard");
+
+            const int pageSize = 50;
+
+            var query = _context.AuditLogs.AsQueryable();
+
+            if (!string.IsNullOrEmpty(actionFilter))
+                query = query.Where(l => l.Action.Contains(actionFilter));
+
+            if (!string.IsNullOrEmpty(tableFilter))
+                query = query.Where(l => l.TableName.Contains(tableFilter));
+
+            var totalCount = await query.CountAsync();
+            var logs = await query
+                .OrderByDescending(l => l.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var vm = new AuditLogListViewModel
+            {
+                Logs = logs,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                ActionFilter = actionFilter,
+                TableFilter = tableFilter
+            };
+
+            return View(vm);
         }
 
         // ──────────────────────────────────────
@@ -444,6 +493,62 @@ namespace CampRegistrationApp.Controllers
             return RedirectToAction("EditSector", new { id = sectorId });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> SearchPersonForMandoob(string query)
+        {
+            if (!IsAuthenticated() || !IsSuperAdmin()) return Unauthorized();
+
+            var persons = await _context.Persons
+                .AsNoTracking()
+                .Where(p => p.IdNumber.Contains(query)
+                    || (p.FirstName + " " + p.SecondName + " " + p.ThirdName + " " + p.LastName).Contains(query))
+                .Select(p => new
+                {
+                    p.Id,
+                    name = p.FirstName + " " + p.SecondName + " " + p.ThirdName + " " + p.LastName,
+                    p.IdNumber,
+                    phone = p.PhoneNumber,
+                    p.Sector
+                })
+                .Take(20)
+                .ToListAsync();
+
+            return Json(persons);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignPersonAsMandoob(int sectorId, int personId)
+        {
+            if (!IsAuthenticated() || !IsSuperAdmin()) return RedirectToAction("Dashboard");
+
+            var person = await _context.Persons.FindAsync(personId);
+            if (person == null) return NotFound();
+
+            if (await _context.Admins.AnyAsync(a => a.NationalId == person.IdNumber))
+            {
+                TempData["Error"] = "هذا الشخص مسجل كمسؤول مسبقاً";
+                return RedirectToAction("EditSector", new { id = sectorId });
+            }
+
+            var admin = new Admin
+            {
+                Name = person.FirstName + " " + person.SecondName + " " + person.ThirdName + " " + person.LastName,
+                NationalId = person.IdNumber,
+                Mobile = person.PhoneNumber,
+                Role = AdminRole.Mandoob,
+                SectorId = sectorId,
+                PasswordHash = HashPassword(person.IdNumber),
+                IsActive = true
+            };
+
+            _context.Admins.Add(admin);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"تم تعيين {admin.Name} كمندوب للقاطع";
+            return RedirectToAction("EditSector", new { id = sectorId });
+        }
+
         [HttpPost]
         public async Task<IActionResult> DeleteSector(int id)
         {
@@ -461,7 +566,7 @@ namespace CampRegistrationApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Refugees(string? sector = null, string? search = null)
+        public async Task<IActionResult> Refugees(string? sector = null, string? search = null, string? status = "Approved")
         {
             if (!IsAuthenticated()) return RedirectToAction("Login");
 
@@ -482,6 +587,9 @@ namespace CampRegistrationApp.Controllers
             if (!string.IsNullOrEmpty(sector))
                 query = query.Where(f => f.FamilyHead.Sector == sector);
 
+            if (!string.IsNullOrEmpty(status) && Enum.TryParse<RegistrationApprovalStatus>(status, out var statusFilter))
+                query = query.Where(f => f.ApprovalStatus == statusFilter);
+
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(f =>
@@ -491,6 +599,18 @@ namespace CampRegistrationApp.Controllers
                     f.Members.Any(m => m.Person.IdNumber.Contains(search) || m.Person.FirstName.Contains(search) || m.Person.LastName.Contains(search))
                 );
             }
+
+            var baseQuery = _context.FamilyRegistrations.AsQueryable();
+            if (adminRole == "Mandoob")
+            {
+                var admin = await _context.Admins.Include(a => a.Sector).FirstOrDefaultAsync(a => a.Id == adminId);
+                if (admin?.Sector != null)
+                    baseQuery = baseQuery.Where(f => f.FamilyHead.Sector == admin.Sector.Name);
+            }
+
+            var approvedCount = await baseQuery.CountAsync(f => f.ApprovalStatus == RegistrationApprovalStatus.Approved);
+            var pendingCount = await baseQuery.CountAsync(f => f.ApprovalStatus == RegistrationApprovalStatus.Pending);
+            var rejectedCount = await baseQuery.CountAsync(f => f.ApprovalStatus == RegistrationApprovalStatus.Rejected);
 
             var list = await query
                 .OrderByDescending(f => f.RegistrationTimestamp)
@@ -511,23 +631,35 @@ namespace CampRegistrationApp.Controllers
                 })
                 .ToListAsync();
 
+            var sectorApproved = await baseQuery
+                .Where(f => f.ApprovalStatus == RegistrationApprovalStatus.Approved)
+                .GroupBy(f => f.FamilyHead.Sector)
+                .Select(g => new { Sector = g.Key, Count = g.Count() })
+                .ToListAsync();
+
             ViewBag.Sectors = await _context.Sectors.OrderBy(s => s.Name).Select(s => s.Name).ToListAsync();
             ViewBag.CurrentSector = sector;
             ViewBag.CurrentSearch = search;
+            ViewBag.CurrentStatus = status;
 
             var vm = new RefugeeListPageViewModel
             {
                 Refugees = list,
                 TotalCount = list.Count,
+                ApprovedCount = approvedCount,
+                PendingCount = pendingCount,
+                RejectedCount = rejectedCount,
                 SectorFilter = sector,
-                SearchQuery = search
+                SearchQuery = search,
+                StatusFilter = status,
+                SectorApprovedCounts = sectorApproved.ToDictionary(x => x.Sector, x => x.Count)
             };
 
             return View(vm);
         }
 
         [HttpGet]
-        public async Task<IActionResult> ExportRefugeesToExcel(string? sector = null, string? search = null)
+        public async Task<IActionResult> ExportRefugeesToExcel(string? sector = null, string? search = null, string? status = null)
         {
             if (!IsAuthenticated()) return RedirectToAction("Login");
 
@@ -537,6 +669,7 @@ namespace CampRegistrationApp.Controllers
             var query = _context.FamilyRegistrations
                 .Include(f => f.FamilyHead)
                 .Include(f => f.Members).ThenInclude(m => m.Person)
+                .Include(f => f.FamilyDesires).ThenInclude(fd => fd.Desire)
                 .AsQueryable();
 
             if (adminRole == "Mandoob")
@@ -548,6 +681,9 @@ namespace CampRegistrationApp.Controllers
 
             if (!string.IsNullOrEmpty(sector))
                 query = query.Where(f => f.FamilyHead.Sector == sector);
+
+            if (!string.IsNullOrEmpty(status) && Enum.TryParse<RegistrationApprovalStatus>(status, out var exportStatusFilter))
+                query = query.Where(f => f.ApprovalStatus == exportStatusFilter);
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -570,6 +706,7 @@ namespace CampRegistrationApp.Controllers
                 ["HeadName"] = "اسم رب الأسرة",
                 ["IdNumber"] = "رقم الهوية",
                 ["Phone"] = "رقم الجوال",
+                ["Wallet"] = "المحفظة",
                 ["Sector"] = "القاطع",
                 ["Gender"] = "الجنس",
                 ["MaritalStatus"] = "الحالة الاجتماعية",
@@ -583,13 +720,48 @@ namespace CampRegistrationApp.Controllers
                 ["Dob"] = "تاريخ الميلاد",
                 ["TentLiving"] = "يسكن خيمة",
                 ["TentType"] = "نوع الخيمة",
+                ["OtherTentType"] = "نوع الخيمة (أخرى)",
                 ["Bathroom"] = "يوجد حمام",
                 ["BathroomType"] = "نوع الحمام",
+                ["BathroomStatus"] = "حالة الحمام",
                 ["ChildHeaded"] = "يعيل طفل",
+                ["ChildHeadedDetails"] = "تفاصيل طفل يعيل",
                 ["FemaleHeaded"] = "تعيل امرأة",
+                ["FemaleHeadedDetails"] = "تفاصيل امرأة تعيل",
                 ["OutsideSupport"] = "دعم خارج العائلة",
+                ["OutsidePersonName"] = "اسم الخارجي",
+                ["OutsidePersonRelation"] = "صلة قرابة الخارجي",
+                ["IsPrisoner"] = "أسير",
+                ["EmploymentStatus"] = "الوظيفة",
+                ["EducationLevel"] = "المستوى التعليمي",
+                ["HasInjury"] = "إصابة",
+                ["InjuryDate"] = "تاريخ الإصابة",
+                ["InjuryDetails"] = "تفاصيل الإصابة",
+                ["IsPregnant"] = "حامل",
+                ["PregnancyMonth"] = "شهر الحمل",
+                ["IsNursing"] = "مرضع",
+                ["NursingInfantName"] = "اسم الطفل",
+                ["NursingInfantDOB"] = "تاريخ ميلاد الطفل",
+                ["NursingInfantID"] = "رقم هوية الطفل",
+                ["NeedsDiapers"] = "حفائظ",
+                ["DiaperDetails"] = "تفاصيل الحفائظ",
+                ["HasMultipleFamiliesInTent"] = "أسر بنفس الخيمة",
+                ["AdditionalFamiliesCount"] = "عدد الأسر الإضافية",
+                ["StatusNotes"] = "ملاحظات",
                 ["Password"] = "كلمة المرور"
             };
+
+            // Add dynamic desire columns
+            var desireLabels = new[] { "الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة", "الثامنة", "التاسعة", "العاشرة" };
+            var allDesires = await _context.Desires.OrderBy(d => d.Id).ToListAsync();
+            var desireHeaderColumns = new List<(string key, string header)>();
+            for (int i = 0; i < allDesires.Count; i++)
+            {
+                var key = $"Desire{i + 1}";
+                var label = i < desireLabels.Length ? desireLabels[i] : (i + 1).ToString();
+                arabicHeaders[key] = $"الرغبة {label} ({allDesires[i].Name})";
+                desireHeaderColumns.Add((key, $"الرغبة {label} ({allDesires[i].Name})"));
+            }
 
             int col = 1;
             foreach (var header in arabicHeaders.Values)
@@ -608,30 +780,62 @@ namespace CampRegistrationApp.Controllers
                 ws.Cell(row, 2).Value = head.FullName;
                 ws.Cell(row, 3).Value = head.IdNumber;
                 ws.Cell(row, 4).Value = head.PhoneNumber;
-                ws.Cell(row, 5).Value = head.Sector;
-                ws.Cell(row, 6).Value = head.Gender == "male" ? "ذكر" : head.Gender == "female" ? "أنثى" : head.Gender;
-                ws.Cell(row, 7).Value = head.MaritalStatus;
-                ws.Cell(row, 8).Value = head.HealthStatus;
-                ws.Cell(row, 9).Value = head.ChronicDiseases ?? "";
-                ws.Cell(row, 10).Value = head.DisabilityTypes ?? "";
-                ws.Cell(row, 11).Value = reg.Members.Count;
-                ws.Cell(row, 12).Value = reg.RegistrationTimestamp.ToString("yyyy-MM-dd");
-                ws.Cell(row, 13).Value = reg.ApprovalStatus switch
+                ws.Cell(row, 5).Value = head.Wallet ?? "";
+                ws.Cell(row, 6).Value = head.Sector;
+                ws.Cell(row, 7).Value = head.Gender == "male" ? "ذكر" : head.Gender == "female" ? "أنثى" : head.Gender;
+                ws.Cell(row, 8).Value = head.MaritalStatus;
+                ws.Cell(row, 9).Value = head.HealthStatus;
+                ws.Cell(row, 10).Value = head.ChronicDiseases ?? "";
+                ws.Cell(row, 11).Value = head.DisabilityTypes ?? "";
+                ws.Cell(row, 12).Value = reg.Members.Count;
+                ws.Cell(row, 13).Value = reg.RegistrationTimestamp.ToString("yyyy-MM-dd");
+                ws.Cell(row, 14).Value = reg.ApprovalStatus switch
                 {
                     RegistrationApprovalStatus.Approved => "مقبول",
                     RegistrationApprovalStatus.Rejected => "مرفوض",
                     _ => "قيد المراجعة"
                 };
-                ws.Cell(row, 14).Value = head.OriginalGovernorate;
-                ws.Cell(row, 15).Value = head.DateOfBirth.ToString("yyyy-MM-dd");
-                ws.Cell(row, 16).Value = reg.LivesInTent ? "نعم" : "لا";
-                ws.Cell(row, 17).Value = reg.TentType ?? "";
-                ws.Cell(row, 18).Value = reg.HasBathroom ? "نعم" : "لا";
-                ws.Cell(row, 19).Value = reg.BathroomType ?? "";
-                ws.Cell(row, 20).Value = reg.IsChildHeaded ? "نعم" : "لا";
-                ws.Cell(row, 21).Value = reg.IsFemaleHeaded ? "نعم" : "لا";
-                ws.Cell(row, 22).Value = reg.SupportsOutsidePerson ? "نعم" : "لا";
-                ws.Cell(row, 23).Value = reg.PasswordHash ?? "";
+                ws.Cell(row, 15).Value = head.OriginalGovernorate;
+                ws.Cell(row, 16).Value = head.DateOfBirth.ToString("yyyy-MM-dd");
+                ws.Cell(row, 17).Value = reg.LivesInTent ? "نعم" : "لا";
+                ws.Cell(row, 18).Value = reg.TentType ?? "";
+                ws.Cell(row, 19).Value = reg.OtherTentType ?? "";
+                ws.Cell(row, 20).Value = reg.HasBathroom ? "نعم" : "لا";
+                ws.Cell(row, 21).Value = reg.BathroomType ?? "";
+                ws.Cell(row, 22).Value = head.BathroomStatus ?? "";
+                ws.Cell(row, 23).Value = reg.IsChildHeaded ? "نعم" : "لا";
+                ws.Cell(row, 24).Value = reg.ChildHeadedDetails ?? "";
+                ws.Cell(row, 25).Value = reg.IsFemaleHeaded ? "نعم" : "لا";
+                ws.Cell(row, 26).Value = reg.FemaleHeadedDetails ?? "";
+                ws.Cell(row, 27).Value = reg.SupportsOutsidePerson ? "نعم" : "لا";
+                ws.Cell(row, 28).Value = reg.OutsidePersonName ?? "";
+                ws.Cell(row, 29).Value = reg.OutsidePersonRelation ?? "";
+                ws.Cell(row, 30).Value = head.IsPrisoner ? "نعم" : "لا";
+                ws.Cell(row, 31).Value = head.EmploymentStatus ?? "";
+                ws.Cell(row, 32).Value = head.EducationLevel ?? "";
+                ws.Cell(row, 33).Value = head.HasInjury ? "نعم" : "لا";
+                ws.Cell(row, 34).Value = head.InjuryDate?.ToString("yyyy-MM-dd") ?? "";
+                ws.Cell(row, 35).Value = head.InjuryDetails ?? "";
+                ws.Cell(row, 36).Value = head.IsPregnant == true ? "نعم" : "لا";
+                ws.Cell(row, 37).Value = head.PregnancyMonth?.ToString() ?? "";
+                ws.Cell(row, 38).Value = head.IsNursing == true ? "نعم" : "لا";
+                ws.Cell(row, 39).Value = head.NursingInfantName ?? "";
+                ws.Cell(row, 40).Value = head.NursingInfantDOB?.ToString("yyyy-MM-dd") ?? "";
+                ws.Cell(row, 41).Value = head.NursingInfantID ?? "";
+                ws.Cell(row, 42).Value = reg.NeedsDiapers ? "نعم" : "لا";
+                ws.Cell(row, 43).Value = reg.DiaperDetails ?? "";
+                ws.Cell(row, 44).Value = reg.HasMultipleFamiliesInTent ? "نعم" : "لا";
+                ws.Cell(row, 45).Value = reg.AdditionalFamiliesCount?.ToString() ?? "";
+                var regDesires = reg.FamilyDesires.OrderBy(fd => fd.Order).ToList();
+                var desireCol = 46;
+                foreach (var desire in allDesires)
+                {
+                    var match = regDesires.FirstOrDefault(fd => fd.DesireId == desire.Id);
+                    ws.Cell(row, desireCol).Value = match != null ? match.Order.ToString() : "-";
+                    desireCol++;
+                }
+                ws.Cell(row, desireCol).Value = reg.StatusNotes ?? "";
+                ws.Cell(row, desireCol + 1).Value = reg.PasswordHash ?? "";
 
                 foreach (int c in Enumerable.Range(1, arabicHeaders.Count))
                 {
@@ -660,6 +864,7 @@ namespace CampRegistrationApp.Controllers
                 .Include(f => f.FamilyHead)
                 .Include(f => f.ApprovedBy)
                 .Include(f => f.Members).ThenInclude(m => m.Person)
+                .Include(f => f.FamilyDesires).ThenInclude(fd => fd.Desire)
                 .FirstOrDefaultAsync(f => f.Id == id);
 
             if (reg == null) return NotFound();
@@ -723,13 +928,21 @@ namespace CampRegistrationApp.Controllers
         {
             if (!IsAuthenticated()) return Unauthorized();
 
-            var registration = await _context.FamilyRegistrations.FindAsync(id);
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
+                .FirstOrDefaultAsync(f => f.Id == id);
             if (registration == null) return NotFound();
 
+            var oldStatus = registration.ApprovalStatus;
             registration.ApprovalStatus = RegistrationApprovalStatus.Approved;
             registration.ApprovedById = GetCurrentAdminId();
             registration.ApprovedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(GetCurrentAdminId(), "Approve", "FamilyRegistrations",
+                registration.RecordId,
+                new { status = oldStatus.ToString() },
+                new { status = RegistrationApprovalStatus.Approved.ToString(), headName = registration.FamilyHead.FullName });
 
             TempData["Success"] = "تم الموافقة على التسجيل بنجاح";
             return RedirectToAction("Registrations");
@@ -740,16 +953,398 @@ namespace CampRegistrationApp.Controllers
         {
             if (!IsAuthenticated()) return Unauthorized();
 
-            var registration = await _context.FamilyRegistrations.FindAsync(id);
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
+                .FirstOrDefaultAsync(f => f.Id == id);
             if (registration == null) return NotFound();
 
+            var oldStatus = registration.ApprovalStatus;
             registration.ApprovalStatus = RegistrationApprovalStatus.Rejected;
             registration.ApprovedById = GetCurrentAdminId();
             registration.ApprovedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
+            await _audit.LogAsync(GetCurrentAdminId(), "Reject", "FamilyRegistrations",
+                registration.RecordId,
+                new { status = oldStatus.ToString() },
+                new { status = RegistrationApprovalStatus.Rejected.ToString(), headName = registration.FamilyHead.FullName });
+
             TempData["Success"] = "تم رفض التسجيل";
             return RedirectToAction("Registrations");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveRefugee(int id)
+        {
+            if (!IsAuthenticated()) return Unauthorized();
+
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
+                .FirstOrDefaultAsync(f => f.Id == id && f.ApprovalStatus == RegistrationApprovalStatus.Approved);
+            if (registration == null) return NotFound();
+
+            registration.IsDeleted = true;
+            registration.DeletedById = GetCurrentAdminId();
+            registration.DeletedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(GetCurrentAdminId(), "RemoveOutOfCamp", "FamilyRegistrations",
+                registration.RecordId,
+                new { headName = registration.FamilyHead.FullName, sector = registration.FamilyHead.Sector, status = registration.ApprovalStatus.ToString() },
+                new { isDeleted = true, deletedAt = registration.DeletedAt },
+                source: "Web");
+
+            TempData["Success"] = $"تم إزالة {registration.FamilyHead.FullName} — انتقل خارج المخيم";
+            return RedirectToAction("Refugees");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AdminEditRegistration(int id)
+        {
+            if (!IsAuthenticated()) return RedirectToAction("Login");
+
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
+                .Include(f => f.Members)
+                    .ThenInclude(m => m.Person)
+                .Include(f => f.FamilyDesires)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            if (registration == null) return NotFound();
+
+            if (registration.ApprovalStatus != RegistrationApprovalStatus.Pending)
+            {
+                TempData["Error"] = "لا يمكن تعديل هذا التسجيل بعد الموافقة عليه";
+                return RedirectToAction("RefugeeDetails", new { id });
+            }
+
+            var model = MapToViewModel(registration);
+
+            ViewBag.FormAction = "AdminUpdateRegistration";
+            ViewBag.FormController = "Admin";
+            await PopulateLookupViewBags();
+
+            return View("~/Views/Record/Edit.cshtml", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdminUpdateRegistration(RegistrationViewModel model)
+        {
+            if (!IsAuthenticated()) return Unauthorized();
+
+            await PopulateLookupViewBags();
+
+            if (!ModelState.IsValid)
+            {
+                ModelState.AddModelError("", "يرجى تصحيح الأخطاء في البيانات");
+                ViewBag.FormAction = "AdminUpdateRegistration";
+                ViewBag.FormController = "Admin";
+                return View("~/Views/Record/Edit.cshtml", model);
+            }
+
+            // Server-side validations
+            if (model.Head.MaritalStatus == "متزوج" && !model.Members.Any(m => m.RelationshipToHead == "زوجة"))
+            {
+                ModelState.AddModelError("", "بما أن الحالة الاجتماعية متزوج، يجب إضافة فرد بصفة زوجة");
+                ViewBag.FormAction = "AdminUpdateRegistration";
+                ViewBag.FormController = "Admin";
+                return View("~/Views/Record/Edit.cshtml", model);
+            }
+
+            if (model.Head.HealthStatus == "مريض" && string.IsNullOrEmpty(model.Head.ChronicDiseases) && string.IsNullOrEmpty(model.Head.DisabilityTypes))
+            {
+                ModelState.AddModelError("", "بما أن الحالة الصحية مريض، يجب اختيار مرض مزمن أو نوع إعاقة على الأقل لرب الأسرة");
+                ViewBag.FormAction = "AdminUpdateRegistration";
+                ViewBag.FormController = "Admin";
+                return View("~/Views/Record/Edit.cshtml", model);
+            }
+
+            for (int i = 0; i < model.Members.Count; i++)
+            {
+                var m = model.Members[i];
+                if (m.HealthStatus == "مريض" && string.IsNullOrEmpty(m.ChronicDiseases) && string.IsNullOrEmpty(m.DisabilityTypes))
+                {
+                    ModelState.AddModelError("", $"الفرد رقم {i + 1}: بما أن الحالة الصحية مريض، يجب اختيار مرض مزمن أو نوع إعاقة على الأقل");
+                    ViewBag.FormAction = "AdminUpdateRegistration";
+                    ViewBag.FormController = "Admin";
+                    return View("~/Views/Record/Edit.cshtml", model);
+                }
+            }
+
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
+                .Include(f => f.Members)
+                    .ThenInclude(m => m.Person)
+                .Include(f => f.FamilyDesires)
+                .FirstOrDefaultAsync(f => f.Id == model.Id);
+
+            if (registration == null) return NotFound();
+
+            if (registration.ApprovalStatus != RegistrationApprovalStatus.Pending)
+            {
+                TempData["Error"] = "لا يمكن تعديل هذا التسجيل بعد الموافقة عليه";
+                return RedirectToAction("RefugeeDetails", new { id = model.Id });
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Update Family Head
+                var head = registration.FamilyHead;
+                head.FirstName = model.Head.FirstName;
+                head.SecondName = model.Head.SecondName;
+                head.ThirdName = model.Head.ThirdName;
+                head.LastName = model.Head.LastName;
+                head.IdNumber = model.Head.IdNumber;
+                head.Sector = model.Head.Sector;
+                head.DateOfBirth = model.Head.DateOfBirth;
+                head.Gender = model.Head.Gender;
+                head.PhoneNumber = model.Head.PhoneNumber;
+                head.OriginalGovernorate = model.Head.OriginalGovernorate;
+                head.MaritalStatus = model.Head.MaritalStatus;
+                head.EmploymentStatus = model.Head.EmploymentStatus;
+                head.EducationLevel = model.Head.EducationLevel;
+                head.HealthStatus = model.Head.HealthStatus;
+                head.ChronicDiseases = model.Head.ChronicDiseases;
+                head.DisabilityTypes = model.Head.DisabilityTypes;
+                head.HasInjury = model.Head.HasInjury;
+                head.InjuryDate = model.Head.InjuryDate;
+                head.InjuryDetails = model.Head.InjuryDetails;
+                head.IsHouseDestroyed = model.Head.IsHouseDestroyed;
+                head.IsPrisoner = model.Head.IsPrisoner;
+                head.Wallet = model.Head.Wallet;
+                head.BathroomStatus = model.Head.BathroomStatus;
+                head.IsPregnant = model.Head.IsPregnant;
+                head.PregnancyMonth = model.Head.PregnancyMonth;
+                head.IsNursing = model.Head.IsNursing;
+                head.NursingInfantName = model.Head.NursingInfantName;
+                head.NursingInfantDOB = model.Head.NursingInfantDOB;
+                head.NursingInfantID = model.Head.NursingInfantID;
+
+                // Update Registration-level fields
+                registration.IsChildHeaded = model.IsChildHeaded;
+                registration.ChildHeadedDetails = model.ChildHeadedDetails;
+                registration.IsFemaleHeaded = model.IsFemaleHeaded;
+                registration.FemaleHeadedDetails = model.FemaleHeadedDetails;
+                registration.SupportsOutsidePerson = model.SupportsOutsidePerson;
+                registration.OutsidePersonName = model.OutsidePersonName;
+                registration.OutsidePersonRelation = model.OutsidePersonRelation;
+                registration.LivesInTent = model.LivesInTent;
+                registration.TentType = model.TentType;
+                registration.OtherTentType = model.OtherTentType;
+                registration.HasBathroom = model.HasBathroom;
+                registration.BathroomType = model.BathroomType;
+                registration.NeedsDiapers = model.NeedsDiapers;
+                registration.DiaperDetails = model.DiaperDetails;
+                registration.HasMultipleFamiliesInTent = model.HasMultipleFamiliesInTent;
+                registration.AdditionalFamiliesCount = model.AdditionalFamiliesCount;
+                registration.StatusNotes = model.StatusNotes;
+
+                // Update family desires
+                _context.FamilyDesires.RemoveRange(registration.FamilyDesires);
+                if (model.DesireIds != null)
+                {
+                    for (int i = 0; i < model.DesireIds.Count; i++)
+                    {
+                        if (model.DesireIds[i] > 0)
+                        {
+                            _context.FamilyDesires.Add(new FamilyDesire
+                            {
+                                FamilyRegistrationId = registration.Id,
+                                DesireId = model.DesireIds[i],
+                                Order = i + 1
+                            });
+                        }
+                    }
+                }
+
+                // Get old member person IDs BEFORE removing
+                var oldPersonIds = registration.Members.Select(m => m.PersonId).ToList();
+
+                // Remove existing members
+                _context.FamilyMembers.RemoveRange(registration.Members);
+
+                // Remove old member persons (not the head)
+                var oldPersons = await _context.Persons
+                    .Where(p => oldPersonIds.Contains(p.Id) && p.Id != registration.FamilyHeadId)
+                    .ToListAsync();
+                _context.Persons.RemoveRange(oldPersons);
+                await _context.SaveChangesAsync();
+
+                // Add new members
+                foreach (var mViewModel in model.Members)
+                {
+                    var memberPerson = new Person
+                    {
+                        FirstName = mViewModel.FirstName,
+                        SecondName = mViewModel.SecondName,
+                        ThirdName = mViewModel.ThirdName,
+                        LastName = mViewModel.LastName,
+                        IdNumber = mViewModel.IdNumber,
+                        Sector = mViewModel.Sector,
+                        DateOfBirth = mViewModel.DateOfBirth,
+                        Gender = mViewModel.Gender,
+                        PhoneNumber = mViewModel.PhoneNumber,
+                        OriginalGovernorate = mViewModel.OriginalGovernorate,
+                        MaritalStatus = mViewModel.MaritalStatus,
+                        EmploymentStatus = mViewModel.EmploymentStatus,
+                        EducationLevel = mViewModel.EducationLevel,
+                        HealthStatus = mViewModel.HealthStatus,
+                        ChronicDiseases = mViewModel.ChronicDiseases,
+                        DisabilityTypes = mViewModel.DisabilityTypes,
+                        HasInjury = mViewModel.HasInjury,
+                        InjuryDate = mViewModel.InjuryDate,
+                        InjuryDetails = mViewModel.InjuryDetails,
+                        IsPrisoner = mViewModel.IsPrisoner,
+                        Wallet = mViewModel.Wallet,
+                        BathroomStatus = mViewModel.BathroomStatus,
+                        IsPregnant = mViewModel.IsPregnant,
+                        PregnancyMonth = mViewModel.PregnancyMonth,
+                        IsNursing = mViewModel.IsNursing,
+                        NursingInfantName = mViewModel.NursingInfantName,
+                        NursingInfantDOB = mViewModel.NursingInfantDOB,
+                        NursingInfantID = mViewModel.NursingInfantID
+                    };
+                    _context.Persons.Add(memberPerson);
+                    await _context.SaveChangesAsync();
+
+                    _context.FamilyMembers.Add(new FamilyMember
+                    {
+                        RegistrationId = registration.Id,
+                        PersonId = memberPerson.Id,
+                        RelationshipToHead = mViewModel.RelationshipToHead
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                await _audit.LogAsync(GetCurrentAdminId(), "AdminEdit", "FamilyRegistrations",
+                    registration.RecordId,
+                    new { action = "تم تعديل بيانات العائلة بواسطة المشرف" },
+                    new { headName = head.FullName, sector = head.Sector },
+                    source: "Web");
+
+                await _notificationService.NotifyMandoobsAsync(
+                    head.Sector,
+                    $"تعديل بيانات بواسطة المشرف: {head.FullName} - رقم القيد: {registration.RecordId}",
+                    $"/Admin/RefugeeDetails/{registration.Id}");
+
+                TempData["Success"] = "تم تعديل البيانات بنجاح";
+                return RedirectToAction("RefugeeDetails", new { id = registration.Id });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                TempData["Error"] = "حدث خطأ أثناء حفظ التعديلات: " + ex.Message;
+                ViewBag.FormAction = "AdminUpdateRegistration";
+                ViewBag.FormController = "Admin";
+                return View("~/Views/Record/Edit.cshtml", model);
+            }
+        }
+
+        private async Task PopulateLookupViewBags()
+        {
+            ViewBag.Sectors = await _context.Sectors.OrderBy(s => s.Name).ToListAsync();
+            ViewBag.HealthStatuses = await _context.HealthStatuses.OrderBy(h => h.Name).ToListAsync();
+            ViewBag.ChronicDiseases = await _context.ChronicDiseases.OrderBy(c => c.Name).ToListAsync();
+            ViewBag.DisabilityTypes = await _context.DisabilityTypes.OrderBy(d => d.Name).ToListAsync();
+            ViewBag.Desires = await _context.Desires.OrderBy(d => d.Id).ToListAsync();
+        }
+
+        private RegistrationViewModel MapToViewModel(FamilyRegistration registration)
+        {
+            return new RegistrationViewModel
+            {
+                Id = registration.Id,
+                RecordId = registration.RecordId,
+                CurrentStep = 1,
+                Head = new PersonViewModel
+                {
+                    FirstName = registration.FamilyHead.FirstName,
+                    SecondName = registration.FamilyHead.SecondName,
+                    ThirdName = registration.FamilyHead.ThirdName,
+                    LastName = registration.FamilyHead.LastName,
+                    IdNumber = registration.FamilyHead.IdNumber,
+                    Sector = registration.FamilyHead.Sector,
+                    DateOfBirth = registration.FamilyHead.DateOfBirth,
+                    Gender = registration.FamilyHead.Gender,
+                    PhoneNumber = registration.FamilyHead.PhoneNumber,
+                    OriginalGovernorate = registration.FamilyHead.OriginalGovernorate,
+                    MaritalStatus = registration.FamilyHead.MaritalStatus,
+                    EmploymentStatus = registration.FamilyHead.EmploymentStatus,
+                    EducationLevel = registration.FamilyHead.EducationLevel,
+                    HealthStatus = registration.FamilyHead.HealthStatus,
+                    ChronicDiseases = registration.FamilyHead.ChronicDiseases,
+                    DisabilityTypes = registration.FamilyHead.DisabilityTypes,
+                    HasInjury = registration.FamilyHead.HasInjury,
+                    InjuryDate = registration.FamilyHead.InjuryDate,
+                    InjuryDetails = registration.FamilyHead.InjuryDetails,
+                    IsPrisoner = registration.FamilyHead.IsPrisoner,
+                    Wallet = registration.FamilyHead.Wallet,
+                    BathroomStatus = registration.FamilyHead.BathroomStatus,
+                    IsHouseDestroyed = registration.FamilyHead.IsHouseDestroyed,
+                    IsPregnant = registration.FamilyHead.IsPregnant,
+                    PregnancyMonth = registration.FamilyHead.PregnancyMonth,
+                    IsNursing = registration.FamilyHead.IsNursing,
+                    NursingInfantName = registration.FamilyHead.NursingInfantName,
+                    NursingInfantDOB = registration.FamilyHead.NursingInfantDOB,
+                    NursingInfantID = registration.FamilyHead.NursingInfantID
+                },
+                Members = registration.Members.Select(m => new MemberViewModel
+                {
+                    FirstName = m.Person.FirstName,
+                    SecondName = m.Person.SecondName,
+                    ThirdName = m.Person.ThirdName,
+                    LastName = m.Person.LastName,
+                    IdNumber = m.Person.IdNumber,
+                    Sector = m.Person.Sector,
+                    DateOfBirth = m.Person.DateOfBirth,
+                    Gender = m.Person.Gender,
+                    PhoneNumber = m.Person.PhoneNumber,
+                    OriginalGovernorate = m.Person.OriginalGovernorate,
+                    MaritalStatus = m.Person.MaritalStatus,
+                    EmploymentStatus = m.Person.EmploymentStatus,
+                    EducationLevel = m.Person.EducationLevel,
+                    HealthStatus = m.Person.HealthStatus,
+                    ChronicDiseases = m.Person.ChronicDiseases,
+                    DisabilityTypes = m.Person.DisabilityTypes,
+                    HasInjury = m.Person.HasInjury,
+                    InjuryDate = m.Person.InjuryDate,
+                    InjuryDetails = m.Person.InjuryDetails,
+                    IsPrisoner = m.Person.IsPrisoner,
+                    IsPregnant = m.Person.IsPregnant,
+                    PregnancyMonth = m.Person.PregnancyMonth,
+                    IsNursing = m.Person.IsNursing,
+                    NursingInfantName = m.Person.NursingInfantName,
+                    NursingInfantDOB = m.Person.NursingInfantDOB,
+                    NursingInfantID = m.Person.NursingInfantID,
+                    RelationshipToHead = m.RelationshipToHead
+                }).ToList(),
+                IsChildHeaded = registration.IsChildHeaded,
+                ChildHeadedDetails = registration.ChildHeadedDetails,
+                IsFemaleHeaded = registration.IsFemaleHeaded,
+                FemaleHeadedDetails = registration.FemaleHeadedDetails,
+                SupportsOutsidePerson = registration.SupportsOutsidePerson,
+                OutsidePersonName = registration.OutsidePersonName,
+                OutsidePersonRelation = registration.OutsidePersonRelation,
+                LivesInTent = registration.LivesInTent,
+                TentType = registration.TentType,
+                OtherTentType = registration.OtherTentType,
+                HasBathroom = registration.HasBathroom,
+                BathroomType = registration.BathroomType,
+                NeedsDiapers = registration.NeedsDiapers,
+                DiaperDetails = registration.DiaperDetails,
+                HasMultipleFamiliesInTent = registration.HasMultipleFamiliesInTent,
+                AdditionalFamiliesCount = registration.AdditionalFamiliesCount,
+                StatusNotes = registration.StatusNotes,
+                DesireIds = registration.FamilyDesires
+                    .OrderBy(fd => fd.Order)
+                    .Select(fd => fd.DesireId)
+                    .ToList()
+            };
         }
     }
 }

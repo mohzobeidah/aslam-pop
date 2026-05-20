@@ -26,4 +26,15 @@ public class NominationPageViewModel
     public List<NominationRowViewModel> Rows { get; set; } = new();
     public bool IsAdmin { get; set; }
     public bool IsPastEndDate { get; set; }
+    public int? DelegateSectorId { get; set; }
+    public List<SectorQuotaInfo> SectorQuotas { get; set; } = new();
+}
+
+public class SectorQuotaInfo
+{
+    public int SectorId { get; set; }
+    public string SectorName { get; set; } = string.Empty;
+    public int MaxCount { get; set; }
+    public int CurrentCount { get; set; }
+    public int Remaining => MaxCount - CurrentCount;
 }

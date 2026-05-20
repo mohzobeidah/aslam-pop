@@ -26,6 +26,7 @@ namespace CampRegistrationApp.Controllers
             ViewBag.HealthStatuses = await _context.HealthStatuses.OrderBy(h => h.Name).ToListAsync();
             ViewBag.ChronicDiseases = await _context.ChronicDiseases.OrderBy(c => c.Name).ToListAsync();
             ViewBag.DisabilityTypes = await _context.DisabilityTypes.OrderBy(d => d.Name).ToListAsync();
+            ViewBag.Desires = await _context.Desires.OrderBy(d => d.Id).ToListAsync();
         }
 
         [HttpGet]
@@ -241,6 +242,24 @@ namespace CampRegistrationApp.Controllers
                 registration.AdditionalFamiliesCount = model.AdditionalFamiliesCount;
                 registration.StatusNotes = model.StatusNotes;
 
+                // Update family desires
+                _context.FamilyDesires.RemoveRange(registration.FamilyDesires);
+                if (model.DesireIds != null)
+                {
+                    for (int i = 0; i < model.DesireIds.Count; i++)
+                    {
+                        if (model.DesireIds[i] > 0)
+                        {
+                            _context.FamilyDesires.Add(new FamilyDesire
+                            {
+                                FamilyRegistrationId = registration.Id,
+                                DesireId = model.DesireIds[i],
+                                Order = i + 1
+                            });
+                        }
+                    }
+                }
+
                 // Get old member person IDs BEFORE removing
                 var oldPersonIds = registration.Members.Select(m => m.PersonId).ToList();
 
@@ -410,7 +429,11 @@ namespace CampRegistrationApp.Controllers
                 DiaperDetails = registration.DiaperDetails,
                 HasMultipleFamiliesInTent = registration.HasMultipleFamiliesInTent,
                 AdditionalFamiliesCount = registration.AdditionalFamiliesCount,
-                StatusNotes = registration.StatusNotes
+                StatusNotes = registration.StatusNotes,
+                DesireIds = registration.FamilyDesires
+                    .OrderBy(fd => fd.Order)
+                    .Select(fd => fd.DesireId)
+                    .ToList()
             };
         }
     }

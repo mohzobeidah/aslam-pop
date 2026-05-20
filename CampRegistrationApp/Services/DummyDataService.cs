@@ -105,11 +105,38 @@ namespace CampRegistrationApp.Services
                     RegistrationTimestamp = DateTime.UtcNow.AddDays(-_random.Next(1, 365)),
                     ApprovalStatus = (RegistrationApprovalStatus)_random.Next(0, 3),
                     IsChildHeaded = _random.Next(0, 10) == 0,
+                    ChildHeadedDetails = _random.Next(0, 10) == 0 ? "طفل يعيل أسرته بسبب فقدان الوالدين" : null,
                     IsFemaleHeaded = _random.Next(0, 10) == 0,
+                    FemaleHeadedDetails = _random.Next(0, 10) == 0 ? "أرملة تعيل أطفالها" : null,
+                    SupportsOutsidePerson = _random.Next(0, 5) == 0,
+                    OutsidePersonName = _random.Next(0, 5) == 0 ? _firstNames[_random.Next(_firstNames.Length)] + " " + _lastNames[_random.Next(_lastNames.Length)] : null,
+                    OutsidePersonRelation = _random.Next(0, 5) == 0 ? "قريب" : null,
                     LivesInTent = true,
-                    HasBathroom = _random.Next(0, 2) == 0
+                    TentType = _random.Next(0, 3) == 0 ? "كاروك" : (_random.Next(0, 2) == 0 ? "خشبي" : "بلاستيك"),
+                    OtherTentType = _random.Next(0, 10) == 0 ? "خيمة كبيرة" : null,
+                    HasBathroom = _random.Next(0, 2) == 0,
+                    BathroomType = _random.Next(0, 2) == 0 ? "داخلي" : "خارجي",
+                    NeedsDiapers = _random.Next(0, 5) == 0,
+                    DiaperDetails = _random.Next(0, 5) == 0 ? "طفلان يحتاجان حفائض" : null,
+                    HasMultipleFamiliesInTent = _random.Next(0, 5) == 0,
+                    AdditionalFamiliesCount = _random.Next(0, 5) == 0 ? _random.Next(1, 4) : null,
+                    StatusNotes = _random.Next(0, 4) == 0 ? "حالة عائلة صعبة تحتاج متابعة" : null,
                 };
                 _context.FamilyRegistrations.Add(registration);
+                await _context.SaveChangesAsync();
+
+                // Seed family desires
+                var desires = await _context.Desires.OrderBy(d => d.Id).ToListAsync();
+                var shuffledDesires = desires.OrderBy(_ => _random.Next()).ToList();
+                for (int di = 0; di < shuffledDesires.Count; di++)
+                {
+                    _context.FamilyDesires.Add(new FamilyDesire
+                    {
+                        FamilyRegistrationId = registration.Id,
+                        DesireId = shuffledDesires[di].Id,
+                        Order = di + 1
+                    });
+                }
                 await _context.SaveChangesAsync();
 
                 // Family Members
@@ -132,6 +159,8 @@ namespace CampRegistrationApp.Services
                         EmploymentStatus = "طالب",
                         EducationLevel = "مدرسة",
                         HealthStatus = _healthStatuses[_random.Next(_healthStatuses.Length)],
+                        BathroomStatus = _bathroomStatuses[_random.Next(_bathroomStatuses.Length)],
+                        Wallet = _random.Next(0, 2) == 0 ? "" : _random.Next(100, 999).ToString(),
                         IsPrisoner = false
                     };
                     _context.Persons.Add(member);

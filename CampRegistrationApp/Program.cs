@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using CampRegistrationApp.Data;
 using CampRegistrationApp.Models;
+using CampRegistrationApp.Middleware;
 using CampRegistrationApp.Services;
 using System.Security.Cryptography;
 using System.Text;
@@ -78,6 +79,9 @@ using (var scope = app.Services.CreateScope())
         IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Persons') AND name = 'Nationality')
         ALTER TABLE [Persons] ADD [Nationality] nvarchar(256) NULL");
     db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Persons') AND name = 'MotherIdNumber')
+        ALTER TABLE [Persons] ADD [MotherIdNumber] nvarchar(50) NULL");
+    db.Database.ExecuteSqlRaw(@"
         IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Admins') AND name = 'IsActive')
         ALTER TABLE [Admins] ADD [IsActive] bit NOT NULL DEFAULT 1");
     db.Database.ExecuteSqlRaw(@"
@@ -106,6 +110,60 @@ using (var scope = app.Services.CreateScope())
     db.Database.ExecuteSqlRaw(@"
         IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'AdditionalFamiliesCount')
         ALTER TABLE [FamilyRegistrations] ADD [AdditionalFamiliesCount] int NULL");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'IsHusbandAbroad')
+        ALTER TABLE [FamilyRegistrations] ADD [IsHusbandAbroad] bit NOT NULL DEFAULT 0");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'IsDeleted')
+        ALTER TABLE [FamilyRegistrations] ADD [IsDeleted] bit NOT NULL DEFAULT 0");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'DeletedById')
+        ALTER TABLE [FamilyRegistrations] ADD [DeletedById] int NULL");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'DeletedAt')
+        ALTER TABLE [FamilyRegistrations] ADD [DeletedAt] datetime2 NULL");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_FamilyRegistrations_Admins_DeletedById')
+        ALTER TABLE [FamilyRegistrations] ADD CONSTRAINT [FK_FamilyRegistrations_Admins_DeletedById]
+        FOREIGN KEY ([DeletedById]) REFERENCES [Admins]([Id])");
+
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ProjectSectorQuotas')
+        CREATE TABLE [ProjectSectorQuotas] (
+            [Id] int IDENTITY(1,1) PRIMARY KEY,
+            [ProjectId] int NOT NULL,
+            [SectorId] int NOT NULL,
+            [MaxCount] int NOT NULL DEFAULT 0,
+            CONSTRAINT [FK_PSQ_Projects_ProjectId] FOREIGN KEY ([ProjectId]) REFERENCES [Projects]([Id]) ON DELETE CASCADE,
+            CONSTRAINT [FK_PSQ_Sectors_SectorId] FOREIGN KEY ([SectorId]) REFERENCES [Sectors]([Id]) ON DELETE CASCADE
+        )");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_ProjectSectorQuotas_ProjectId_SectorId')
+        CREATE UNIQUE INDEX [IX_ProjectSectorQuotas_ProjectId_SectorId] ON [ProjectSectorQuotas] ([ProjectId], [SectorId])");
+
+    // Create Desires and FamilyDesires tables for existing databases
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Desires')
+        CREATE TABLE [Desires] (
+            [Id] int IDENTITY(1,1) PRIMARY KEY,
+            [Name] nvarchar(200) NOT NULL
+        )");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'FamilyDesires')
+        CREATE TABLE [FamilyDesires] (
+            [Id] int IDENTITY(1,1) PRIMARY KEY,
+            [FamilyRegistrationId] int NOT NULL,
+            [DesireId] int NOT NULL,
+            [Order] int NOT NULL,
+            CONSTRAINT [FK_FD_FamilyRegistrations_FamilyRegistrationId] FOREIGN KEY ([FamilyRegistrationId]) REFERENCES [FamilyRegistrations]([Id]) ON DELETE CASCADE,
+            CONSTRAINT [FK_FD_Desires_DesireId] FOREIGN KEY ([DesireId]) REFERENCES [Desires]([Id])
+        )");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_FamilyDesires_FamilyRegistrationId_DesireId')
+        CREATE UNIQUE INDEX [IX_FamilyDesires_FamilyRegistrationId_DesireId] ON [FamilyDesires] ([FamilyRegistrationId], [DesireId])");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Desires_Name')
+        CREATE UNIQUE INDEX [IX_Desires_Name] ON [Desires] ([Name])");
 
     // Seed default sectors if none exist
     if (!db.Sectors.Any())
@@ -194,6 +252,17 @@ using (var scope = app.Services.CreateScope())
         );
         db.SaveChanges();
     }
+
+    // Seed Desires
+    var essentialDesires = new[] { "خيم", "اغطية", "فرشات", "ادوات مطبخ", "شوادر", "ملابس", "طرد صحي" };
+    foreach (var name in essentialDesires)
+    {
+        if (!db.Desires.Any(d => d.Name == name))
+        {
+            db.Desires.Add(new Desire { Name = name });
+        }
+    }
+    db.SaveChanges();
 
     // Create Projects, Nominations, AuditLogs tables for existing databases
     db.Database.ExecuteSqlRaw(@"
@@ -360,6 +429,8 @@ using (var scope = app.Services.CreateScope())
         await dummyDataService.SeedDummyDataAsync();
     }
 }
+
+app.UseExceptionLogging();
 
 if (!app.Environment.IsDevelopment())
 {

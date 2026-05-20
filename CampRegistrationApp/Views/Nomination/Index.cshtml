@@ -5,21 +5,35 @@
 }
 
 <div class="mb-6">
-    <div class="flex justify-between items-start">
-        <div>
+    <div class="flex flex-col sm:flex-row justify-between items-start gap-2">
+        <div class="w-full sm:w-auto">
             <a asp-controller="Project" asp-action="Index" class="text-gray-400 hover:text-camp-gold text-sm transition">← المشاريع</a>
-            <h1 class="text-2xl text-camp-gold font-bold mt-1">@Model.ProjectName</h1>
+            <h1 class="text-xl sm:text-2xl text-camp-gold font-bold mt-1 break-words">@Model.ProjectName</h1>
             <p class="text-gray-400 text-sm">
                 العدد المطلوب: <span class="text-camp-gold font-bold">@Model.RequiredCount</span>
                 | الترشيحات الحالية: <span class="@(Model.ExistingCount >= Model.RequiredCount ? "text-green-400" : "text-camp-gold") font-bold">@Model.ExistingCount</span>
             </p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 self-start">
             <span class="px-3 py-1 rounded text-sm @(Model.ProjectStatus == ProjectStatus.Active ? "bg-green-900/50 text-green-300" : Model.ProjectStatus == ProjectStatus.Draft ? "bg-yellow-900/50 text-yellow-300" : "bg-red-900/50 text-red-300")">
                 @(Model.ProjectStatus switch { ProjectStatus.Active => "نشط", ProjectStatus.Draft => "مسودة", ProjectStatus.Closed => "مغلق", _ => "" })
             </span>
         </div>
     </div>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+    @foreach (var sq in Model.SectorQuotas)
+    {
+        var show = Model.IsAdmin || sq.SectorId == Model.DelegateSectorId;
+        if (!show) continue;
+        var pct = sq.MaxCount > 0 ? (sq.CurrentCount * 100 / sq.MaxCount) : 0;
+        var color = sq.MaxCount > 0 ? (sq.CurrentCount >= sq.MaxCount ? "text-red-400" : sq.CurrentCount >= sq.MaxCount * 0.8 ? "text-yellow-400" : "text-green-400") : "text-gray-400";
+        <div class="bg-camp-accent-grey p-3 rounded-xl border border-gray-700 text-center">
+            <div class="text-xs text-gray-400 mb-1">@sq.SectorName</div>
+            <div class="text-lg font-bold @color">@sq.CurrentCount / @(sq.MaxCount > 0 ? sq.MaxCount.ToString() : "∞")</div>
+        </div>
+    }
 </div>
 
 @if (TempData["Success"] is string successMsg)
@@ -35,10 +49,10 @@
 {
     <div class="bg-camp-accent-grey p-4 rounded-xl border border-gray-700 mb-6">
         <h2 class="text-camp-gold font-bold mb-3">إضافة ترشيح</h2>
-        <div class="flex gap-2 mb-3">
+        <div class="flex flex-col sm:flex-row gap-2 mb-3">
             <input type="text" id="personSearch" placeholder="ابحث برقم الهوية أو الاسم..." 
-                   class="flex-1 bg-gray-800 text-white border border-gray-600 rounded-lg p-2.5 focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none" />
-            <button onclick="searchPerson()" class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition font-bold text-sm">بحث</button>
+                   class="w-full sm:flex-1 bg-gray-800 text-white border border-gray-600 rounded-lg p-2.5 focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none" />
+            <button onclick="searchPerson()" class="w-full sm:w-auto bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition font-bold text-sm">بحث</button>
         </div>
 
         <div id="searchResults" class="hidden">
@@ -48,32 +62,49 @@
                     <div><span class="text-gray-400">رقم الهوية:</span> <span id="resultIdNumber" class="text-white"></span></div>
                     <div><span class="text-gray-400">الهاتف:</span> <span id="resultPhone" class="text-white"></span></div>
                 </div>
-                <form method="post" asp-action="AddRow" class="flex gap-2 items-end">
+                <form method="post" asp-action="AddRow" class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
                     <input type="hidden" name="projectId" value="@Model.ProjectId" />
                     <input type="hidden" name="personId" id="addPersonId" value="" />
                     <div class="flex-1">
                         <label class="block text-camp-gold mb-1 text-xs">القاطع</label>
                         @if (ViewBag.IsSuperAdmin == true)
                         {
-                            <select name="sectorId" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none">
+                            <select name="sectorId" id="sectorSelect" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none" onchange="updateQuotaWarning()">
                                 @foreach (var s in sectors)
                                 {
-                                    <option value="@s.Id">@s.Name</option>
+                                    var sq = Model.SectorQuotas.FirstOrDefault(q => q.SectorId == s.Id);
+                                    var disabled = sq != null && sq.MaxCount > 0 && sq.CurrentCount >= sq.MaxCount;
+                                    <option value="@s.Id" data-remaining="@(sq?.Remaining ?? -1)" disabled="@disabled">
+                                        @s.Name @(sq != null && sq.MaxCount > 0 ? $"({sq.Remaining}/{sq.MaxCount})" : "")
+                                    </option>
                                 }
                             </select>
+                            <div id="quotaWarning" class="text-red-400 text-xs mt-1 hidden">هذا القطاع وصل للحد الأقصى</div>
                         }
                         else
                         {
                             var delegateSector = sectors.FirstOrDefault(s => s.Id == ViewBag.DelegateSectorId);
+                            var sq = Model.SectorQuotas.FirstOrDefault(q => q.SectorId == delegateSector?.Id);
+                            var quotaFull = sq != null && sq.MaxCount > 0 && sq.CurrentCount >= sq.MaxCount;
                             <input type="hidden" name="sectorId" value="@(delegateSector?.Id)" />
-                            <div class="bg-gray-700 text-gray-300 border border-gray-600 rounded-lg p-2 text-sm">@(delegateSector?.Name ?? "—")</div>
+                            <div class="bg-gray-700 text-gray-300 border border-gray-600 rounded-lg p-2 text-sm">
+                                @(delegateSector?.Name ?? "—")
+                                @if (sq != null && sq.MaxCount > 0)
+                                {
+                                    <span class="text-xs @(sq.Remaining <= 0 ? "text-red-400" : "text-gray-400")">(@sq.Remaining/@sq.MaxCount)</span>
+                                }
+                            </div>
+                            @if (quotaFull)
+                            {
+                                <div class="text-red-400 text-xs mt-1">تم الوصول للحد الأقصى لترشيحات هذا القطاع</div>
+                            }
                         }
                     </div>
                     <div class="flex-1">
                         <label class="block text-camp-gold mb-1 text-xs">ملاحظات</label>
                         <input name="notes" placeholder="اختياري" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none" />
                     </div>
-                    <button type="submit" id="addBtn" disabled class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition font-bold text-sm disabled:opacity-50">
+                    <button type="submit" id="addBtn" disabled class="w-full sm:w-auto bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition font-bold text-sm disabled:opacity-50">
                         إضافة
                     </button>
                 </form>
@@ -128,6 +159,27 @@
     <script>
         let lastSearchResult = null;
 
+        function updateQuotaWarning() {
+            const select = document.getElementById('sectorSelect');
+            if (!select) return;
+            const opt = select.options[select.selectedIndex];
+            const remaining = parseInt(opt?.dataset?.remaining ?? '-1');
+            const warning = document.getElementById('quotaWarning');
+            if (warning) {
+                warning.classList.toggle('hidden', remaining !== 0);
+            }
+        }
+
+        function checkQuotaAndEnable() {
+            const select = document.getElementById('sectorSelect');
+            if (select) {
+                const opt = select.options[select.selectedIndex];
+                const remaining = parseInt(opt?.dataset?.remaining ?? '-1');
+                if (remaining === 0) return false;
+            }
+            return true;
+        }
+
         async function searchPerson() {
             const query = document.getElementById('personSearch').value.trim();
             if (!query) return;
@@ -163,7 +215,7 @@
                     document.getElementById('resultName').innerHTML = person.name + ' <span class="text-yellow-400 text-xs">(مرشح مسبقاً)</span>';
                     addBtn.disabled = true;
                 } else {
-                    addBtn.disabled = false;
+                    addBtn.disabled = !checkQuotaAndEnable();
                 }
 
                 resultsDiv.classList.remove('hidden');
@@ -177,6 +229,20 @@
             if (e.key === 'Enter') {
                 e.preventDefault();
                 searchPerson();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const select = document.getElementById('sectorSelect');
+            if (select) {
+                select.addEventListener('change', function() {
+                    updateQuotaWarning();
+                    const addBtn = document.getElementById('addBtn');
+                    if (!addBtn.disabled) {
+                        addBtn.disabled = !checkQuotaAndEnable();
+                    }
+                });
+                updateQuotaWarning();
             }
         });
     </script>

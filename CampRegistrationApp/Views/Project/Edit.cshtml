@@ -55,6 +55,37 @@
                 <textarea asp-for="Notes" rows="3" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2.5 focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none"></textarea>
             </div>
 
+            <div class="mb-6">
+                <h3 class="text-camp-gold font-bold mb-3">العدد المسموح لكل قطاع</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full border border-gray-700 rounded-lg">
+                        <thead>
+                            <tr class="border-b border-gray-700 text-camp-gold text-sm">
+                                <th class="p-2 text-right">القطاع</th>
+                                <th class="p-2 text-center">العدد المسموح</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.SectorQuotas.Count; i++)
+                            {
+                                <tr class="border-b border-gray-700">
+                                    <td class="p-2 text-white">
+                                        <input type="hidden" asp-for="SectorQuotas[i].SectorId" />
+                                        <input type="hidden" asp-for="SectorQuotas[i].SectorName" />
+                                        @Model.SectorQuotas[i].SectorName
+                                    </td>
+                                    <td class="p-2 text-center">
+                                        <input asp-for="SectorQuotas[i].MaxCount" type="number" min="0" max="1000"
+                                               class="w-full max-w-[90px] bg-gray-800 text-white border border-gray-600 rounded-lg p-1.5 text-center focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-gray-500 text-xs mt-1">أدخل 0 للقطاعات غير المسموح لها بالترشيح</p>
+            </div>
+
             <button type="submit" class="bg-camp-gold text-black font-bold px-6 py-2.5 rounded-lg hover:bg-yellow-500 transition w-full">
                 حفظ التعديلات
             </button>

@@ -20,9 +20,12 @@ namespace CampRegistrationApp.Data
         public DbSet<ChronicDisease> ChronicDiseases { get; set; } = null!;
         public DbSet<DisabilityType> DisabilityTypes { get; set; } = null!;
         public DbSet<Project> Projects { get; set; } = null!;
+        public DbSet<ProjectSectorQuota> ProjectSectorQuotas { get; set; } = null!;
         public DbSet<Nomination> Nominations { get; set; } = null!;
         public DbSet<AuditLog> AuditLogs { get; set; } = null!;
         public DbSet<Notification> Notifications { get; set; } = null!;
+        public DbSet<Desire> Desires { get; set; } = null!;
+        public DbSet<FamilyDesire> FamilyDesires { get; set; } = null!;
 
         // New: Aid Management System
         public DbSet<Assistance> Assistances { get; set; } = null!;
@@ -47,6 +50,37 @@ namespace CampRegistrationApp.Data
                 .WithMany()
                 .HasForeignKey(f => f.ApprovedById)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<FamilyRegistration>()
+                .HasOne(f => f.DeletedBy)
+                .WithMany()
+                .HasForeignKey(f => f.DeletedById)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<FamilyRegistration>()
+                .HasQueryFilter(f => !f.IsDeleted);
+
+            // ── FamilyDesire ──
+            modelBuilder.Entity<FamilyDesire>()
+                .HasOne(fd => fd.FamilyRegistration)
+                .WithMany(f => f.FamilyDesires)
+                .HasForeignKey(fd => fd.FamilyRegistrationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<FamilyDesire>()
+                .HasOne(fd => fd.Desire)
+                .WithMany()
+                .HasForeignKey(fd => fd.DesireId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FamilyDesire>()
+                .HasIndex(fd => new { fd.FamilyRegistrationId, fd.DesireId })
+                .IsUnique();
+
+            // ── Desire ──
+            modelBuilder.Entity<Desire>()
+                .HasIndex(d => d.Name)
+                .IsUnique();
 
             // ── Person ──
             modelBuilder.Entity<Person>()
@@ -91,6 +125,23 @@ namespace CampRegistrationApp.Data
 
             modelBuilder.Entity<Project>()
                 .HasQueryFilter(p => !p.IsDeleted);
+
+            // ── ProjectSectorQuota ──
+            modelBuilder.Entity<ProjectSectorQuota>()
+                .HasOne(q => q.Project)
+                .WithMany()
+                .HasForeignKey(q => q.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProjectSectorQuota>()
+                .HasOne(q => q.Sector)
+                .WithMany()
+                .HasForeignKey(q => q.SectorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProjectSectorQuota>()
+                .HasIndex(q => new { q.ProjectId, q.SectorId })
+                .IsUnique();
 
             // ── Nomination ──
             modelBuilder.Entity<Nomination>()

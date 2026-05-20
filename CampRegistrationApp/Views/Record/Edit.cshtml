@@ -28,7 +28,7 @@
                 @Html.ValidationSummary(false, "", new { @class = "text-red-500 text-sm" })
             </div>
 
-            <form asp-action="Update" method="post" class="space-y-8">
+            <form asp-action="@(ViewBag.FormAction ?? "Update")" asp-controller="@(ViewBag.FormController ?? "Record")" method="post" class="space-y-8">
                 <input type="hidden" name="Id" value="@Model.Id" />
                 <input type="hidden" name="RecordId" value="@Model.RecordId" />
                 <input type="hidden" name="CurrentStep" value="1" />
@@ -518,6 +518,15 @@
                 </div>
             </div>
 
+            <!-- Refugee Desires -->
+            <div class="mt-6 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                <h3 class="text-lg font-semibold text-camp-gold mb-3">الرغبات (رتب احتياجاتك حسب الأهمية)</h3>
+                <div id="desires-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Filled by JS -->
+                </div>
+                <input type="hidden" name="DesireIds" id="desireIdsInput" value="@string.Join(",", Model.DesireIds)" />
+            </div>
+
             <!-- Status Notes -->
             <div class="mt-6 p-4 bg-camp-dark-grey rounded border border-gray-700">
                 <label class="block text-sm mb-2 text-camp-gold font-semibold">ملاحظات حول الحالة</label>
@@ -553,8 +562,11 @@
         const HEALTH_STATUSES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.HealthStatus>)ViewBag.HealthStatuses).Select(h => h.Name)));
         const CHRONIC_DISEASES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.ChronicDisease>)ViewBag.ChronicDiseases).Select(c => c.Name)));
         const DISABILITY_TYPES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.DisabilityType>)ViewBag.DisabilityTypes).Select(d => d.Name)));
+        const DESIRES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.Desire>)ViewBag.Desires).Select(d => new { d.Id, d.Name })));
 
         let memberIdx = @Model.Members.Count;
+
+        // ========== VALIDATION HELPERS ==========
 
         function validatePalestinianId(id) {
             return /^\d{9}$/.test(id);
@@ -825,11 +837,40 @@
 
             if (!valid) return false;
 
+            // Validate desires
+            const desireSelects = document.querySelectorAll('.desire-select');
+            let allDesiresSelected = true;
+            desireSelects.forEach(sel => { if (!sel.value) allDesiresSelected = false; });
+            if (!allDesiresSelected) {
+                alert('يرجى ترتيب جميع الرغبات (اختيار قيمة لكل رغبة)');
+                return false;
+            }
+
             const form = document.querySelector('form');
 
             // Disable ALL checkboxes + radios so only hidden inputs submit values
             form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
             form.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
+
+            // Head radio values (Gender, HealthStatus) — captured before radios are disabled
+            ['Head.Gender', 'Head.HealthStatus'].forEach(field => {
+                const checked = document.querySelector(`[name="${field}"]:checked`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = field;
+                hidden.value = checked?.value || '';
+                form.appendChild(hidden);
+            });
+
+            // Members radio values (HealthStatus)
+            document.querySelectorAll('.member-card').forEach((card, idx) => {
+                const checked = card.querySelector(`[name="Members[${idx}].HealthStatus"]:checked`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = `Members[${idx}].HealthStatus`;
+                hidden.value = checked?.value || '';
+                form.appendChild(hidden);
+            });
 
             // Head multi-value: ChronicDiseases, DisabilityTypes
             [['Head.ChronicDiseases'], ['Head.DisabilityTypes']].forEach(([name]) => {
@@ -885,6 +926,20 @@
                 form.appendChild(hidden);
             });
 
+            // Convert single comma-separated DesireIds input to indexed inputs for model binding
+            const desireInput = document.getElementById('desireIdsInput');
+            if (desireInput && desireInput.value) {
+                const ids = desireInput.value.split(',').filter(Boolean);
+                desireInput.remove();
+                ids.forEach((id, i) => {
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = `DesireIds[${i}]`;
+                    hidden.value = id.trim();
+                    form.appendChild(hidden);
+                });
+            }
+
             return true;
         }
 
@@ -897,6 +952,107 @@
                 form.submit();
             }
         }
+
+        // ========== DESIRES (DYNAMIC RANKING) ==========
+        function renderDesires() {
+            const container = document.getElementById('desires-container');
+            if (!container) return;
+
+            const selected = getSavedDesireIds();
+
+            DESIRES.forEach((d, idx) => {
+                const order = idx + 1;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex flex-col gap-2';
+                wrapper.id = `desire-wrapper-${order}`;
+
+                const label = document.createElement('label');
+                label.className = 'text-sm text-gray-300';
+                label.textContent = `الرغبة رقم ${order}`;
+                wrapper.appendChild(label);
+
+                const select = document.createElement('select');
+                select.className = 'w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none text-white desire-select';
+                select.setAttribute('data-order', order);
+                select.name = `Desires[${idx}]`;
+
+                const blank = document.createElement('option');
+                blank.value = '';
+                blank.textContent = 'اختر الرغبة...';
+                select.appendChild(blank);
+
+                DESIRES.forEach(d2 => {
+                    const opt = document.createElement('option');
+                    opt.value = d2.Id;
+                    opt.textContent = d2.Name;
+                    select.appendChild(opt);
+                });
+
+                // Restore saved selection
+                if (selected.length > idx && selected[idx]) {
+                    select.value = selected[idx];
+                }
+
+                select.addEventListener('change', function () {
+                    updateDesireOptions();
+                    saveDesireIds();
+                });
+
+                wrapper.appendChild(select);
+                container.appendChild(wrapper);
+            });
+
+            updateDesireOptions();
+        }
+
+        function updateDesireOptions() {
+            const selects = document.querySelectorAll('.desire-select');
+            const selectedValues = [];
+
+            selects.forEach(sel => {
+                const val = sel.value;
+                selectedValues.push(val);
+
+                Array.from(sel.options).forEach(opt => {
+                    if (opt.value === '') return;
+                    if (opt.value === val) {
+                        opt.disabled = false;
+                        opt.hidden = false;
+                        return;
+                    }
+                    const alreadySelectedInEarlier = Array.from(selects).some(s => {
+                        const sOrder = parseInt(s.getAttribute('data-order'));
+                        const curOrder = parseInt(sel.getAttribute('data-order'));
+                        return sOrder < curOrder && s.value === opt.value;
+                    });
+                    opt.disabled = alreadySelectedInEarlier;
+                    opt.hidden = alreadySelectedInEarlier;
+                });
+            });
+        }
+
+        function getSavedDesireIds() {
+            const input = document.getElementById('desireIdsInput');
+            if (input && input.value) {
+                return input.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0);
+            }
+            return [];
+        }
+
+        function saveDesireIds() {
+            const selects = document.querySelectorAll('.desire-select');
+            const ids = [];
+            selects.forEach(sel => {
+                if (sel.value) ids.push(sel.value);
+            });
+            const input = document.getElementById('desireIdsInput');
+            if (input) input.value = ids.join(',');
+        }
+
+        // Render desires on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            renderDesires();
+        });
     </script>
 </div>
 

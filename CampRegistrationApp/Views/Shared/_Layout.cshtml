@@ -41,22 +41,31 @@
     <header>
         <nav class="bg-camp-accent-grey border-b border-camp-gold p-4 shadow-lg">
             <div class="container mx-auto flex justify-between items-center">
-                <a class="text-2xl font-bold text-camp-gold" asp-area="" asp-controller="Home" asp-action="Index">
+                <a class="text-xl sm:text-2xl font-bold text-camp-gold" asp-area="" asp-controller="Home" asp-action="Index">
                     نظام تسجيل العائلات
                 </a>
-                <div class="flex gap-4">
-                    @{
-                        var isLoggedIn = Context.Session.GetInt32("AdminId").HasValue;
-                    }
-                    <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded" asp-controller="Registration" asp-action="Index">تسجيل جديد</a>
-                    <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded" asp-controller="Record" asp-action="Login">تسجيل الدخول</a>
+
+                @{
+                    var isLoggedIn = Context.Session.GetInt32("AdminId").HasValue;
+                }
+
+                <!-- Hamburger button (mobile) -->
+                <button id="menuBtn" class="sm:hidden text-gray-300 hover:text-camp-gold p-2" onclick="toggleMenu()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path id="menuIcon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+
+                <!-- Desktop nav -->
+                <div class="hidden sm:flex gap-2 items-center">
+                    <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Registration" asp-action="Index">تسجيل جديد</a>
+                    <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Record" asp-action="Login">تسجيل الدخول</a>
                     @if (isLoggedIn)
                     {
-                        <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded" asp-controller="Project" asp-action="Index">المشاريع</a>
-                        <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded" asp-controller="Assistance" asp-action="Index">المساعدات</a>
-                        <a class="relative text-camp-gold hover:text-yellow-500 transition-colors px-3 py-2 rounded font-bold" asp-controller="Admin" asp-action="Dashboard">
-                            لوحة التحكم
-                        </a>
+                        <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Project" asp-action="Index">المشاريع</a>
+                        <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Assistance" asp-action="Index">المساعدات</a>
+                        <a class="text-camp-gold hover:text-yellow-500 transition-colors px-3 py-2 rounded text-sm font-bold" asp-controller="Admin" asp-action="Dashboard">لوحة التحكم</a>
+                        <a class="text-gray-300 hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Admin" asp-action="AuditLogs">سجل التدقيق</a>
                         <a class="relative text-gray-300 hover:text-camp-gold transition-colors px-3 py-2 rounded" asp-controller="Admin" asp-action="Notifications" id="notificationBell">
                             🔔
                             <span id="notificationBadge" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center hidden" style="font-size:9px">0</span>
@@ -70,9 +79,33 @@
                     }
                     else
                     {
-                        <a class="text-camp-gold hover:text-yellow-500 transition-colors px-3 py-2 rounded font-bold" asp-controller="Admin" asp-action="Login">دخول المشرفين</a>
+                        <a class="text-camp-gold hover:text-yellow-500 transition-colors px-3 py-2 rounded text-sm font-bold" asp-controller="Admin" asp-action="Login">دخول المشرفين</a>
                     }
                 </div>
+            </div>
+
+            <!-- Mobile dropdown menu -->
+            <div id="mobileMenu" class="hidden sm:hidden mt-4 space-y-1 border-t border-gray-700 pt-3">
+                <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Registration" asp-action="Index">تسجيل جديد</a>
+                <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Record" asp-action="Login">تسجيل الدخول</a>
+                @if (isLoggedIn)
+                {
+                    <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Project" asp-action="Index">المشاريع</a>
+                    <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Assistance" asp-action="Index">المساعدات</a>
+                    <a class="block text-camp-gold hover:text-yellow-500 transition-colors px-3 py-2 rounded text-sm font-bold" asp-controller="Admin" asp-action="Dashboard">لوحة التحكم</a>
+                    <a class="block text-gray-300 hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Admin" asp-action="AuditLogs">سجل التدقيق</a>
+                    <a class="block text-gray-300 hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Admin" asp-action="Notifications">🔔 الإشعارات</a>
+                    <a asp-controller="Admin" asp-action="Logout" method="post"
+                       class="block text-red-400 hover:text-red-300 transition-colors px-3 py-2 rounded text-sm"
+                       onclick="event.preventDefault(); document.getElementById('logoutFormMobile').submit();">
+                        تسجيل خروج
+                    </a>
+                    <form id="logoutFormMobile" asp-controller="Admin" asp-action="Logout" method="post" class="hidden"></form>
+                }
+                else
+                {
+                    <a class="block text-camp-gold hover:text-yellow-500 transition-colors px-3 py-2 rounded text-sm font-bold" asp-controller="Admin" asp-action="Login">دخول المشرفين</a>
+                }
             </div>
         </nav>
     </header>
@@ -101,6 +134,10 @@
                     }
                 }
             } catch {}
+        }
+        function toggleMenu() {
+            var menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
         }
         document.addEventListener('DOMContentLoaded', function() {
             updateNotificationBadge();

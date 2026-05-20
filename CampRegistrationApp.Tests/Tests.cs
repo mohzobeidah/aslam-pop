@@ -66,6 +66,15 @@ public class Helpers
                 new DisabilityType { Name = "حركية" }, new DisabilityType { Name = "سمعية" }
             );
         }
+        if (!db.Desires.Any())
+        {
+            db.Desires.AddRange(
+                new Desire { Name = "خيم" }, new Desire { Name = "اغطية" },
+                new Desire { Name = "فرشات" }, new Desire { Name = "ادوات مطبخ" },
+                new Desire { Name = "شوادر" }, new Desire { Name = "ملابس" },
+                new Desire { Name = "طرد صحي" }
+            );
+        }
         db.SaveChanges();
     }
 
@@ -140,7 +149,8 @@ public class RegistrationControllerTests
         var idGen = new Mock<IRecordIdGenerator>();
         var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
         var notifService = new Mock<INotificationService>();
-        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object);
+        var auditService = new Mock<IAuditService>();
+        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object);
 
         var result = await ctrl.Index();
         var view = Assert.IsType<ViewResult>(result);
@@ -155,7 +165,8 @@ public class RegistrationControllerTests
         var idGen = new Mock<IRecordIdGenerator>();
         var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
         var notifService = new Mock<INotificationService>();
-        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object);
+        var auditService = new Mock<IAuditService>();
+        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object);
 
         var result = await ctrl.CheckId("999999999");
         var json = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result);
@@ -179,7 +190,8 @@ public class RegistrationControllerTests
         var idGen = new Mock<IRecordIdGenerator>();
         var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
         var notifService = new Mock<INotificationService>();
-        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object);
+        var auditService = new Mock<IAuditService>();
+        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object);
 
         var result = await ctrl.CheckId("123456789");
         var json = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result);
@@ -203,7 +215,8 @@ public class RegistrationControllerTests
         var idGen = new Mock<IRecordIdGenerator>();
         var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
         var notifService = new Mock<INotificationService>();
-        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object);
+        var auditService = new Mock<IAuditService>();
+        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object);
 
         var model = Helpers.GetValidViewModel();
         var result = await ctrl.Submit(model);
@@ -223,14 +236,31 @@ public class RegistrationControllerTests
         idGen.Setup(g => g.GenerateUniqueIdAsync()).ReturnsAsync("TEST1234");
         var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
         var notifService = new Mock<INotificationService>();
+        notifService.Setup(n => n.NotifyMandoobsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()))
+            .Returns(Task.CompletedTask);
+        var auditService = new Mock<IAuditService>();
+        auditService.Setup(a => a.LogAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<object?>(), It.IsAny<object?>(), It.IsAny<string?>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
 
-        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object);
+        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object);
 
         var model = Helpers.GetValidViewModel();
-        var result = await ctrl.Submit(model);
+        model.Head.PhoneNumber = "0591234567";
 
-        var view = Assert.IsType<ViewResult>(result);
-        Assert.Equal("Success", view.ViewName);
+        ViewResult? view;
+        try
+        {
+            var result = await ctrl.Submit(model);
+            view = Assert.IsType<ViewResult>(result);
+        }
+        catch (Exception ex)
+        {
+            Assert.Fail($"Controller threw exception: {ex}");
+            return;
+        }
+
+        var errors = ctrl.ModelState.Values.SelectMany(v => v.Errors).ToList();
+        Assert.True(view.ViewName == "Success", $"ViewName: '{view.ViewName}', ModelState errors: {string.Join("; ", errors.Select(e => e.ErrorMessage))}");
 
         var reg = db.FamilyRegistrations.Include(r => r.FamilyHead).First();
         Assert.Equal("TEST1234", reg.RecordId);
@@ -405,7 +435,8 @@ public class AdminControllerTests
             db.SaveChanges();
         }
 
-        var ctrl = new AdminController(db);
+        var auditService = new Mock<IAuditService>();
+        var ctrl = new AdminController(db, auditService.Object);
         var http = new DefaultHttpContext();
         http.Session = new TestSession();
         var admin = db.Admins.First();
@@ -489,7 +520,8 @@ public class AdminControllerTests
     public async Task Registrations_NotAuth_RedirectsToLogin()
     {
         var db = Helpers.CreateDbContext("admin_noauth");
-        var ctrl = new AdminController(db);
+        var auditService = new Mock<IAuditService>();
+        var ctrl = new AdminController(db, auditService.Object);
         var http = new DefaultHttpContext();
         http.Session = new TestSession();
         ctrl.ControllerContext = new ControllerContext { HttpContext = http };

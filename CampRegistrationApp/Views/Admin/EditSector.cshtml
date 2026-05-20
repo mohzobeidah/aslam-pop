@@ -64,15 +64,20 @@
     <div class="bg-camp-accent-grey p-6 rounded-2xl border border-gray-700">
         <h2 class="text-lg text-camp-gold font-bold mb-4">المندوبون المسؤولون عن القاطع</h2>
 
+        @if (TempData["Error"] is string errMsg)
+        {
+            <div class="bg-red-900/50 text-red-300 p-3 rounded-lg mb-4 text-sm">@errMsg</div>
+        }
+
         @if (Model.Admins.Any())
         {
             <div class="space-y-2 mb-4">
                 @foreach (var m in Model.Admins)
                 {
-                    <div class="flex items-center justify-between bg-gray-800 p-3 rounded-lg border border-gray-700">
-                        <div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-gray-800 p-3 rounded-lg border border-gray-700">
+                        <div class="text-sm sm:text-base">
                             <span class="text-white font-bold">@m.Name</span>
-                            <span class="text-gray-400 text-sm mr-2">@m.NationalId</span>
+                            <span class="text-gray-400 mr-2">@m.NationalId</span>
                             <span class="text-gray-500 text-xs mr-2">@m.Mobile</span>
                         </div>
                         <form method="post" asp-action="RemoveMandoob" class="inline"
@@ -92,10 +97,10 @@
 
         @if (mandoobs.Any())
         {
-            <form method="post" asp-action="AssignMandoob" class="flex gap-2 items-end border-t border-gray-700 pt-4">
+            <form method="post" asp-action="AssignMandoob" class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end border-t border-gray-700 pt-4">
                 <input type="hidden" name="sectorId" value="@Model.Id" />
                 <div class="flex-1">
-                    <label class="block text-camp-gold text-xs mb-1">إضافة مندوب</label>
+                    <label class="block text-camp-gold text-xs mb-1">إضافة مندوب (من المسؤولين)</label>
                     <select name="adminId" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none">
                         <option value="">اختر مندوب...</option>
                         @foreach (var a in mandoobs)
@@ -104,16 +109,92 @@
                         }
                     </select>
                 </div>
-                <button type="submit" class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-bold">إضافة</button>
+                <button type="submit" class="w-full sm:w-auto bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-bold">إضافة</button>
             </form>
         }
         else
         {
-            <p class="text-gray-500 text-xs border-t border-gray-700 pt-4">جميع المندوبين مسؤولون عن قواطع حالياً</p>
+            <p class="text-gray-500 text-xs border-t border-gray-700 pt-4">جميع المندوبين الحاليين مسؤولون عن قواطع</p>
         }
+
+        <!-- Select from Refugees -->
+        <div class="border-t border-gray-700 pt-4 mt-4">
+            <h3 class="text-camp-gold font-bold text-sm mb-2">أو اختر من المسجلين (النازحين)</h3>
+            <div class="flex flex-col sm:flex-row gap-2 mb-2">
+                <input type="text" id="refugeeSearch" placeholder="ابحث برقم الهوية أو الاسم..."
+                       class="w-full sm:flex-1 bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold focus:ring-1 focus:ring-camp-gold outline-none" />
+                <button onclick="searchRefugee()" class="w-full sm:w-auto bg-camp-gold text-black px-3 py-2 rounded-lg hover:bg-yellow-500 transition font-bold text-xs">بحث</button>
+            </div>
+            <div id="refugeeResults" class="hidden">
+                <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                    <div class="grid grid-cols-2 gap-1 text-xs mb-2">
+                        <div><span class="text-gray-400">الاسم:</span> <span id="refResultName" class="text-white"></span></div>
+                        <div><span class="text-gray-400">رقم الهوية:</span> <span id="refResultId" class="text-white"></span></div>
+                        <div><span class="text-gray-400">الهاتف:</span> <span id="refResultPhone" class="text-white"></span></div>
+                        <div><span class="text-gray-400">القاطع:</span> <span id="refResultSector" class="text-white"></span></div>
+                    </div>
+                    <form method="post" asp-action="AssignPersonAsMandoob" class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                        <input type="hidden" name="sectorId" value="@Model.Id" />
+                        <input type="hidden" name="personId" id="assignPersonId" value="" />
+                        <button type="submit" id="assignMandoobBtn" disabled class="w-full sm:w-auto bg-camp-gold text-black px-3 py-1.5 rounded-lg hover:bg-yellow-500 transition font-bold text-xs disabled:opacity-50">
+                            تعيين كمندوب
+                        </button>
+                        <span class="text-gray-500 text-xs">كلمة المرور الافتراضية: رقم الهوية</span>
+                    </form>
+                </div>
+            </div>
+            <div id="refugeeNotFound" class="hidden bg-red-900/30 text-red-300 p-2 rounded-lg text-xs">لم يتم العثور على الشخص</div>
+        </div>
     </div>
 
     <div class="mt-4">
         <a asp-action="Sectors" class="text-gray-400 hover:text-camp-gold text-sm transition">← العودة إلى القواطع</a>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        async function searchRefugee() {
+            const query = document.getElementById('refugeeSearch').value.trim();
+            if (!query) return;
+
+            const resultsDiv = document.getElementById('refugeeResults');
+            const notFoundDiv = document.getElementById('refugeeNotFound');
+            const assignBtn = document.getElementById('assignMandoobBtn');
+
+            resultsDiv.classList.add('hidden');
+            notFoundDiv.classList.add('hidden');
+            assignBtn.disabled = true;
+
+            try {
+                const res = await fetch(`/Admin/SearchPersonForMandoob?query=${encodeURIComponent(query)}`);
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    notFoundDiv.classList.remove('hidden');
+                    return;
+                }
+
+                const person = data[0];
+                document.getElementById('refResultName').textContent = person.name;
+                document.getElementById('refResultId').textContent = person.idNumber;
+                document.getElementById('refResultPhone').textContent = person.phone || '—';
+                document.getElementById('refResultSector').textContent = person.sector;
+                document.getElementById('assignPersonId').value = person.id;
+                assignBtn.disabled = false;
+
+                resultsDiv.classList.remove('hidden');
+            } catch {
+                notFoundDiv.textContent = 'حدث خطأ في البحث';
+                notFoundDiv.classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('refugeeSearch').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchRefugee();
+            }
+        });
+    </script>
+}

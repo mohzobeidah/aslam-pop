@@ -6,6 +6,7 @@ namespace CampRegistrationApp.Models.ViewModels
         public int TotalRegistrations { get; set; }
         public int TotalAdmins { get; set; }
         public int TotalSectors { get; set; }
+        public int TotalApprovedRefugees { get; set; }
     }
 
     public class SectorDashboard
@@ -17,6 +18,7 @@ namespace CampRegistrationApp.Models.ViewModels
         public int HandmadeTents { get; set; }
         public int Bathrooms { get; set; }
         public int RegistrationCount { get; set; }
+        public int ApprovedFamilyCount { get; set; }
     }
 
     public class RegistrationApprovalViewModel
@@ -53,7 +55,12 @@ namespace CampRegistrationApp.Models.ViewModels
     {
         public List<RefugeeViewModel> Refugees { get; set; } = new();
         public int TotalCount { get; set; }
+        public int PendingCount { get; set; }
+        public int ApprovedCount { get; set; }
+        public int RejectedCount { get; set; }
         public string? SectorFilter { get; set; }
         public string? SearchQuery { get; set; }
+        public string? StatusFilter { get; set; }
+        public Dictionary<string, int> SectorApprovedCounts { get; set; } = new();
     }
 }

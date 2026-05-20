@@ -33,11 +33,25 @@ public class NominationService : INominationService
         if (project == null)
             throw new KeyNotFoundException("Project not found");
 
-        var rows = await _context.Nominations
+        int? adminSectorId = null;
+        if (!isAdmin)
+        {
+            var admin = await _context.Admins
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == delegateId);
+            adminSectorId = admin?.SectorId;
+        }
+
+        var query = _context.Nominations
             .AsNoTracking()
             .Include(n => n.Person)
             .Include(n => n.Sector)
-            .Where(n => n.ProjectId == projectId && !n.IsDeleted)
+            .Where(n => n.ProjectId == projectId && !n.IsDeleted);
+
+        if (adminSectorId.HasValue)
+            query = query.Where(n => n.SectorId == adminSectorId.Value);
+
+        var rows = await query
             .Select(n => new NominationRowViewModel
             {
                 Id = n.Id,
@@ -55,6 +69,33 @@ public class NominationService : INominationService
         for (int i = 0; i < rows.Count; i++)
             rows[i].RowNumber = i + 1;
 
+        var quotas = await _context.ProjectSectorQuotas
+            .AsNoTracking()
+            .Where(q => q.ProjectId == projectId)
+            .ToListAsync();
+
+        var sectorCounts = await _context.Nominations
+            .AsNoTracking()
+            .Where(n => n.ProjectId == projectId && !n.IsDeleted)
+            .GroupBy(n => n.SectorId)
+            .Select(g => new { SectorId = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        var countMap = sectorCounts.ToDictionary(x => x.SectorId, x => x.Count);
+
+        var sectors = await _context.Sectors.AsNoTracking().ToListAsync();
+        var sectorQuotaInfos = sectors.Select(s =>
+        {
+            var q = quotas.FirstOrDefault(qq => qq.SectorId == s.Id);
+            return new SectorQuotaInfo
+            {
+                SectorId = s.Id,
+                SectorName = s.Name,
+                MaxCount = q?.MaxCount ?? 0,
+                CurrentCount = countMap.GetValueOrDefault(s.Id, 0)
+            };
+        }).ToList();
+
         return new NominationPageViewModel
         {
             ProjectId = project.Id,
@@ -64,7 +105,9 @@ public class NominationService : INominationService
             ExistingCount = rows.Count,
             Rows = rows,
             IsAdmin = isAdmin,
-            IsPastEndDate = project.EndDate < DateTime.UtcNow
+            IsPastEndDate = project.EndDate < DateTime.UtcNow,
+            DelegateSectorId = adminSectorId,
+            SectorQuotas = sectorQuotaInfos
         };
     }
 
@@ -84,6 +127,19 @@ public class NominationService : INominationService
         }
         else
         {
+            var quota = await _context.ProjectSectorQuotas
+                .AsNoTracking()
+                .FirstOrDefaultAsync(q => q.ProjectId == projectId && q.SectorId == sectorId);
+
+            if (quota != null && quota.MaxCount > 0)
+            {
+                var currentCount = await _context.Nominations
+                    .CountAsync(n => n.ProjectId == projectId && n.SectorId == sectorId && !n.IsDeleted);
+
+                if (currentCount >= quota.MaxCount)
+                    throw new InvalidOperationException("تم الوصول للحد الأقصى لترشيحات هذا القطاع");
+            }
+
             _context.Nominations.Add(new Nomination
             {
                 ProjectId = projectId,

@@ -26,6 +26,7 @@
             <div><span class="text-gray-400">تاريخ الميلاد:</span> <span class="text-white">@head.DateOfBirth.ToString("yyyy/MM/dd")</span></div>
             <div><span class="text-gray-400">الجنس:</span> <span class="text-white">@head.Gender</span></div>
             <div><span class="text-gray-400">الهاتف:</span> <span class="text-white" dir="ltr">@head.PhoneNumber</span></div>
+            <div><span class="text-gray-400">المحفظة:</span> <span class="text-white" dir="ltr">@head.Wallet</span></div>
             <div><span class="text-gray-400">الحالة الاجتماعية:</span> <span class="text-white">@head.MaritalStatus</span></div>
             <div><span class="text-gray-400">الوظيفة:</span> <span class="text-white">@head.EmploymentStatus</span></div>
             <div><span class="text-gray-400">المستوى التعليمي:</span> <span class="text-white">@head.EducationLevel</span></div>
@@ -67,15 +68,42 @@
             @if (Model.IsChildHeaded) { <div><span class="text-gray-400">تفاصيل:</span> <span class="text-white">@Model.ChildHeadedDetails</span></div> }
             <div><span class="text-gray-400">ربة أسرة امرأة:</span> <span class="text-white">@(Model.IsFemaleHeaded ? "نعم" : "لا")</span></div>
             @if (Model.IsFemaleHeaded) { <div><span class="text-gray-400">تفاصيل:</span> <span class="text-white">@Model.FemaleHeadedDetails</span></div> }
+            <div><span class="text-gray-400">الزوج خارج البلاد:</span> <span class="text-white">@(Model.IsHusbandAbroad ? "نعم" : "لا")</span></div>
             <div><span class="text-gray-400">شخص خارجي:</span> <span class="text-white">@(Model.SupportsOutsidePerson ? "نعم" : "لا")</span></div>
             @if (Model.SupportsOutsidePerson) { <div><span class="text-gray-400">اسم الخارجي:</span> <span class="text-white">@Model.OutsidePersonName</span></div> }
+            @if (Model.SupportsOutsidePerson) { <div><span class="text-gray-400">صلة القرابة:</span> <span class="text-white">@Model.OutsidePersonRelation</span></div> }
             <div><span class="text-gray-400">يسكن في خيمة:</span> <span class="text-white">@(Model.LivesInTent ? "نعم" : "لا")</span></div>
             @if (Model.LivesInTent) { <div><span class="text-gray-400">نوع الخيمة:</span> <span class="text-white">@Model.TentType @(!string.IsNullOrEmpty(Model.OtherTentType) ? "(" + Model.OtherTentType + ")" : "")</span></div> }
             <div><span class="text-gray-400">حمام:</span> <span class="text-white">@(Model.HasBathroom ? "نعم" : "لا")</span></div>
             @if (Model.HasBathroom) { <div><span class="text-gray-400">نوع الحمام:</span> <span class="text-white">@(Model.BathroomType == "Private" ? "خاص" : Model.BathroomType == "Shared" ? "مشترك" : Model.BathroomType)</span></div> }
             @if (Model.HasBathroom && !string.IsNullOrEmpty(head.BathroomStatus)) { <div><span class="text-gray-400">حالة الحمام:</span> <span class="text-white">@head.BathroomStatus</span></div> }
             <div><span class="text-gray-400">حفائظ:</span> <span class="text-white">@(Model.NeedsDiapers ? "نعم" : "لا")</span></div>
+            @if (Model.NeedsDiapers) { <div><span class="text-gray-400">تفاصيل الحفائظ:</span> <span class="text-white">@Model.DiaperDetails</span></div> }
             <div><span class="text-gray-400">أسر بنفس الخيمة:</span> <span class="text-white">@(Model.HasMultipleFamiliesInTent ? "نعم" : "لا")</span></div>
+            @if (Model.HasMultipleFamiliesInTent) { <div><span class="text-gray-400">عدد الأسر الإضافية:</span> <span class="text-white">@Model.AdditionalFamiliesCount</span></div> }
+        </div>
+    </div>
+
+    <!-- Refugee Desires -->
+    <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700">
+        <h2 class="text-lg text-camp-gold font-bold mb-4">الرغبات (حسب الأهمية)</h2>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+            @{
+                var orderedDesires = Model.FamilyDesires.OrderBy(fd => fd.Order).ToList();
+                var labels = new[] { "الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة", "الثامنة", "التاسعة", "العاشرة" };
+            }
+            @if (orderedDesires.Any())
+            {
+                @foreach (var fd in orderedDesires)
+                {
+                    var label = fd.Order <= labels.Length ? labels[fd.Order - 1] : fd.Order.ToString();
+                    <div><span class="text-gray-400">الرغبة @label:</span> <span class="text-white">@fd.Desire.Name</span></div>
+                }
+            }
+            else
+            {
+                <div><span class="text-gray-400">لم يتم تحديد رغبات</span></div>
+            }
         </div>
     </div>
 
@@ -105,6 +133,27 @@
                 <div><span class="text-gray-400">تاريخ الموافقة:</span> <span class="text-white">@Model.ApprovedAt?.ToString("yyyy/MM/dd HH:mm")</span></div>
             }
         </div>
+
+        @if (Model.ApprovalStatus == RegistrationApprovalStatus.Pending)
+        {
+            <div class="mt-4 pt-4 border-t border-gray-700 flex gap-3">
+                <a asp-action="AdminEditRegistration" asp-route-id="@Model.Id"
+                   class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-bold">
+                    تعديل البيانات
+                </a>
+            </div>
+        }
+        else if (Model.ApprovalStatus == RegistrationApprovalStatus.Approved)
+        {
+            <div class="mt-4 pt-4 border-t border-gray-700">
+                <form method="post" asp-action="RemoveRefugee" asp-route-id="@Model.Id"
+                      onsubmit="return confirm('هل أنت متأكد من إزالة @Model.FamilyHead.FullName؟ تم نقل العائلة خارج المخيم؟')">
+                    <button type="submit" class="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition text-sm font-bold">
+                        إزالة — انتقل خارج المخيم
+                    </button>
+                </form>
+            </div>
+        }
     </div>
 </div>
 
@@ -123,6 +172,7 @@
                         <th class="p-2 text-center">الجنس</th>
                         <th class="p-2 text-center">تاريخ الميلاد</th>
                         <th class="p-2 text-center">الحالة الصحية</th>
+                        <th class="p-2 text-center">إجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -136,6 +186,37 @@
                             <td class="p-2 text-center text-gray-300">@p.Gender</td>
                             <td class="p-2 text-center text-gray-300">@p.DateOfBirth.ToString("yyyy/MM/dd")</td>
                             <td class="p-2 text-center text-gray-300">@p.HealthStatus</td>
+                            <td class="p-2 text-center">
+                                <button type="button" onclick='showMemberModal(@Html.Raw(Json.Serialize(new {
+                                    name = p.FullName,
+                                    idNumber = p.IdNumber,
+                                    relationship = m.RelationshipToHead,
+                                    gender = p.Gender,
+                                    dob = p.DateOfBirth.ToString("yyyy/MM/dd"),
+                                    phone = p.PhoneNumber,
+                                    maritalStatus = p.MaritalStatus,
+                                    healthStatus = p.HealthStatus,
+                                    chronicDiseases = p.ChronicDiseases,
+                                    disabilityTypes = p.DisabilityTypes,
+                                    hasInjury = p.HasInjury,
+                                    injuryDate = p.InjuryDate?.ToString("yyyy/MM/dd"),
+                                    injuryDetails = p.InjuryDetails,
+                                    isPregnant = p.IsPregnant,
+                                    pregnancyMonth = p.PregnancyMonth,
+                                    isNursing = p.IsNursing,
+                                    nursingInfantName = p.NursingInfantName,
+                                    nursingInfantDOB = p.NursingInfantDOB?.ToString("yyyy/MM/dd"),
+                                    isPrisoner = p.IsPrisoner,
+                                    employmentStatus = p.EmploymentStatus,
+                                    educationLevel = p.EducationLevel,
+                                    originalGovernorate = p.OriginalGovernorate,
+                                    wallet = p.Wallet,
+                                    bathroomStatus = p.BathroomStatus,
+                                    isHouseDestroyed = p.IsHouseDestroyed
+                                })))' class="text-camp-gold hover:text-yellow-500 transition text-sm cursor-pointer">
+                                    عرض التفاصيل
+                                </button>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -147,6 +228,81 @@
         <p class="text-gray-500 text-center py-4">لا يوجد أفراد إضافيون</p>
     }
 </div>
+
+<!-- Member Details Modal -->
+<div id="memberModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4" onclick="if(event.target===this)closeMemberModal()">
+    <div class="bg-camp-accent-grey rounded-xl border border-gray-700 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="sticky top-0 bg-camp-accent-grey border-b border-gray-700 p-4 flex justify-between items-center">
+            <h2 class="text-lg text-camp-gold font-bold" id="memberModalTitle">تفاصيل العضو</h2>
+            <button onclick="closeMemberModal()" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <div class="p-4" id="memberModalBody"></div>
+    </div>
+</div>
+
+<script>
+    function showMemberModal(data) {
+        var modal = document.getElementById('memberModal');
+        document.getElementById('memberModalTitle').textContent = data.name;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        var html = '<div class="grid grid-cols-2 gap-3 text-sm">';
+
+        var fields = [
+            { label: 'رقم الهوية', value: data.idNumber },
+            { label: 'صلة القرابة', value: data.relationship },
+            { label: 'الجنس', value: data.gender },
+            { label: 'تاريخ الميلاد', value: data.dob },
+            { label: 'الهاتف', value: data.phone || '-' },
+            { label: 'الحالة الاجتماعية', value: data.maritalStatus || '-' },
+            { label: 'الحالة الصحية', value: data.healthStatus },
+            { label: 'الأمراض المزمنة', value: data.chronicDiseases || '-' },
+            { label: 'أنواع الإعاقة', value: data.disabilityTypes || '-' },
+            { label: 'الوظيفة', value: data.employmentStatus || '-' },
+            { label: 'المستوى التعليمي', value: data.educationLevel || '-' },
+            { label: 'مكان السكن الأصلي', value: data.originalGovernorate || '-' },
+            { label: 'المحفظة', value: data.wallet || '-' },
+            { label: 'حالة الحمام', value: data.bathroomStatus || '-' },
+        ];
+
+        fields.forEach(function(f) {
+            html += '<div class="border-b border-gray-800 pb-2"><span class="text-gray-400">' + f.label + ':</span> <span class="text-white">' + f.value + '</span></div>';
+        });
+
+        // Injury
+        html += '<div class="border-b border-gray-800 pb-2"><span class="text-gray-400">إصابة:</span> <span class="text-white">' + (data.hasInjury ? 'نعم' : 'لا') + '</span></div>';
+        if (data.hasInjury) {
+            html += '<div class="border-b border-gray-800 pb-2 col-span-2"><span class="text-gray-400">تاريخ الإصابة:</span> <span class="text-white">' + (data.injuryDate || '-') + '</span></div>';
+            html += '<div class="border-b border-gray-800 pb-2 col-span-2"><span class="text-gray-400">تفاصيل الإصابة:</span> <span class="text-white">' + (data.injuryDetails || '-') + '</span></div>';
+        }
+
+        // Pregnancy / Nursing
+        if (data.gender === 'female' || data.gender === 'أنثى') {
+            html += '<div class="border-b border-gray-800 pb-2"><span class="text-gray-400">حامل:</span> <span class="text-white">' + (data.isPregnant ? 'نعم' : 'لا') + '</span></div>';
+            if (data.isPregnant) {
+                html += '<div class="border-b border-gray-800 pb-2"><span class="text-gray-400">شهر الحمل:</span> <span class="text-white">' + (data.pregnancyMonth || '-') + '</span></div>';
+            }
+            html += '<div class="border-b border-gray-800 pb-2"><span class="text-gray-400">مرضع:</span> <span class="text-white">' + (data.isNursing ? 'نعم' : 'لا') + '</span></div>';
+            if (data.isNursing) {
+                html += '<div class="border-b border-gray-800 pb-2"><span class="text-gray-400">اسم الطفل:</span> <span class="text-white">' + (data.nursingInfantName || '-') + '</span></div>';
+                html += '<div class="border-b border-gray-800 pb-2"><span class="text-gray-400">تاريخ ميلاد الطفل:</span> <span class="text-white">' + (data.nursingInfantDOB || '-') + '</span></div>';
+            }
+        }
+
+        html += '<div class="border-b border-gray-800 pb-2"><span class="text-gray-400">أسير:</span> <span class="text-white">' + (data.isPrisoner ? 'نعم' : 'لا') + '</span></div>';
+        html += '<div class="border-b border-gray-800 pb-2"><span class="text-gray-400">منزل مدمر:</span> <span class="text-white">' + (data.isHouseDestroyed ? 'نعم' : 'لا') + '</span></div>';
+
+        html += '</div>';
+        document.getElementById('memberModalBody').innerHTML = html;
+    }
+
+    function closeMemberModal() {
+        var modal = document.getElementById('memberModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+</script>
 
 <div class="mt-6">
     <a asp-action="Refugees" class="text-gray-400 hover:text-camp-gold text-sm transition">← العودة إلى قائمة النازحين</a>

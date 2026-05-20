@@ -14,13 +14,15 @@ namespace CampRegistrationApp.Controllers
         private readonly IRecordIdGenerator _idGenerator;
         private readonly IWebHostEnvironment _env;
         private readonly INotificationService _notificationService;
+        private readonly IAuditService _audit;
 
-        public RegistrationController(ApplicationDbContext context, IRecordIdGenerator idGenerator, IWebHostEnvironment env, INotificationService notificationService)
+        public RegistrationController(ApplicationDbContext context, IRecordIdGenerator idGenerator, IWebHostEnvironment env, INotificationService notificationService, IAuditService audit)
         {
             _context = context;
             _idGenerator = idGenerator;
             _env = env;
             _notificationService = notificationService;
+            _audit = audit;
         }
 
         private async Task PopulateLookupViewBags()
@@ -29,6 +31,7 @@ namespace CampRegistrationApp.Controllers
             ViewBag.HealthStatuses = await _context.HealthStatuses.OrderBy(h => h.Name).ToListAsync();
             ViewBag.ChronicDiseases = await _context.ChronicDiseases.OrderBy(c => c.Name).ToListAsync();
             ViewBag.DisabilityTypes = await _context.DisabilityTypes.OrderBy(d => d.Name).ToListAsync();
+            ViewBag.Desires = await _context.Desires.OrderBy(d => d.Id).ToListAsync();
         }
 
         [HttpGet]
@@ -123,6 +126,12 @@ namespace CampRegistrationApp.Controllers
                 return View("Index", model);
             }
 
+            // Hash password if provided
+            var password = model.Password;
+            var passwordHash = !string.IsNullOrEmpty(password)
+                ? Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(password)))
+                : null;
+
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
@@ -152,6 +161,7 @@ namespace CampRegistrationApp.Controllers
                     IsPrisoner = model.Head.IsPrisoner,
                     Wallet = model.Head.Wallet,
                     BathroomStatus = model.Head.BathroomStatus,
+                    MotherIdNumber = model.Head.MotherIdNumber,
                     IsPregnant = model.Head.IsPregnant,
                     PregnancyMonth = model.Head.PregnancyMonth,
                     IsNursing = model.Head.IsNursing,
@@ -191,6 +201,7 @@ namespace CampRegistrationApp.Controllers
                     ChildHeadedDetails = model.ChildHeadedDetails,
                     IsFemaleHeaded = model.IsFemaleHeaded,
                     FemaleHeadedDetails = model.FemaleHeadedDetails,
+                    IsHusbandAbroad = model.IsHusbandAbroad,
                     SupportsOutsidePerson = model.SupportsOutsidePerson,
                     OutsidePersonName = model.OutsidePersonName,
                     OutsidePersonRelation = model.OutsidePersonRelation,
@@ -204,15 +215,27 @@ namespace CampRegistrationApp.Controllers
                     HasMultipleFamiliesInTent = model.HasMultipleFamiliesInTent,
                     AdditionalFamiliesCount = model.AdditionalFamiliesCount,
                     StatusNotes = model.StatusNotes,
-                    NeedTents = (NeedPriority)model.NeedTents,
-                    NeedBlankets = (NeedPriority)model.NeedBlankets,
-                    NeedMattresses = (NeedPriority)model.NeedMattresses,
-                    NeedKitchenTools = (NeedPriority)model.NeedKitchenTools,
-                    NeedTarpaulins = (NeedPriority)model.NeedTarpaulins,
-                    NeedClothes = (NeedPriority)model.NeedClothes,
-                    NeedHygieneKit = (NeedPriority)model.NeedHygieneKit
+                    PasswordHash = passwordHash
                 };
                 _context.FamilyRegistrations.Add(registration);
+                await _context.SaveChangesAsync();
+
+                // Save family desires
+                if (model.DesireIds != null)
+                {
+                    for (int i = 0; i < model.DesireIds.Count; i++)
+                    {
+                        if (model.DesireIds[i] > 0)
+                        {
+                            _context.FamilyDesires.Add(new FamilyDesire
+                            {
+                                FamilyRegistrationId = registration.Id,
+                                DesireId = model.DesireIds[i],
+                                Order = i + 1
+                            });
+                        }
+                    }
+                }
                 await _context.SaveChangesAsync();
 
                 foreach (var mViewModel in model.Members)
@@ -240,6 +263,7 @@ namespace CampRegistrationApp.Controllers
                         IsPrisoner = mViewModel.IsPrisoner,
                         Wallet = mViewModel.Wallet,
                         BathroomStatus = mViewModel.BathroomStatus,
+                        MotherIdNumber = mViewModel.MotherIdNumber,
                         IsPregnant = mViewModel.IsPregnant,
                         PregnancyMonth = mViewModel.PregnancyMonth,
                         IsNursing = mViewModel.IsNursing,
@@ -260,16 +284,26 @@ namespace CampRegistrationApp.Controllers
                 await _context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
+
+                await _audit.LogAsync(0, "Create", "FamilyRegistrations", recordId, null, new
+                {
+                    head.IdNumber, head.FullName, head.Sector,
+                    memberCount = model.Members.Count,
+                    registrationId = registration.Id
+                }, source: "Web");
+
                 await _notificationService.NotifyMandoobsAsync(
                     model.Head.Sector,
                     $"تسجيل جديد: {head.FullName} - رقم القيد: {recordId}",
                     $"/Admin/RefugeeDetails/{registration.Id}");
+
+                TempData["Success"] = $"تم تسجيل العائلة بنجاح! رقم القيد: <strong>{recordId}</strong>";
                 return View("Success", recordId);
             }
-            catch
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                ModelState.AddModelError("", "An error occurred while saving the registration.");
+                ModelState.AddModelError("", "حدث خطأ أثناء حفظ التسجيل: " + ex.ToString());
                 return View("Index", model);
             }
         }
