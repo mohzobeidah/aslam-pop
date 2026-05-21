@@ -496,13 +496,17 @@
                     <button type="button" id="prevBtn" onclick="prevStep()" class="px-6 py-2 rounded border border-camp-gold text-camp-gold hover:bg-camp-gold hover:text-camp-dark-grey transition-colors hidden">
                         السابق
                     </button>
-                    <div id="navSpacer"></div>
-                    <button type="button" id="nextBtn" onclick="nextStep()" class="px-8 py-2 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors">
-                        التالي
-                    </button>
-                    <button type="submit" id="submitBtn" onclick="return submitForm()" class="px-8 py-2 rounded bg-green-600 text-white font-bold hover:bg-green-700 transition-colors hidden">
-                        تأكيد وإرسال
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="clearAllFields()" class="px-4 py-2 rounded border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors text-sm">
+                            ✕ مسح الكل
+                        </button>
+                        <button type="button" id="nextBtn" onclick="nextStep()" class="px-8 py-2 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors">
+                            التالي
+                        </button>
+                        <button type="submit" id="submitBtn" onclick="return submitForm()" class="px-8 py-2 rounded bg-green-600 text-white font-bold hover:bg-green-700 transition-colors hidden">
+                            تأكيد وإرسال
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -1543,6 +1547,23 @@
         function toggleSectionCheckbox(el, sectionId) {
             const section = document.getElementById(sectionId);
             if (section) section.classList.toggle('hidden', !el.checked);
+        }
+
+        // ========== CLEAR ALL ==========
+        function clearAllFields() {
+            if (!confirm('هل تريد مسح جميع الحقول؟ سيتم فقدان البيانات المدخلة.')) return;
+            const form = document.querySelector('form');
+            form.querySelectorAll('input[type="text"], input[type="date"], input[type="password"], input[type="number"], textarea').forEach(el => el.value = '');
+            form.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+            form.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+            form.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
+            document.getElementById('members-container').innerHTML = '';
+            memberIndex = 0;
+            document.getElementById('regPassword').value = '';
+            document.getElementById('regConfirmPassword').value = '';
+            document.getElementById('acceptResponsibility').checked = false;
+            currentStep = 1;
+            showStep(1);
         }
 
         // ========== SUBMIT ==========

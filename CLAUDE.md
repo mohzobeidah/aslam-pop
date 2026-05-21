@@ -117,8 +117,8 @@ Notification >── (0..1) Link (URL string)
 **Submit**: Wraps everything in a DB transaction — creates FamilyHead `Person`, then `FamilyRegistration`, then each Member `Person` + `FamilyMember`. On success, creates notifications for all sector mandoobs.
 
 ## Registration ViewModel (`RegistrationViewModel`)
-- `Head` (PersonViewModel) + `Members` (List of MemberViewModel inheriting PersonViewModel) + housing/special-case fields + `StatusNotes` (string) + **Refugee Needs** (7 `int` fields mapped to `NeedPriority` enum).
-- `MemberViewModel` adds `RelationshipToHead` to PersonViewModel.
+- `Head` (PersonViewModel) + `Members` (List of MemberViewModel) + housing/special-case fields + `StatusNotes` (string) + **Refugee Needs** (7 `int` fields mapped to `NeedPriority` enum).
+- `MemberViewModel` is a **standalone class** (does NOT inherit `PersonViewModel`). It has its own fields without Sector, PhoneNumber, or Wallet — these are head-only.
 - `CurrentStep` (1-4) tracks wizard progress.
 - `UploadedFiles` (List<string>) tracks client-side uploaded file paths.
 - `Password` string — set in Step 4, hashed on server.
@@ -180,7 +180,9 @@ Notification >── (0..1) Link (URL string)
 - **Password hashing**: SHA256 without salt is weak — not production-grade.
 - **No migrations**: `EnsureCreated()` won't update existing DB schema; uses raw SQL as workaround.
 - **Session-based auth**: Lost on server restart; no token/refresh mechanism.
-- **ID Validation**: Palestinian ID enforced as 9-digit string via `[RegularExpression(@"^\d{9}$")]` on ViewModel. Client-side validates on blur + on step navigation + on submit. Invalid IDs show red border + inline error message.
+- **ID Validation**: Palestinian ID enforced as 9-digit string with **check digit** (Luhn-like algorithm with weights 1,2,1,2,1,2,1,2). Validation via `validatePalestinianId()` in JS + `[RegularExpression(@"^\d{9}$")]` on ViewModel. Client-side validates on blur + on step navigation + on submit. Invalid IDs show red border + inline error message.
+- **Mother ID Validation**: Same Palestinian ID validation as regular ID number (9 digits + check digit), but optional (empty allowed). Validated via `validateMotherIdField()` in both Index.cshtml and Edit.cshtml.
+- **Duplicate ID check**: Server-side in all 3 controllers (Submit, Update, AdminUpdateRegistration) — checks both within-family duplicates and against DB. Client-side in validateStep2 / submitEditForm prevents duplicates within the form.
 - **Health validation**: If health status is "مريض" (sick), at least one chronic disease or disability must be selected (client-side in validateStep1/validateStep2, server-side in RegistrationController.Submit, RecordController.Update, and AdminController.AdminUpdateRegistration).
 - **Phone required**: Phone number is required in the registration form, validated both client-side and server-side with `[Required]`.
 - **No input sanitization**: User text inputs go directly to DB.

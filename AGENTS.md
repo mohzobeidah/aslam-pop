@@ -54,11 +54,38 @@ Camp family registration system in two versions:
 
 ### Client-Side Validation (Registration wizards)
 - **Step 1 check** (`validateStep1`): 13 required text/select fields + 2 radio groups (Gender, HealthStatus): FirstName, SecondName, ThirdName, LastName, IdNumber, Sector, DateOfBirth, PhoneNumber, Wallet, OriginalGovernorate, MaritalStatus, EmploymentStatus, EducationLevel. Field-specific Arabic error messages listed in alert.
-- **Step 2 check** (`validateStep2`): Per member: FirstName, IdNumber, RelationshipToHead, Gender, DateOfBirth required. Also checks wife requirement if head married, and sick members require at least one disease/disability.
+- **Step 2 check** (`validateStep2`): Per member: FirstName, IdNumber, RelationshipToHead, Gender, DateOfBirth required. Also checks wife requirement if head married, and sick members require at least one disease/disability. Checks no duplicate ID numbers within the family.
 - **Step 3 check** (`validateStep3`): All desire selects required. Conditionally: if LivesInTent=true, TentType required; if HasBathroom=true, BathroomType + BathroomStatus required.
 - **Step 4 check** (`submitForm`): Calls `validateStep1() || validateStep2() || validateStep3()` before submitting. Also validates password (4+ chars, match), accept responsibility checkbox, ID/phone/wallet format.
 - **Edit.cshtml** (`submitEditForm`): Same field-specific validation as Index.cshtml; uses `highlightError`/`clearHighlight` helpers.
 - `highlightError(el)` adds `.field-error` class (red border); `clearHighlight(el)` removes it.
+
+## Key Fixes Applied
+
+### MemberViewModel — Sector/PhoneNumber/Wallet removed
+- `MemberViewModel` is now a **standalone class** (no longer inherits `PersonViewModel`).
+- Sector, PhoneNumber, and Wallet are only for the family head, never for members.
+- Controllers no longer save/map these fields for member `Person` records.
+
+### Duplicate ID Number Validation
+- **Server-side** (`RegistrationController.Submit`, `RecordController.Update`, `AdminController.AdminUpdateRegistration`):
+  - Checks for duplicates within the submission (head vs members, member vs member)
+  - Checks each ID against the DB for existing persons
+  - In update flows, excludes the current head's ID from duplicate check
+- **Client-side** (`validateStep2` in Index.cshtml, `submitEditForm` in Edit.cshtml):
+  - Prevents adding members with the same ID as the head or another member
+
+### Palestinian ID Check Digit Validation
+- `validatePalestinianId(id)` validates both format (9 digits) and check digit:
+  - Weights: 1, 2, 1, 2, 1, 2, 1, 2 on first 8 digits
+  - For products >= 10, sum the individual digits
+  - Check digit = `(10 - (sum % 10)) % 10`
+  - Compared with the 9th digit
+
+### MotherIdNumber Validation
+- Added field to `Edit.cshtml` member template (was missing entirely)
+- Added `onblur="validateMotherIdField(this)"` + `oninput="clearMotherIdError(this)"` + error span in both Index.cshtml and Edit.cshtml
+- If provided, must be a valid Palestinian ID (9 digits + check digit); empty is allowed (optional field)
 
 ## Key Conventions (both versions)
 - All UI text in Arabic, RTL layout, Cairo font, dark theme (`#121212` + `#d4af37` gold).
