@@ -117,6 +117,7 @@ namespace CampRegistrationApp.Controllers
                 .Include(f => f.FamilyHead)
                 .Include(f => f.Members)
                     .ThenInclude(m => m.Person)
+                .Include(f => f.FamilyDesires)
                 .FirstOrDefaultAsync(f => f.Id == regId);
 
             if (registration == null)
@@ -178,6 +179,7 @@ namespace CampRegistrationApp.Controllers
                 .Include(f => f.FamilyHead)
                 .Include(f => f.Members)
                     .ThenInclude(m => m.Person)
+                .Include(f => f.FamilyDesires)
                 .FirstOrDefaultAsync(f => f.Id == regId);
 
             if (registration == null) return RedirectToAction("Login");
@@ -255,6 +257,7 @@ namespace CampRegistrationApp.Controllers
                 head.NursingInfantName = model.Head.NursingInfantName;
                 head.NursingInfantDOB = model.Head.NursingInfantDOB;
                 head.NursingInfantID = model.Head.NursingInfantID;
+                head.MotherIdNumber = model.Head.MotherIdNumber;
 
                 // Update Registration-level fields
                 registration.IsChildHeaded = model.IsChildHeaded;
@@ -274,6 +277,7 @@ namespace CampRegistrationApp.Controllers
                 registration.HasMultipleFamiliesInTent = model.HasMultipleFamiliesInTent;
                 registration.AdditionalFamiliesCount = model.AdditionalFamiliesCount;
                 registration.StatusNotes = model.StatusNotes;
+                registration.IsHusbandAbroad = model.IsHusbandAbroad;
 
                 // Update family desires
                 _context.FamilyDesires.RemoveRange(registration.FamilyDesires);
@@ -334,7 +338,9 @@ namespace CampRegistrationApp.Controllers
                         IsNursing = mViewModel.IsNursing,
                         NursingInfantName = mViewModel.NursingInfantName,
                         NursingInfantDOB = mViewModel.NursingInfantDOB,
-                        NursingInfantID = mViewModel.NursingInfantID
+                        NursingInfantID = mViewModel.NursingInfantID,
+                        MotherIdNumber = mViewModel.MotherIdNumber,
+                        BathroomStatus = mViewModel.BathroomStatus
                     };
                     _context.Persons.Add(memberPerson);
                     await _context.SaveChangesAsync();
@@ -410,7 +416,8 @@ namespace CampRegistrationApp.Controllers
                     IsNursing = registration.FamilyHead.IsNursing,
                     NursingInfantName = registration.FamilyHead.NursingInfantName,
                     NursingInfantDOB = registration.FamilyHead.NursingInfantDOB,
-                    NursingInfantID = registration.FamilyHead.NursingInfantID
+                    NursingInfantID = registration.FamilyHead.NursingInfantID,
+                    MotherIdNumber = registration.FamilyHead.MotherIdNumber
                 },
                 Members = registration.Members.Select(m => new MemberViewModel
                 {
@@ -438,6 +445,8 @@ namespace CampRegistrationApp.Controllers
                     NursingInfantName = m.Person.NursingInfantName,
                     NursingInfantDOB = m.Person.NursingInfantDOB,
                     NursingInfantID = m.Person.NursingInfantID,
+                    MotherIdNumber = m.Person.MotherIdNumber,
+                    BathroomStatus = m.Person.BathroomStatus,
                     RelationshipToHead = m.RelationshipToHead
                 }).ToList(),
                 IsChildHeaded = registration.IsChildHeaded,
@@ -457,6 +466,7 @@ namespace CampRegistrationApp.Controllers
                 HasMultipleFamiliesInTent = registration.HasMultipleFamiliesInTent,
                 AdditionalFamiliesCount = registration.AdditionalFamiliesCount,
                 StatusNotes = registration.StatusNotes,
+                IsHusbandAbroad = registration.IsHusbandAbroad,
                 DesireIds = registration.FamilyDesires
                     .OrderBy(fd => fd.Order)
                     .Select(fd => fd.DesireId)

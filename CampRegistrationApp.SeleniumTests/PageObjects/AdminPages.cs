@@ -6,8 +6,8 @@ public class AdminLoginPage : BasePage
 {
     public AdminLoginPage(Infrastructure.TestBase test) : base(test) { }
 
-    private static By NationalIdInput => By.Id("NationalId");
-    private static By PasswordInput => By.Id("Password");
+    private static By NationalIdInput => By.CssSelector("[name='nationalId']");
+    private static By PasswordInput => By.CssSelector("[name='password']");
     private static By LoginButton => By.CssSelector("button[type='submit'], .btn-login");
     private static By ErrorMessage => By.CssSelector(".validation-summary-errors, .alert-danger");
 
@@ -50,7 +50,7 @@ public class AdminDashboardPage : BasePage
     private static By TotalAdmins => By.CssSelector("#totalAdmins, .stat-admins");
     private static By TotalSectors => By.CssSelector("#totalSectors, .stat-sectors");
     private static By SectorTable => By.CssSelector(".sector-table, table");
-    private static By RegistrationsLink => By.LinkText("الطلبات");
+    private static By RegistrationsLink => By.LinkText("الموافقة على التسجيلات");
     private static By RefugeesLink => By.LinkText("اللاجئين");
     private static By AdminManagementLink => By.LinkText("إدارة المشرفين");
     private static By SectorManagementLink => By.LinkText("القطاعات");

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
+<script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');</script>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -58,6 +59,9 @@
 
                 <!-- Desktop nav -->
                 <div class="hidden sm:flex gap-2 items-center">
+                    <button id="themeToggle" onclick="toggleTheme()" class="text-gray-300 hover:text-camp-gold transition-colors px-2 py-2 rounded text-sm" title="تغيير السمة">
+                        <span id="themeIcon">☀️</span>
+                    </button>
                     <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Registration" asp-action="Index">تسجيل جديد</a>
                     <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Record" asp-action="Login">تسجيل الدخول</a>
                     @if (isLoggedIn)
@@ -86,6 +90,9 @@
 
             <!-- Mobile dropdown menu -->
             <div id="mobileMenu" class="hidden sm:hidden mt-4 space-y-1 border-t border-gray-700 pt-3">
+                <a id="mobileThemeToggle" href="#" onclick="toggleTheme(); return false;" class="block text-gray-300 hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm">
+                    <span id="mobileThemeIcon">☀️</span> تغيير السمة
+                </a>
                 <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Registration" asp-action="Index">تسجيل جديد</a>
                 <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Record" asp-action="Login">تسجيل الدخول</a>
                 @if (isLoggedIn)
@@ -147,5 +154,97 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <style>
+        /* ===== THEME VARIABLES ===== */
+        [data-theme] {
+            --bg-primary: #1A1A1A;
+            --bg-secondary: #2D2D2D;
+            --text-primary: #FFFFFF;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --border-color: #374151;
+            --border-light: #4B5563;
+        }
+        [data-theme="light"] {
+            --bg-primary: #F3F4F6;
+            --bg-secondary: #FFFFFF;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6B7280;
+            --border-color: #D1D5DB;
+            --border-light: #E5E7EB;
+        }
+        /* Background overrides */
+        [data-theme] .bg-camp-dark-grey { background-color: var(--bg-primary); }
+        [data-theme] .bg-camp-accent-grey { background-color: var(--bg-secondary); }
+        [data-theme] .bg-gray-800 { background-color: var(--bg-primary); }
+        /* Text overrides */
+        [data-theme] .text-white { color: var(--text-primary); }
+        [data-theme] .text-gray-300 { color: var(--text-secondary); }
+        [data-theme] .text-gray-400 { color: var(--text-muted); }
+        [data-theme] .text-gray-500 { color: var(--text-muted); }
+        [data-theme="dark"] .text-gray-600 { color: var(--text-muted); }
+        /* Black/dark text — readable on dark backgrounds */
+        [data-theme="dark"] .text-black,
+        [data-theme="dark"] .text-camp-dark-grey { color: #E5E7EB; }
+        /* But keep dark text on gold buttons (contrast on gold is fine) */
+        [data-theme="dark"] .bg-camp-gold.text-black,
+        [data-theme="dark"] .bg-camp-gold.text-camp-dark-grey { color: #1A1A1A; }
+        /* Border overrides */
+        [data-theme] .border-gray-600 { border-color: var(--border-light); }
+        [data-theme] .border-gray-700 { border-color: var(--border-color); }
+        [data-theme] .border-gray-800 { border-color: var(--border-color); }
+        /* Hover states */
+        [data-theme] .hover\:bg-gray-700:hover { background-color: var(--border-color); }
+        [data-theme] .hover\:bg-gray-800\/50:hover,
+        [data-theme] .hover\:bg-camp-dark-grey\/50:hover { background-color: color-mix(in srgb, var(--bg-primary) 50%, transparent); }
+        [data-theme] .hover\:text-white:hover { color: var(--text-primary); }
+        /* Semi-transparent backgrounds */
+        [data-theme] .bg-gray-800\/50,
+        [data-theme] .bg-camp-dark-grey\/50 { background-color: color-mix(in srgb, var(--bg-primary) 50%, transparent); }
+        /* Darken gold text in light mode for readability */
+        [data-theme="light"] .text-camp-gold { color: #9A7B0C; }
+        /* Keep colored button text white in light mode */
+        [data-theme="light"] .bg-green-600.text-white,
+        [data-theme="light"] .bg-green-700.text-white,
+        [data-theme="light"] .bg-red-700.text-white,
+        [data-theme="light"] .bg-red-500.text-white,
+        [data-theme="light"] .bg-black\/50.text-white,
+        [data-theme="light"] .hover\:text-white:hover { color: #fff; }
+        /* Safe area for mobile */
+        [data-theme] .bg-black\/50 { background-color: rgba(0,0,0,0.5); }
+        /* Select / input / textarea background for light mode */
+        [data-theme="light"] select.bg-camp-dark-grey,
+        [data-theme="light"] input.bg-camp-dark-grey,
+        [data-theme="light"] textarea.bg-camp-dark-grey { background-color: #fff; }
+        /* Input background for gray-700 used in admin forms */
+        [data-theme="light"] .bg-gray-700 { background-color: #F3F4F6; }
+        /* Input border text color on focus */
+        [data-theme="light"] .focus\:border-camp-gold:focus { border-color: #D4AF37; }
+
+        /* Smooth transition when toggling theme */
+        html { transition: background-color 0.3s, color 0.3s; }
+    </style>
+
+    <script>
+        function toggleTheme() {
+            var current = document.documentElement.getAttribute('data-theme');
+            var next = current === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        }
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            var icon = document.getElementById('themeIcon');
+            var mobileIcon = document.getElementById('mobileThemeIcon');
+            if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            if (mobileIcon) mobileIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        (function initTheme() {
+            var saved = localStorage.getItem('theme') || 'dark';
+            setTheme(saved);
+        })();
+    </script>
 </body>
 </html>

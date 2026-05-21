@@ -1056,22 +1056,28 @@
             if (!container) return;
 
             const selected = getSavedDesireIds();
+            const RANK_COUNT = Math.max(5, selected.length);
 
-            DESIRES.forEach((d, idx) => {
-                const order = idx + 1;
+            if (!DESIRES || DESIRES.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center col-span-full">لا توجد رغبات متاحة حالياً</p>';
+                return;
+            }
+
+            for (let i = 1; i <= RANK_COUNT; i++) {
+                const order = i;
                 const wrapper = document.createElement('div');
-                wrapper.className = 'flex flex-col gap-2';
+                wrapper.className = 'flex items-center gap-3 p-2 bg-camp-dark-grey/50 rounded border border-gray-700';
                 wrapper.id = `desire-wrapper-${order}`;
 
                 const label = document.createElement('label');
-                label.className = 'text-sm text-gray-300';
-                label.textContent = `الرغبة رقم ${order}`;
+                label.className = 'text-sm text-gray-300 min-w-fit';
+                label.textContent = `الرغبة ${order}:`;
                 wrapper.appendChild(label);
 
                 const select = document.createElement('select');
                 select.className = 'w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none text-white desire-select';
                 select.setAttribute('data-order', order);
-                select.name = `Desires[${idx}]`;
+                select.name = `Desires[${i - 1}]`;
 
                 const blank = document.createElement('option');
                 blank.value = '';
@@ -1079,15 +1085,17 @@
                 select.appendChild(blank);
 
                 DESIRES.forEach(d2 => {
+                    const id = d2.Id !== undefined ? d2.Id : d2.id;
+                    const name = d2.Name !== undefined ? d2.Name : d2.name;
                     const opt = document.createElement('option');
-                    opt.value = d2.Id;
-                    opt.textContent = d2.Name;
+                    opt.value = id;
+                    opt.textContent = name;
                     select.appendChild(opt);
                 });
 
                 // Restore saved selection
-                if (selected.length > idx && selected[idx]) {
-                    select.value = selected[idx];
+                if (selected.length >= i && selected[i - 1]) {
+                    select.value = selected[i - 1];
                 }
 
                 select.addEventListener('change', function () {
@@ -1097,7 +1105,7 @@
 
                 wrapper.appendChild(select);
                 container.appendChild(wrapper);
-            });
+            }
 
             updateDesireOptions();
         }

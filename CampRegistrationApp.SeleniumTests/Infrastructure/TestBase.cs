@@ -7,7 +7,7 @@ namespace CampRegistrationApp.SeleniumTests.Infrastructure;
 [CollectionDefinition("SeleniumTests", DisableParallelization = true)]
 public class SeleniumTestCollection : ICollectionFixture<CustomWebApplicationFactory> { }
 
-public class TestBase : IClassFixture<CustomWebApplicationFactory>, IDisposable
+public class TestBase : IDisposable
 {
     public readonly CustomWebApplicationFactory Factory;
     public readonly IWebDriver Driver;
@@ -145,11 +145,24 @@ public class TestBase : IClassFixture<CustomWebApplicationFactory>, IDisposable
             .ExecuteScript("arguments[0].scrollIntoView(true);", element);
     }
 
-    public string GenerateUniqueIdNumber()
+    public string GenerateValidPalestinianId()
     {
         var rng = new Random();
-        return string.Concat(Enumerable.Range(0, 9).Select(_ => rng.Next(0, 10).ToString()));
+        var digits = new int[8];
+        for (int i = 0; i < 8; i++)
+            digits[i] = rng.Next(0, 10);
+        int[] weights = [1, 2, 1, 2, 1, 2, 1, 2];
+        int sum = 0;
+        for (int i = 0; i < 8; i++)
+        {
+            int product = digits[i] * weights[i];
+            sum += product >= 10 ? (product / 10) + (product % 10) : product;
+        }
+        int checkDigit = (10 - (sum % 10)) % 10;
+        return string.Concat(digits.Select(d => d.ToString())) + checkDigit;
     }
+
+    public string GenerateUniqueIdNumber() => GenerateValidPalestinianId();
 
     public string UploadTestFile(string extension = ".pdf")
     {
