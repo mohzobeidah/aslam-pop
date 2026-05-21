@@ -99,6 +99,10 @@ public class NominationService : INominationService
             };
         }).ToList();
 
+        var createdBy = await _context.Admins
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == project.CreatedById);
+
         return new NominationPageViewModel
         {
             ProjectId = project.Id,
@@ -110,7 +114,12 @@ public class NominationService : INominationService
             IsAdmin = isAdmin,
             IsPastEndDate = project.EndDate < DateTime.UtcNow,
             DelegateSectorId = adminSectorId,
-            SectorQuotas = sectorQuotaInfos
+            SectorQuotas = sectorQuotaInfos,
+            Description = project.Description,
+            Notes = project.Notes,
+            StartDate = project.StartDate,
+            EndDate = project.EndDate,
+            CreatedByName = createdBy?.Name ?? ""
         };
     }
 

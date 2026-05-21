@@ -51,6 +51,7 @@ public class ProjectController : Controller
                 EndDate = p.EndDate,
                 RequiredCount = p.RequiredCount,
                 Status = p.Status.ToString(),
+                Notes = p.Notes,
                 CreatedByName = p.CreatedBy.Name,
                 CreatedAt = p.CreatedAt,
                 NominationCount = _context.Nominations.Count(n => n.ProjectId == p.Id && !n.IsDeleted)
@@ -58,6 +59,36 @@ public class ProjectController : Controller
             .ToListAsync();
 
         return View(projects);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetSectorQuotas(int projectId)
+    {
+        var quotas = await _context.ProjectSectorQuotas
+            .AsNoTracking()
+            .Include(q => q.Sector)
+            .Where(q => q.ProjectId == projectId)
+            .Select(q => new { sectorName = q.Sector.Name, maxCount = q.MaxCount })
+            .ToListAsync();
+
+        var counts = await _context.Nominations
+            .AsNoTracking()
+            .Where(n => n.ProjectId == projectId && !n.IsDeleted)
+            .GroupBy(n => n.SectorId)
+            .Select(g => new { SectorId = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        var countMap = counts.ToDictionary(x => x.SectorId, x => x.Count);
+        var sectors = await _context.Sectors.AsNoTracking().ToListAsync();
+
+        var result = sectors.Select(s => new
+        {
+            name = s.Name,
+            max = quotas.FirstOrDefault(q => q.sectorName == s.Name)?.maxCount ?? 0,
+            current = countMap.GetValueOrDefault(s.Id, 0)
+        }).ToList();
+
+        return Ok(result);
     }
 
     [HttpGet]

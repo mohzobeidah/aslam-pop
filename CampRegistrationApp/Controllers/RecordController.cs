@@ -13,11 +13,13 @@ namespace CampRegistrationApp.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly INotificationService _notificationService;
+        private readonly IWebHostEnvironment _env;
 
-        public RecordController(ApplicationDbContext context, INotificationService notificationService)
+        public RecordController(ApplicationDbContext context, INotificationService notificationService, IWebHostEnvironment env)
         {
             _context = context;
             _notificationService = notificationService;
+            _env = env;
         }
 
         private async Task PopulateLookupViewBags()
@@ -136,6 +138,27 @@ namespace CampRegistrationApp.Controllers
             var model = MapToViewModel(registration);
             ViewBag.HeadAttachments = registration.FamilyHead.Attachments.ToList();
             return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadFile(int personId, string fileType, IFormFile file)
+        {
+            if (file == null || file.Length == 0) return BadRequest("No file uploaded");
+
+            var regId = HttpContext.Session.GetInt32("EditRegistrationId");
+            var recordId = regId?.ToString() ?? "TEMP";
+            var fileName = $"{personId}_{fileType}_{DateTime.Now:yyyyMMddHHmmss}_{Path.GetExtension(file.FileName)}";
+            var folderPath = Path.Combine(_env.WebRootPath, "uploads", "registrations", recordId);
+
+            if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+
+            var filePath = Path.Combine(folderPath, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return Ok(new { path = $"/uploads/registrations/{recordId}/{fileName}" });
         }
 
         [HttpPost]
@@ -258,6 +281,29 @@ namespace CampRegistrationApp.Controllers
                 head.NursingInfantDOB = model.Head.NursingInfantDOB;
                 head.NursingInfantID = model.Head.NursingInfantID;
                 head.MotherIdNumber = model.Head.MotherIdNumber;
+
+                await _context.SaveChangesAsync();
+
+                // Save new attachments
+                if (!string.IsNullOrEmpty(model.Head.HeadIdImagePath))
+                {
+                    _context.Attachments.Add(new Attachment
+                    {
+                        PersonId = head.Id,
+                        FileType = "IDImage",
+                        FilePath = model.Head.HeadIdImagePath
+                    });
+                }
+
+                if (!string.IsNullOrEmpty(model.Head.MedicalImagePath))
+                {
+                    _context.Attachments.Add(new Attachment
+                    {
+                        PersonId = head.Id,
+                        FileType = "MedicalReport",
+                        FilePath = model.Head.MedicalImagePath
+                    });
+                }
 
                 // Update Registration-level fields
                 registration.Sector = model.Sector;

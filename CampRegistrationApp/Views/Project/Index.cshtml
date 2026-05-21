@@ -20,7 +20,6 @@
         <thead>
             <tr class="border-b border-gray-700 text-camp-gold text-sm">
                 <th class="p-3 text-right">اسم المشروع</th>
-                <th class="p-3 text-right">الوصف</th>
                 <th class="p-3 text-center">تاريخ البداية</th>
                 <th class="p-3 text-center">تاريخ النهاية</th>
                 <th class="p-3 text-center">العدد المطلوب</th>
@@ -48,7 +47,10 @@
                     _ => p.Status
                 };
                 <tr class="border-b border-gray-700 hover:bg-gray-800/50 text-sm">
-                    <td class="p-3 font-bold text-white">@p.Name</td>
+                    <td class="p-3 font-bold text-white flex items-center gap-2">
+                        @p.Name
+                        <button onclick="showProjectDetail(@p.Id)" class="text-gray-400 hover:text-camp-gold transition text-lg" title="تفاصيل">ⓘ</button>
+                    </td>
                     <td class="p-3 text-center text-gray-300">@p.StartDate.ToString("yyyy/MM/dd")</td>
                     <td class="p-3 text-center text-gray-300">@p.EndDate.ToString("yyyy/MM/dd")</td>
                     <td class="p-3 text-center text-gray-300">@p.RequiredCount</td>
@@ -72,11 +74,107 @@
             @if (!Model.Any())
             {
                 <tr>
-                    <td colspan="8" class="p-6 text-center text-gray-500">لا توجد مشاريع بعد</td>
+                    <td colspan="7" class="p-6 text-center text-gray-500">لا توجد مشاريع بعد</td>
                 </tr>
             }
         </tbody>
     </table>
+
+    <!-- Project Detail Modal -->
+    <div id="projectDetailModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70" onclick="if(event.target===this)this.classList.add('hidden')">
+        <div class="bg-camp-accent-grey rounded-xl border border-gray-700 shadow-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-5 border-b border-gray-700">
+                <h3 class="text-xl font-bold text-camp-gold" id="modalTitle">تفاصيل المشروع</h3>
+                <button onclick="document.getElementById('projectDetailModal').classList.add('hidden')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-5 space-y-4 text-sm" id="modalBody">
+            </div>
+            <div class="p-5 border-t border-gray-700 text-left">
+                <button onclick="document.getElementById('projectDetailModal').classList.add('hidden')" class="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition text-sm">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    @section Scripts {
+        <script>
+            const projects = @Html.Raw(Json.Serialize(Model));
+            function showProjectDetail(id) {
+                const p = projects.find(x => x.id === id);
+                if (!p) return;
+                const statusMap = { 'Active': 'نشط', 'Draft': 'مسودة', 'Closed': 'مغلق' };
+                const sectored = window.sectorQuotas && window.sectorQuotas[id] ? window.sectorQuotas[id] : [];
+                document.getElementById('modalTitle').textContent = p.name;
+                document.getElementById('modalBody').innerHTML = `
+                    <div class="mb-4">
+                        <label class="text-gray-400 block mb-1">الاسم</label>
+                        <div class="text-white font-bold">\${p.name}</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-gray-400 block mb-1">تاريخ البداية</label>
+                            <div class="text-white">\${new Date(p.startDate).toLocaleDateString('en-CA')}</div>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 block mb-1">تاريخ النهاية</label>
+                            <div class="text-white">\${new Date(p.endDate).toLocaleDateString('en-CA')}</div>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 block mb-1">العدد المطلوب</label>
+                            <div class="text-white">\${p.requiredCount}</div>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 block mb-1">الترشيحات الحالية</label>
+                            <div class="text-white">\${p.nominationCount}</div>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 block mb-1">الحالة</label>
+                            <span class="\${p.status === 'Active' ? 'text-green-400' : p.status === 'Draft' ? 'text-yellow-400' : 'text-red-400'} font-bold">\${statusMap[p.status] || p.status}</span>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 block mb-1">بواسطة</label>
+                            <div class="text-white">\${p.createdByName}</div>
+                        </div>
+                    </div>
+                    \${p.description ? '<div><label class="text-gray-400 block mb-1">الوصف</label><div class="text-white bg-gray-800 p-3 rounded">' + p.description + '</div></div>' : ''}
+                    \${p.notes ? '<div><label class="text-gray-400 block mb-1">ملاحظات</label><div class="text-white bg-gray-800 p-3 rounded">' + p.notes + '</div></div>' : ''}
+                    \${renderSectorQuotas(id)}
+                `;
+                document.getElementById('projectDetailModal').classList.remove('hidden');
+            }
+
+            function renderSectorQuotas(projectId) {
+                const quotas = window.sectorQuotas && window.sectorQuotas[projectId];
+                if (!quotas || quotas.length === 0) return '';
+                let html = '<div><label class="text-gray-400 block mb-1">حصة القطاعات</label><div class="grid grid-cols-2 gap-2">';
+                quotas.forEach(q => {
+                    const color = q.max > 0 && q.current >= q.max ? 'text-red-400' : 'text-green-400';
+                    html += '<div class="bg-gray-800 p-2 rounded text-center"><div class="text-xs text-gray-400">' + q.name + '</div><div class="text-sm font-bold ' + color + '">' + q.current + ' / ' + (q.max > 0 ? q.max : '∞') + '</div></div>';
+                });
+                html += '</div></div>';
+                return html;
+            }
+                document.getElementById('projectDetailModal').classList.remove('hidden');
+            }
+
+            // Fetch sector quotas for each project
+            @if (Model.Any())
+            {
+                <text>
+                (async function() {
+                    window.sectorQuotas = {};
+                    const ids = [@string.Join(",", Model.Select(p => p.Id))];
+                    for (const id of ids) {
+                        try {
+                            const res = await fetch('/Project/GetSectorQuotas?projectId=' + id);
+                            const data = await res.json();
+                            window.sectorQuotas[id] = data;
+                        } catch(e) {}
+                    }
+                })();
+                </text>
+            }
+        </script>
+    }
 </div>
 
 <div class="mt-4">

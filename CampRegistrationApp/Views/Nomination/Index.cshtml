@@ -8,7 +8,10 @@
     <div class="flex flex-col sm:flex-row justify-between items-start gap-2">
         <div class="w-full sm:w-auto">
             <a asp-controller="Project" asp-action="Index" class="text-gray-400 hover:text-camp-gold text-sm transition">← المشاريع</a>
-            <h1 class="text-xl sm:text-2xl text-camp-gold font-bold mt-1 break-words">@Model.ProjectName</h1>
+            <div class="flex items-center gap-2 mt-1">
+                <h1 class="text-xl sm:text-2xl text-camp-gold font-bold break-words">@Model.ProjectName</h1>
+                <button onclick="document.getElementById('projectDetailModal').classList.remove('hidden')" class="text-gray-400 hover:text-camp-gold transition text-lg" title="تفاصيل المشروع">ⓘ</button>
+            </div>
             <p class="text-gray-400 text-sm">
                 العدد المطلوب: <span class="text-camp-gold font-bold">@Model.RequiredCount</span>
                 | الترشيحات الحالية: <span class="@(Model.ExistingCount >= Model.RequiredCount ? "text-green-400" : "text-camp-gold") font-bold">@Model.ExistingCount</span>
@@ -18,6 +21,79 @@
             <span class="px-3 py-1 rounded text-sm @(Model.ProjectStatus == ProjectStatus.Active ? "bg-green-900/50 text-green-300" : Model.ProjectStatus == ProjectStatus.Draft ? "bg-yellow-900/50 text-yellow-300" : "bg-red-900/50 text-red-300")">
                 @(Model.ProjectStatus switch { ProjectStatus.Active => "نشط", ProjectStatus.Draft => "مسودة", ProjectStatus.Closed => "مغلق", _ => "" })
             </span>
+        </div>
+    </div>
+</div>
+
+<!-- Project Detail Modal -->
+<div id="projectDetailModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70" onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="bg-camp-accent-grey rounded-xl border border-gray-700 shadow-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <div class="flex justify-between items-center p-5 border-b border-gray-700">
+            <h3 class="text-xl font-bold text-camp-gold">تفاصيل المشروع</h3>
+            <button onclick="document.getElementById('projectDetailModal').classList.add('hidden')" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <div class="p-5 space-y-4 text-sm">
+            <div>
+                <label class="text-gray-400 block mb-1">الاسم</label>
+                <div class="text-white font-bold">@Model.ProjectName</div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-gray-400 block mb-1">تاريخ البداية</label>
+                    <div class="text-white">@Model.StartDate.ToString("yyyy/MM/dd")</div>
+                </div>
+                <div>
+                    <label class="text-gray-400 block mb-1">تاريخ النهاية</label>
+                    <div class="text-white">@Model.EndDate.ToString("yyyy/MM/dd")</div>
+                </div>
+                <div>
+                    <label class="text-gray-400 block mb-1">العدد المطلوب</label>
+                    <div class="text-white">@Model.RequiredCount</div>
+                </div>
+                <div>
+                    <label class="text-gray-400 block mb-1">التريشيحات الحالية</label>
+                    <div class="text-white">@Model.ExistingCount</div>
+                </div>
+                <div>
+                    <label class="text-gray-400 block mb-1">الحالة</label>
+                    <span class="@(Model.ProjectStatus == ProjectStatus.Active ? "text-green-400" : Model.ProjectStatus == ProjectStatus.Draft ? "text-yellow-400" : "text-red-400") font-bold">
+                        @(Model.ProjectStatus switch { ProjectStatus.Active => "نشط", ProjectStatus.Draft => "مسودة", ProjectStatus.Closed => "مغلق", _ => "" })
+                    </span>
+                </div>
+                <div>
+                    <label class="text-gray-400 block mb-1">بواسطة</label>
+                    <div class="text-white">@Model.CreatedByName</div>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div>
+                    <label class="text-gray-400 block mb-1">الوصف</label>
+                    <div class="text-white bg-gray-800 p-3 rounded">@Model.Description</div>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div>
+                    <label class="text-gray-400 block mb-1">ملاحظات</label>
+                    <div class="text-white bg-gray-800 p-3 rounded">@Model.Notes</div>
+                </div>
+            }
+            <div>
+                <label class="text-gray-400 block mb-1">حصة القطاعات</label>
+                <div class="grid grid-cols-2 gap-2">
+                    @foreach (var sq in Model.SectorQuotas)
+                    {
+                        <div class="bg-gray-800 p-2 rounded text-center">
+                            <div class="text-xs text-gray-400">@sq.SectorName</div>
+                            <div class="text-sm font-bold @(sq.CurrentCount >= sq.MaxCount && sq.MaxCount > 0 ? "text-red-400" : "text-green-400")">@sq.CurrentCount / @(sq.MaxCount > 0 ? sq.MaxCount.ToString() : "∞")</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="p-5 border-t border-gray-700 text-left">
+            <button onclick="document.getElementById('projectDetailModal').classList.add('hidden')" class="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition text-sm">إغلاق</button>
         </div>
     </div>
 </div>

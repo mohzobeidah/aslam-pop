@@ -206,6 +206,23 @@
                             </div>
                         </div>
 
+                        <!-- Attachments Upload -->
+                        <div class="border-t border-gray-700 pt-6 mt-6 space-y-4">
+                            <h3 class="text-xl font-semibold text-camp-gold mb-4">المرفقات</h3>
+                            <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                                <label class="text-lg">صورة الهوية</label>
+                                <input type="file" id="headIdFile" accept="image/*" onchange="uploadFile(this, 'IDImage', 'headIdPath')" class="text-sm text-gray-400" />
+                                <input type="hidden" name="Head.HeadIdImagePath" id="headIdPath" value="@Model.Head.HeadIdImagePath" />
+                                <span id="headIdPath-name" class="text-xs text-camp-gold hidden"></span>
+                            </div>
+                            <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                                <label class="text-lg">تقرير طبي</label>
+                                <input type="file" id="headMedicalFile" accept="image/*,application/pdf" onchange="uploadFile(this, 'MedicalReport', 'headMedicalPath')" class="text-sm text-gray-400" />
+                                <input type="hidden" name="Head.MedicalImagePath" id="headMedicalPath" value="@Model.Head.MedicalImagePath" />
+                                <span id="headMedicalPath-name" class="text-xs text-camp-gold hidden"></span>
+                            </div>
+                        </div>
+
                         <!-- Female-specific -->
                         <div class="flex items-center gap-2 mt-4">
                             <input type="checkbox" name="Head.IsPregnant" value="true" class="accent-camp-gold" @(Model.Head.IsPregnant == true ? "checked" : "") onchange="toggleSection(this, 'head-pregnancy-details')" />
@@ -705,6 +722,33 @@
             errorSpan.classList.add('hidden');
             el.classList.remove('field-error');
             return true;
+        }
+
+        // ========== FILE UPLOAD ==========
+        async function uploadFile(input, fileType, hiddenId) {
+            if (!input.files || !input.files[0]) return;
+
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+
+            // Show file name
+            const fileNameSpan = document.getElementById(hiddenId + '-name');
+            if (fileNameSpan) {
+                fileNameSpan.textContent = input.files[0].name;
+                fileNameSpan.classList.remove('hidden');
+            }
+
+            try {
+                const response = await fetch('/Record/UploadFile?personId=-1&fileType=' + fileType, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                document.getElementById(hiddenId).value = result.path;
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                alert('حدث خطأ أثناء رفع الملف');
+            }
         }
 
         function toggleHealth(el, sectionId) {

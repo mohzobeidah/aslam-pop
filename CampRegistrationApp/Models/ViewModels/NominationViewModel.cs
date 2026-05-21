@@ -28,6 +28,11 @@ public class NominationPageViewModel
     public bool IsPastEndDate { get; set; }
     public int? DelegateSectorId { get; set; }
     public List<SectorQuotaInfo> SectorQuotas { get; set; } = new();
+    public string? Description { get; set; }
+    public string? Notes { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public string CreatedByName { get; set; } = string.Empty;
 }
 
 public class SectorQuotaInfo

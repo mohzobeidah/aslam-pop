@@ -43,6 +43,7 @@ public class ProjectListViewModel
     public DateTime EndDate { get; set; }
     public int RequiredCount { get; set; }
     public string Status { get; set; } = string.Empty;
+    public string? Notes { get; set; }
     public string CreatedByName { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public int NominationCount { get; set; }
