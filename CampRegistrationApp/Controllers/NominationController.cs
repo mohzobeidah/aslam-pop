@@ -111,8 +111,7 @@ public class NominationController : Controller
         {
             p.Id,
             name = p.FullName,
-            p.IdNumber,
-            phone = p.PhoneNumber
+            p.IdNumber
         }));
     }
 

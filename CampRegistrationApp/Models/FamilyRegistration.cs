@@ -37,6 +37,11 @@ namespace CampRegistrationApp.Models
         public string? DiaperDetails { get; set; }
         public bool HasMultipleFamiliesInTent { get; set; }
         public int? AdditionalFamiliesCount { get; set; }
+        [Required]
+        public string Sector { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string? Wallet { get; set; }
+        public string? WalletType { get; set; }
         public string? PasswordHash { get; set; }
         public string? StatusNotes { get; set; }
 

@@ -83,10 +83,10 @@ else
                 {
                     <tr class="border-b border-gray-700 hover:bg-camp-dark-grey/50 transition">
                         <td class="p-3 font-mono text-camp-gold text-sm" dir="ltr">@reg.RecordId</td>
-                        <td class="p-3 font-semibold">@reg.HeadName</td>
-                        <td class="p-3 font-mono text-sm" dir="ltr">@reg.IdNumber</td>
+                        <td class="p-3 font-semibold text-white">@reg.HeadName</td>
+                        <td class="p-3 font-mono text-sm text-gray-300" dir="ltr">@reg.IdNumber</td>
                         <td class="p-3 text-camp-gold">@reg.Sector</td>
-                        <td class="p-3 text-center">@reg.MemberCount</td>
+                        <td class="p-3 text-center text-gray-300">@reg.MemberCount</td>
                         <td class="p-3 text-center text-gray-400">@reg.RegistrationDate.ToString("yyyy-MM-dd")</td>
                         <td class="p-3 text-center">
                             @if (reg.ApprovalStatus == RegistrationApprovalStatus.Pending)
@@ -104,7 +104,7 @@ else
                         </td>
                         @if (currentStatus != "Pending")
                         {
-                            <td class="p-3 text-center">@reg.ApprovedByName</td>
+                            <td class="p-3 text-center text-gray-300">@reg.ApprovedByName</td>
                             <td class="p-3 text-center text-gray-400">@reg.ApprovedAt?.ToString("yyyy-MM-dd")</td>
                         }
                         <td class="p-3 text-center">

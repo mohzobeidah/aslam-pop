@@ -118,9 +118,9 @@ namespace CampRegistrationApp.Controllers
                         ManufacturedTents = s.ManufacturedTentsCount,
                         HandmadeTents = s.HandmadeTentsCount,
                         Bathrooms = s.BathroomsCount,
-                        RegistrationCount = _context.Persons.Count(p => p.Sector == s.Name),
+                        RegistrationCount = _context.FamilyRegistrations.Count(f => f.Sector == s.Name),
                         ApprovedFamilyCount = _context.FamilyRegistrations
-                            .Count(f => f.FamilyHead.Sector == s.Name && f.ApprovalStatus == RegistrationApprovalStatus.Approved)
+                            .Count(f => f.Sector == s.Name && f.ApprovalStatus == RegistrationApprovalStatus.Approved)
                     })
                     .ToListAsync();
                 totalRegistrations = await _context.FamilyRegistrations.CountAsync();
@@ -138,13 +138,13 @@ namespace CampRegistrationApp.Controllers
                         ManufacturedTents = s.ManufacturedTentsCount,
                         HandmadeTents = s.HandmadeTentsCount,
                         Bathrooms = s.BathroomsCount,
-                        RegistrationCount = _context.Persons.Count(p => p.Sector == s.Name),
+                        RegistrationCount = _context.FamilyRegistrations.Count(f => f.Sector == s.Name),
                         ApprovedFamilyCount = _context.FamilyRegistrations
-                            .Count(f => f.FamilyHead.Sector == s.Name && f.ApprovalStatus == RegistrationApprovalStatus.Approved)
+                            .Count(f => f.Sector == s.Name && f.ApprovalStatus == RegistrationApprovalStatus.Approved)
                     })
                     .ToListAsync();
-                totalRegistrations = await _context.Persons
-                    .CountAsync(p => p.Sector == sectorName);
+                totalRegistrations = await _context.FamilyRegistrations
+                    .CountAsync(f => f.Sector == sectorName);
             }
 
             var model = new DashboardViewModel
@@ -506,9 +506,7 @@ namespace CampRegistrationApp.Controllers
                 {
                     p.Id,
                     name = p.FirstName + " " + p.SecondName + " " + p.ThirdName + " " + p.LastName,
-                    p.IdNumber,
-                    phone = p.PhoneNumber,
-                    p.Sector
+                    p.IdNumber
                 })
                 .Take(20)
                 .ToListAsync();
@@ -531,11 +529,14 @@ namespace CampRegistrationApp.Controllers
                 return RedirectToAction("EditSector", new { id = sectorId });
             }
 
+            // Get phone from family registration if available
+            var reg = await _context.FamilyRegistrations
+                .FirstOrDefaultAsync(f => f.FamilyHeadId == personId);
             var admin = new Admin
             {
                 Name = person.FirstName + " " + person.SecondName + " " + person.ThirdName + " " + person.LastName,
                 NationalId = person.IdNumber,
-                Mobile = person.PhoneNumber,
+                Mobile = reg?.PhoneNumber ?? person.IdNumber,
                 Role = AdminRole.Mandoob,
                 SectorId = sectorId,
                 PasswordHash = HashPassword(person.IdNumber),
@@ -579,13 +580,13 @@ namespace CampRegistrationApp.Controllers
             {
                 var admin = await _context.Admins.Include(a => a.Sector).FirstOrDefaultAsync(a => a.Id == adminId);
                 if (admin?.Sector != null)
-                    query = query.Where(f => f.FamilyHead.Sector == admin.Sector.Name);
+                    query = query.Where(f => f.Sector == admin.Sector.Name);
                 else if (admin == null)
                     return NotFound();
             }
 
             if (!string.IsNullOrEmpty(sector))
-                query = query.Where(f => f.FamilyHead.Sector == sector);
+                query = query.Where(f => f.Sector == sector);
 
             if (!string.IsNullOrEmpty(status) && Enum.TryParse<RegistrationApprovalStatus>(status, out var statusFilter))
                 query = query.Where(f => f.ApprovalStatus == statusFilter);
@@ -605,7 +606,7 @@ namespace CampRegistrationApp.Controllers
             {
                 var admin = await _context.Admins.Include(a => a.Sector).FirstOrDefaultAsync(a => a.Id == adminId);
                 if (admin?.Sector != null)
-                    baseQuery = baseQuery.Where(f => f.FamilyHead.Sector == admin.Sector.Name);
+                    baseQuery = baseQuery.Where(f => f.Sector == admin.Sector.Name);
             }
 
             var approvedCount = await baseQuery.CountAsync(f => f.ApprovalStatus == RegistrationApprovalStatus.Approved);
@@ -620,8 +621,8 @@ namespace CampRegistrationApp.Controllers
                     RecordId = f.RecordId,
                     HeadName = f.FamilyHead.FirstName + " " + f.FamilyHead.SecondName + " " + f.FamilyHead.ThirdName + " " + f.FamilyHead.LastName,
                     IdNumber = f.FamilyHead.IdNumber,
-                    Phone = f.FamilyHead.PhoneNumber,
-                    Sector = f.FamilyHead.Sector,
+                    Phone = f.PhoneNumber,
+                    Sector = f.Sector,
                     Gender = f.FamilyHead.Gender,
                     MaritalStatus = f.FamilyHead.MaritalStatus,
                     HealthStatus = f.FamilyHead.HealthStatus,
@@ -633,7 +634,7 @@ namespace CampRegistrationApp.Controllers
 
             var sectorApproved = await baseQuery
                 .Where(f => f.ApprovalStatus == RegistrationApprovalStatus.Approved)
-                .GroupBy(f => f.FamilyHead.Sector)
+                .GroupBy(f => f.Sector)
                 .Select(g => new { Sector = g.Key, Count = g.Count() })
                 .ToListAsync();
 
@@ -676,11 +677,11 @@ namespace CampRegistrationApp.Controllers
             {
                 var admin = await _context.Admins.Include(a => a.Sector).FirstOrDefaultAsync(a => a.Id == adminId);
                 if (admin?.Sector != null)
-                    query = query.Where(f => f.FamilyHead.Sector == admin.Sector.Name);
+                    query = query.Where(f => f.Sector == admin.Sector.Name);
             }
 
             if (!string.IsNullOrEmpty(sector))
-                query = query.Where(f => f.FamilyHead.Sector == sector);
+                query = query.Where(f => f.Sector == sector);
 
             if (!string.IsNullOrEmpty(status) && Enum.TryParse<RegistrationApprovalStatus>(status, out var exportStatusFilter))
                 query = query.Where(f => f.ApprovalStatus == exportStatusFilter);
@@ -779,9 +780,9 @@ namespace CampRegistrationApp.Controllers
                 ws.Cell(row, 1).Value = reg.RecordId;
                 ws.Cell(row, 2).Value = head.FullName;
                 ws.Cell(row, 3).Value = head.IdNumber;
-                ws.Cell(row, 4).Value = head.PhoneNumber;
-                ws.Cell(row, 5).Value = head.Wallet ?? "";
-                ws.Cell(row, 6).Value = head.Sector;
+                ws.Cell(row, 4).Value = reg.PhoneNumber;
+                ws.Cell(row, 5).Value = reg.Wallet ?? "";
+                ws.Cell(row, 6).Value = reg.Sector;
                 ws.Cell(row, 7).Value = head.Gender == "male" ? "ذكر" : head.Gender == "female" ? "أنثى" : head.Gender;
                 ws.Cell(row, 8).Value = head.MaritalStatus;
                 ws.Cell(row, 9).Value = head.HealthStatus;
@@ -861,7 +862,7 @@ namespace CampRegistrationApp.Controllers
             if (!IsAuthenticated()) return RedirectToAction("Login");
 
             var reg = await _context.FamilyRegistrations
-                .Include(f => f.FamilyHead)
+                .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)
                 .Include(f => f.ApprovedBy)
                 .Include(f => f.Members).ThenInclude(m => m.Person)
                 .Include(f => f.FamilyDesires).ThenInclude(fd => fd.Desire)
@@ -889,11 +890,11 @@ namespace CampRegistrationApp.Controllers
             {
                 var admin = await _context.Admins.Include(a => a.Sector).FirstAsync(a => a.Id == adminId);
                 if (admin.Sector != null)
-                    query = query.Where(f => f.FamilyHead.Sector == admin.Sector.Name);
+                    query = query.Where(f => f.Sector == admin.Sector.Name);
             }
 
             if (!string.IsNullOrEmpty(sector))
-                query = query.Where(f => f.FamilyHead.Sector == sector);
+                query = query.Where(f => f.Sector == sector);
 
             if (Enum.TryParse<RegistrationApprovalStatus>(status, true, out var statusEnum))
                 query = query.Where(f => f.ApprovalStatus == statusEnum);
@@ -906,7 +907,7 @@ namespace CampRegistrationApp.Controllers
                     RecordId = f.RecordId,
                     HeadName = f.FamilyHead.FirstName + " " + f.FamilyHead.LastName,
                     IdNumber = f.FamilyHead.IdNumber,
-                    Sector = f.FamilyHead.Sector,
+                    Sector = f.Sector,
                     RegistrationDate = f.RegistrationTimestamp,
                     ApprovalStatus = f.ApprovalStatus,
                     ApprovedByName = f.ApprovedBy != null ? f.ApprovedBy.Name : null,
@@ -991,12 +992,35 @@ namespace CampRegistrationApp.Controllers
 
             await _audit.LogAsync(GetCurrentAdminId(), "RemoveOutOfCamp", "FamilyRegistrations",
                 registration.RecordId,
-                new { headName = registration.FamilyHead.FullName, sector = registration.FamilyHead.Sector, status = registration.ApprovalStatus.ToString() },
+                new { headName = registration.FamilyHead.FullName, sector = registration.Sector, status = registration.ApprovalStatus.ToString() },
                 new { isDeleted = true, deletedAt = registration.DeletedAt },
                 source: "Web");
 
             TempData["Success"] = $"تم إزالة {registration.FamilyHead.FullName} — انتقل خارج المخيم";
             return RedirectToAction("Refugees");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(int id)
+        {
+            if (!IsAuthenticated()) return Unauthorized();
+
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
+                .FirstOrDefaultAsync(f => f.Id == id);
+            if (registration == null) return NotFound();
+
+            var newPassword = Random.Shared.Next(1000, 10000).ToString();
+            registration.PasswordHash = HashPassword(newPassword);
+            await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(GetCurrentAdminId(), "ResetPassword", "FamilyRegistrations",
+                registration.RecordId,
+                new { action = "تم إعادة تعيين كلمة المرور", headName = registration.FamilyHead.FullName },
+                null,
+                source: "Web");
+
+            return Json(new { success = true, newPassword });
         }
 
         [HttpGet]
@@ -1005,7 +1029,7 @@ namespace CampRegistrationApp.Controllers
             if (!IsAuthenticated()) return RedirectToAction("Login");
 
             var registration = await _context.FamilyRegistrations
-                .Include(f => f.FamilyHead)
+                .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)
                 .Include(f => f.Members)
                     .ThenInclude(m => m.Person)
                 .Include(f => f.FamilyDesires)
@@ -1023,6 +1047,7 @@ namespace CampRegistrationApp.Controllers
 
             ViewBag.FormAction = "AdminUpdateRegistration";
             ViewBag.FormController = "Admin";
+            ViewBag.HeadAttachments = registration.FamilyHead.Attachments.ToList();
             await PopulateLookupViewBags();
 
             return View("~/Views/Record/Edit.cshtml", model);
@@ -1074,7 +1099,7 @@ namespace CampRegistrationApp.Controllers
             }
 
             var registration = await _context.FamilyRegistrations
-                .Include(f => f.FamilyHead)
+                .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)
                 .Include(f => f.Members)
                     .ThenInclude(m => m.Person)
                 .Include(f => f.FamilyDesires)
@@ -1087,6 +1112,8 @@ namespace CampRegistrationApp.Controllers
                 TempData["Error"] = "لا يمكن تعديل هذا التسجيل بعد الموافقة عليه";
                 return RedirectToAction("RefugeeDetails", new { id = model.Id });
             }
+
+            ViewBag.HeadAttachments = registration.FamilyHead.Attachments.ToList();
 
             // Check for duplicate IDs
             var currentHeadId = registration.FamilyHead.IdNumber;
@@ -1135,10 +1162,8 @@ namespace CampRegistrationApp.Controllers
                 head.ThirdName = model.Head.ThirdName;
                 head.LastName = model.Head.LastName;
                 head.IdNumber = model.Head.IdNumber;
-                head.Sector = model.Head.Sector;
                 head.DateOfBirth = model.Head.DateOfBirth;
                 head.Gender = model.Head.Gender;
-                head.PhoneNumber = model.Head.PhoneNumber;
                 head.OriginalGovernorate = model.Head.OriginalGovernorate;
                 head.MaritalStatus = model.Head.MaritalStatus;
                 head.EmploymentStatus = model.Head.EmploymentStatus;
@@ -1151,7 +1176,6 @@ namespace CampRegistrationApp.Controllers
                 head.InjuryDetails = model.Head.InjuryDetails;
                 head.IsHouseDestroyed = model.Head.IsHouseDestroyed;
                 head.IsPrisoner = model.Head.IsPrisoner;
-                head.Wallet = model.Head.Wallet;
                 head.BathroomStatus = model.Head.BathroomStatus;
                 head.IsPregnant = model.Head.IsPregnant;
                 head.PregnancyMonth = model.Head.PregnancyMonth;
@@ -1162,6 +1186,10 @@ namespace CampRegistrationApp.Controllers
                 head.MotherIdNumber = model.Head.MotherIdNumber;
 
                 // Update Registration-level fields
+                registration.Sector = model.Sector;
+                registration.PhoneNumber = model.PhoneNumber;
+                registration.Wallet = model.Wallet;
+                registration.WalletType = model.WalletType;
                 registration.IsChildHeaded = model.IsChildHeaded;
                 registration.ChildHeadedDetails = model.ChildHeadedDetails;
                 registration.IsFemaleHeaded = model.IsFemaleHeaded;
@@ -1261,11 +1289,11 @@ namespace CampRegistrationApp.Controllers
                 await _audit.LogAsync(GetCurrentAdminId(), "AdminEdit", "FamilyRegistrations",
                     registration.RecordId,
                     new { action = "تم تعديل بيانات العائلة بواسطة المشرف" },
-                    new { headName = head.FullName, sector = head.Sector },
+                    new { headName = head.FullName, sector = registration.Sector },
                     source: "Web");
 
                 await _notificationService.NotifyMandoobsAsync(
-                    head.Sector,
+                    registration.Sector,
                     $"تعديل بيانات بواسطة المشرف: {head.FullName} - رقم القيد: {registration.RecordId}",
                     $"/Admin/RefugeeDetails/{registration.Id}");
 
@@ -1305,10 +1333,8 @@ namespace CampRegistrationApp.Controllers
                     ThirdName = registration.FamilyHead.ThirdName,
                     LastName = registration.FamilyHead.LastName,
                     IdNumber = registration.FamilyHead.IdNumber,
-                    Sector = registration.FamilyHead.Sector,
                     DateOfBirth = registration.FamilyHead.DateOfBirth,
                     Gender = registration.FamilyHead.Gender,
-                    PhoneNumber = registration.FamilyHead.PhoneNumber,
                     OriginalGovernorate = registration.FamilyHead.OriginalGovernorate,
                     MaritalStatus = registration.FamilyHead.MaritalStatus,
                     EmploymentStatus = registration.FamilyHead.EmploymentStatus,
@@ -1320,7 +1346,6 @@ namespace CampRegistrationApp.Controllers
                     InjuryDate = registration.FamilyHead.InjuryDate,
                     InjuryDetails = registration.FamilyHead.InjuryDetails,
                     IsPrisoner = registration.FamilyHead.IsPrisoner,
-                    Wallet = registration.FamilyHead.Wallet,
                     BathroomStatus = registration.FamilyHead.BathroomStatus,
                     IsHouseDestroyed = registration.FamilyHead.IsHouseDestroyed,
                     IsPregnant = registration.FamilyHead.IsPregnant,
@@ -1378,6 +1403,10 @@ namespace CampRegistrationApp.Controllers
                 HasMultipleFamiliesInTent = registration.HasMultipleFamiliesInTent,
                 AdditionalFamiliesCount = registration.AdditionalFamiliesCount,
                 StatusNotes = registration.StatusNotes,
+                Sector = registration.Sector,
+                PhoneNumber = registration.PhoneNumber,
+                Wallet = registration.Wallet,
+                WalletType = registration.WalletType,
                 IsHusbandAbroad = registration.IsHusbandAbroad,
                 DesireIds = registration.FamilyDesires
                     .OrderBy(fd => fd.Order)

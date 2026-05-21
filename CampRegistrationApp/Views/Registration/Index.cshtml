@@ -93,7 +93,7 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">القاطع</label>
-                            <select name="Head.Sector" data-ls="Head.Sector" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
+                            <select name="Sector" data-ls="Sector" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
                                 <option value="">اختر القاطع...</option>
                                 @foreach (var s in ViewBag.Sectors)
                                 {
@@ -118,13 +118,22 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">رقم الهاتف</label>
-                            <input name="Head.PhoneNumber" data-ls="Head.PhoneNumber" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearPhoneError(this)" />
+                            <input name="PhoneNumber" data-ls="PhoneNumber" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearPhoneError(this)" />
                             <span class="phone-error text-red-500 text-xs hidden">رقم الهاتف يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056</span>
                         </div>
                         <div>
                             <label class="block text-sm mb-1">المحفظة</label>
-                            <input name="Head.Wallet" data-ls="Head.Wallet" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearWalletError(this)" />
+                            <input name="Wallet" data-ls="Wallet" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearWalletError(this)" />
                             <span class="wallet-error text-red-500 text-xs hidden">رقم المحفظة يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056</span>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">نوع المحفظة</label>
+                            <select name="WalletType" data-ls="WalletType" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                                <option value="">اختر نوع المحفظة...</option>
+                                <option value="بنك">بنك</option>
+                                <option value="بال بي">بال بي</option>
+                                <option value="جوال بي">جوال بي</option>
+                            </select>
                         </div>
                         <div>
                             <label class="block text-sm mb-1">مكان السكن الأصلي</label>
@@ -969,10 +978,10 @@
                 'Head.ThirdName': 'الاسم الثالث',
                 'Head.LastName': 'اسم العائلة',
                 'Head.IdNumber': 'رقم الهوية',
-                'Head.Sector': 'القاطع',
+                'Sector': 'القاطع',
                 'Head.DateOfBirth': 'تاريخ الميلاد',
-                'Head.PhoneNumber': 'رقم الهاتف',
-                'Head.Wallet': 'المحفظة',
+                'PhoneNumber': 'رقم الهاتف',
+                'Wallet': 'المحفظة',
                 'Head.OriginalGovernorate': 'مكان السكن الأصلي',
                 'Head.MaritalStatus': 'الحالة الاجتماعية',
                 'Head.EmploymentStatus': 'الوظيفة',
@@ -1016,13 +1025,13 @@
                 valid = false;
             }
             // Validate phone format
-            const phoneEl = document.querySelector('[data-ls="Head.PhoneNumber"]');
+            const phoneEl = document.querySelector('[data-ls="PhoneNumber"]');
             if (phoneEl && phoneEl.value && !validatePhoneField(phoneEl)) {
                 missingFields.push('رقم الهاتف (صيغة غير صحيحة)');
                 valid = false;
             }
             // Validate wallet format
-            const walletEl = document.querySelector('[data-ls="Head.Wallet"]');
+            const walletEl = document.querySelector('[data-ls="Wallet"]');
             if (walletEl && walletEl.value && !validateWalletField(walletEl)) {
                 missingFields.push('المحفظة (صيغة غير صحيحة)');
                 valid = false;
@@ -1184,9 +1193,10 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                     <div><span class="text-gray-400">الاسم:</span> ${data['Head.FirstName'] || ''} ${data['Head.SecondName'] || ''} ${data['Head.ThirdName'] || ''} ${data['Head.LastName'] || ''}</div>
                     <div><span class="text-gray-400">رقم الهوية:</span> ${data['Head.IdNumber'] || ''}</div>
-                    <div><span class="text-gray-400">رقم الهاتف:</span> ${data['Head.PhoneNumber'] || ''}</div>
-                    <div><span class="text-gray-400">المحفظة:</span> ${data['Head.Wallet'] || '-'}</div>
-                    <div><span class="text-gray-400">القاطع:</span> ${data['Head.Sector'] || ''}</div>
+                    <div><span class="text-gray-400">رقم الهاتف:</span> ${data['PhoneNumber'] || ''}</div>
+                    <div><span class="text-gray-400">المحفظة:</span> ${data['Wallet'] || '-'}</div>
+                    <div><span class="text-gray-400">نوع المحفظة:</span> ${data['WalletType'] || '-'}</div>
+                    <div><span class="text-gray-400">القاطع:</span> ${data['Sector'] || ''}</div>
                     <div><span class="text-gray-400">تاريخ الميلاد:</span> ${data['Head.DateOfBirth'] || ''}</div>
                     <div><span class="text-gray-400">الجنس:</span> ${data['Head.Gender'] || ''}</div>
                     <div><span class="text-gray-400">الحالة الاجتماعية:</span> ${data['Head.MaritalStatus'] || ''}</div>

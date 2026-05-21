@@ -168,10 +168,8 @@ namespace CampRegistrationApp.Controllers
                     ThirdName = model.Head.ThirdName,
                     LastName = model.Head.LastName,
                     IdNumber = model.Head.IdNumber,
-                    Sector = model.Head.Sector,
                     DateOfBirth = model.Head.DateOfBirth,
                     Gender = model.Head.Gender,
-                    PhoneNumber = model.Head.PhoneNumber,
                     OriginalGovernorate = model.Head.OriginalGovernorate,
                     MaritalStatus = model.Head.MaritalStatus,
                     EmploymentStatus = model.Head.EmploymentStatus,
@@ -184,7 +182,6 @@ namespace CampRegistrationApp.Controllers
                     InjuryDetails = model.Head.InjuryDetails,
                     IsHouseDestroyed = model.Head.IsHouseDestroyed,
                     IsPrisoner = model.Head.IsPrisoner,
-                    Wallet = model.Head.Wallet,
                     BathroomStatus = model.Head.BathroomStatus,
                     MotherIdNumber = model.Head.MotherIdNumber,
                     IsPregnant = model.Head.IsPregnant,
@@ -233,6 +230,10 @@ namespace CampRegistrationApp.Controllers
                     LivesInTent = model.LivesInTent,
                     TentType = model.TentType,
                     OtherTentType = model.OtherTentType,
+                    Sector = model.Sector,
+                    PhoneNumber = model.PhoneNumber,
+                    Wallet = model.Wallet,
+                    WalletType = model.WalletType,
                     HasBathroom = model.HasBathroom,
                     BathroomType = model.BathroomType,
                     NeedsDiapers = model.NeedsDiapers,
@@ -308,13 +309,13 @@ namespace CampRegistrationApp.Controllers
 
                 await _audit.LogAsync(0, "Create", "FamilyRegistrations", recordId, null, new
                 {
-                    head.IdNumber, head.FullName, head.Sector,
+                    head.IdNumber, head.FullName, Sector = model.Sector,
                     memberCount = model.Members.Count,
                     registrationId = registration.Id
                 }, source: "Web");
 
                 await _notificationService.NotifyMandoobsAsync(
-                    model.Head.Sector,
+                    model.Sector,
                     $"تسجيل جديد: {head.FullName} - رقم القيد: {recordId}",
                     $"/Admin/RefugeeDetails/{registration.Id}");
 

@@ -35,6 +35,15 @@ namespace CampRegistrationApp.Models.ViewModels
 
         public string? StatusNotes { get; set; }
 
+        [Required(ErrorMessage = "القاطع مطلوب")]
+        public string Sector { get; set; } = string.Empty;
+        [Required(ErrorMessage = "رقم الهاتف مطلوب")]
+        [RegularExpression(@"^(059|056)\d{7}$", ErrorMessage = "رقم الهاتف يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056")]
+        public string PhoneNumber { get; set; } = string.Empty;
+        [RegularExpression(@"^(059|056)\d{7}$", ErrorMessage = "رقم المحفظة يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056")]
+        public string? Wallet { get; set; }
+        public string? WalletType { get; set; }
+
         // Refugee Desires - ordered list of selected desire IDs (1st choice = index 0, etc.)
         public List<int> DesireIds { get; set; } = new();
 
@@ -57,15 +66,10 @@ namespace CampRegistrationApp.Models.ViewModels
         [Required(ErrorMessage = "رقم الهوية مطلوب")]
         [RegularExpression(@"^\d{9}$", ErrorMessage = "رقم الهوية يجب أن يتكون من 9 أرقام")]
         public string IdNumber { get; set; } = string.Empty;
-        [Required(ErrorMessage = "القاطع مطلوب")]
-        public string Sector { get; set; } = string.Empty;
         [Required(ErrorMessage = "تاريخ الميلاد مطلوب")]
         public DateTime DateOfBirth { get; set; } = DateTime.Today;
         [Required(ErrorMessage = "الجنس مطلوب")]
         public string Gender { get; set; } = "ذكر";
-        [Required(ErrorMessage = "رقم الهاتف مطلوب")]
-        [RegularExpression(@"^(059|056)\d{7}$", ErrorMessage = "رقم الهاتف يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056")]
-        public string PhoneNumber { get; set; } = string.Empty;
         public string OriginalGovernorate { get; set; } = string.Empty;
         public string MaritalStatus { get; set; } = string.Empty;
         public string EmploymentStatus { get; set; } = string.Empty;
@@ -85,8 +89,6 @@ namespace CampRegistrationApp.Models.ViewModels
         public DateTime? NursingInfantDOB { get; set; }
         public string? NursingInfantID { get; set; }
         public bool IsPrisoner { get; set; }
-        [RegularExpression(@"^(059|056)\d{7}$", ErrorMessage = "رقم المحفظة يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056")]
-        public string? Wallet { get; set; }
         public string? BathroomStatus { get; set; }
         public string? MotherIdNumber { get; set; }
         public string? HeadIdImagePath { get; set; }

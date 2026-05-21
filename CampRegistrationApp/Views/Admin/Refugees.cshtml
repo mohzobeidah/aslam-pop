@@ -134,7 +134,8 @@
                         <a asp-action="RefugeeDetails" asp-route-id="@r.Id" class="text-camp-gold hover:text-yellow-500 transition text-sm">عرض</a>
                         @if (r.ApprovalStatus == "Approved")
                         {
-                            <form method="post" asp-action="RemoveRefugee" asp-route-id="@r.Id" class="inline mr-2"
+                            <button type="button" onclick="resetPassword(@r.Id, '@r.HeadName')" class="text-blue-400 hover:text-blue-300 transition text-xs mx-2">إعادة تعيين كلمة المرور</button>
+                            <form method="post" asp-action="RemoveRefugee" asp-route-id="@r.Id" class="inline"
                                   onsubmit="return confirm('إزالة @r.HeadName — انتقل خارج المخيم؟')">
                                 <button type="submit" class="text-red-400 hover:text-red-300 transition text-xs">إزالة</button>
                             </form>
@@ -155,3 +156,58 @@
 <div class="mt-4">
     <a asp-action="Dashboard" class="text-gray-400 hover:text-camp-gold text-sm transition">← العودة إلى لوحة التحكم</a>
 </div>
+
+@Html.AntiForgeryToken()
+
+<!-- Reset Password Modal -->
+<div id="resetPasswordModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4" onclick="if(event.target===this)closeResetModal()">
+    <div class="bg-camp-accent-grey rounded-xl border border-gray-700 w-full max-w-md shadow-2xl">
+        <div class="border-b border-gray-700 p-4 flex justify-between items-center">
+            <h2 class="text-lg text-camp-gold font-bold">تم إعادة تعيين كلمة المرور</h2>
+            <button onclick="closeResetModal()" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <div class="p-6 text-center">
+            <p class="text-gray-300 mb-2" id="resetPasswordName"></p>
+            <div class="bg-gray-800 rounded-lg p-4 mb-4">
+                <p class="text-gray-400 text-sm mb-1">كلمة المرور الجديدة</p>
+                <p id="resetPasswordValue" class="text-3xl text-camp-gold font-bold font-mono tracking-widest"></p>
+            </div>
+            <p class="text-gray-500 text-xs">يرجى حفظ كلمة المرور وإرسالها إلى النازح</p>
+        </div>
+        <div class="border-t border-gray-700 p-4 flex justify-center">
+            <button onclick="closeResetModal()" class="bg-camp-gold text-black px-6 py-2 rounded-lg hover:bg-yellow-500 transition font-bold text-sm">حسناً</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function resetPassword(id, headName) {
+        if (!confirm('إعادة تعيين كلمة المرور لـ ' + headName + '؟')) return;
+
+        fetch('/Admin/ResetPassword', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            },
+            body: 'id=' + id
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                document.getElementById('resetPasswordName').textContent = headName;
+                document.getElementById('resetPasswordValue').textContent = data.newPassword;
+                var modal = document.getElementById('resetPasswordModal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        })
+        .catch(function() { alert('حدث خطأ أثناء إعادة تعيين كلمة المرور'); });
+    }
+
+    function closeResetModal() {
+        var modal = document.getElementById('resetPasswordModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+</script>

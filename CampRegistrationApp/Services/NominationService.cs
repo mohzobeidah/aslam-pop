@@ -58,7 +58,10 @@ public class NominationService : INominationService
                 PersonId = n.PersonId,
                     PersonName = n.Person.FirstName + " " + n.Person.SecondName + " " + n.Person.ThirdName + " " + n.Person.LastName,
                     IdNumber = n.Person.IdNumber,
-                    Phone = n.Person.PhoneNumber,
+                    Phone = _context.FamilyRegistrations
+                        .Where(fr => fr.FamilyHeadId == n.PersonId)
+                        .Select(fr => fr.PhoneNumber)
+                        .FirstOrDefault() ?? "",
                 Sector = n.Sector.Name,
                 Status = n.Status.ToString(),
                 Description = n.Description,
@@ -183,7 +186,12 @@ public class NominationService : INominationService
         var q = _context.Persons.AsNoTracking();
 
         if (!string.IsNullOrEmpty(sectorName))
-            q = q.Where(p => p.Sector == sectorName);
+        {
+            var sectorPersonIds = _context.FamilyRegistrations
+                .Where(fr => fr.Sector == sectorName)
+                .Select(fr => fr.FamilyHeadId);
+            q = q.Where(p => sectorPersonIds.Contains(p.Id));
+        }
 
         return await q
             .Where(p => p.IdNumber.Contains(query)

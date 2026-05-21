@@ -82,17 +82,14 @@ namespace CampRegistrationApp.Services
                     ThirdName = _firstNames[_random.Next(_firstNames.Length)],
                     LastName = _lastNames[_random.Next(_lastNames.Length)],
                     IdNumber = _random.Next(100000000, 999999999).ToString(),
-                    Sector = sectorName,
                     DateOfBirth = DateTime.UtcNow.AddYears(-_random.Next(20, 70)),
                     Gender = _random.Next(0, 2) == 0 ? "ذكر" : "أنثى",
-                    PhoneNumber = "059" + _random.Next(1000000, 9999999),
                     OriginalGovernorate = "غزة",
                     MaritalStatus = "متزوج",
                     EmploymentStatus = "عاطل",
                     EducationLevel = "جامعي",
                     HealthStatus = _healthStatuses[_random.Next(_healthStatuses.Length)],
                     BathroomStatus = _bathroomStatuses[_random.Next(_bathroomStatuses.Length)],
-                    Wallet = _random.Next(0, 2) == 0 ? "" : _random.Next(100, 999).ToString(),
                     IsPrisoner = _random.Next(0, 10) == 0
                 };
                 _context.Persons.Add(head);
@@ -102,6 +99,9 @@ namespace CampRegistrationApp.Services
                 {
                     RecordId = await _idGenerator.GenerateUniqueIdAsync(),
                     FamilyHeadId = head.Id,
+                    Sector = sectorName,
+                    PhoneNumber = "059" + _random.Next(1000000, 9999999),
+                    Wallet = _random.Next(0, 2) == 0 ? "" : _random.Next(100, 999).ToString(),
                     RegistrationTimestamp = DateTime.UtcNow.AddDays(-_random.Next(1, 365)),
                     ApprovalStatus = (RegistrationApprovalStatus)_random.Next(0, 3),
                     IsChildHeaded = _random.Next(0, 10) == 0,
@@ -150,17 +150,14 @@ namespace CampRegistrationApp.Services
                         ThirdName = _firstNames[_random.Next(_firstNames.Length)],
                         LastName = head.LastName,
                         IdNumber = _random.Next(100000000, 999999999).ToString(),
-                        Sector = sectorName,
                         DateOfBirth = DateTime.UtcNow.AddYears(-_random.Next(1, 60)),
                         Gender = _random.Next(0, 2) == 0 ? "ذكر" : "أنثى",
-                        PhoneNumber = "",
                         OriginalGovernorate = "غزة",
                         MaritalStatus = "أعزب",
                         EmploymentStatus = "طالب",
                         EducationLevel = "مدرسة",
                         HealthStatus = _healthStatuses[_random.Next(_healthStatuses.Length)],
                         BathroomStatus = _bathroomStatuses[_random.Next(_bathroomStatuses.Length)],
-                        Wallet = _random.Next(0, 2) == 0 ? "" : _random.Next(100, 999).ToString(),
                         IsPrisoner = false
                     };
                     _context.Persons.Add(member);

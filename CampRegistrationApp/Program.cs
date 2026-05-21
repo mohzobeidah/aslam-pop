@@ -123,6 +123,18 @@ using (var scope = app.Services.CreateScope())
         IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'IsHusbandAbroad')
         ALTER TABLE [FamilyRegistrations] ADD [IsHusbandAbroad] bit NOT NULL DEFAULT 0");
     db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'Sector')
+        ALTER TABLE [FamilyRegistrations] ADD [Sector] nvarchar(max) NOT NULL DEFAULT ''");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'PhoneNumber')
+        ALTER TABLE [FamilyRegistrations] ADD [PhoneNumber] nvarchar(max) NOT NULL DEFAULT ''");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'Wallet')
+        ALTER TABLE [FamilyRegistrations] ADD [Wallet] nvarchar(max) NULL");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'WalletType')
+        ALTER TABLE [FamilyRegistrations] ADD [WalletType] nvarchar(max) NULL");
+    db.Database.ExecuteSqlRaw(@"
         IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'IsDeleted')
         ALTER TABLE [FamilyRegistrations] ADD [IsDeleted] bit NOT NULL DEFAULT 0");
     db.Database.ExecuteSqlRaw(@"

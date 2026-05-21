@@ -63,11 +63,11 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">القاطع</label>
-                            <select name="Head.Sector" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
+                            <select name="Sector" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
                                 <option value="">اختر القاطع...</option>
                                 @foreach (var s in ViewBag.Sectors)
                                 {
-                                    <option value="@s.Name" selected="@(Model.Head.Sector == s.Name)">@s.Name</option>
+                                    <option value="@s.Name" selected="@(Model.Sector == s.Name)">@s.Name</option>
                                 }
                             </select>
                         </div>
@@ -88,13 +88,22 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">رقم الهاتف</label>
-                            <input name="Head.PhoneNumber" value="@Model.Head.PhoneNumber" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearPhoneError(this)" />
+                            <input name="PhoneNumber" value="@Model.PhoneNumber" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearPhoneError(this)" />
                             <span class="phone-error text-red-500 text-xs hidden">رقم الهاتف يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056</span>
                         </div>
                         <div>
                             <label class="block text-sm mb-1">المحفظة</label>
-                            <input name="Head.Wallet" value="@Model.Head.Wallet" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearWalletError(this)" />
+                            <input name="Wallet" value="@Model.Wallet" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearWalletError(this)" />
                             <span class="wallet-error text-red-500 text-xs hidden">رقم المحفظة يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056</span>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">نوع المحفظة</label>
+                            <select name="WalletType" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                                <option value="">اختر نوع المحفظة...</option>
+                                <option value="بنك" selected="@(Model.WalletType == "بنك")">بنك</option>
+                                <option value="بال بي" selected="@(Model.WalletType == "بال بي")">بال بي</option>
+                                <option value="جوال بي" selected="@(Model.WalletType == "جوال بي")">جوال بي</option>
+                            </select>
                         </div>
                         <div>
                             <label class="block text-sm mb-1">مكان السكن الأصلي</label>
@@ -527,6 +536,30 @@
                 <input type="hidden" name="DesireIds" id="desireIdsInput" value="@string.Join(",", Model.DesireIds)" />
             </div>
 
+            <!-- Attachments -->
+            <div class="mt-6 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                <h3 class="text-lg font-semibold text-camp-gold mb-3">المرفقات</h3>
+                @{
+                    var headAttachments = ViewBag.HeadAttachments as ICollection<CampRegistrationApp.Models.Attachment> ?? new List<CampRegistrationApp.Models.Attachment>();
+                }
+                @if (headAttachments.Any())
+                {
+                    <div class="flex flex-wrap gap-3">
+                        @foreach (var att in headAttachments)
+                        {
+                            var label = att.FileType == "IDImage" ? "صورة الهوية" : "تقرير طبي";
+                            <a href="/File/Download?path=@Uri.EscapeDataString(att.FilePath)" target="_blank" class="bg-camp-accent-grey border border-gray-600 rounded px-4 py-2 text-sm text-camp-gold hover:text-yellow-500 hover:border-camp-gold transition">
+                                @label
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-gray-500 text-sm">لا توجد مرفقات</p>
+                }
+            </div>
+
             <!-- Status Notes -->
             <div class="mt-6 p-4 bg-camp-dark-grey rounded border border-gray-700">
                 <label class="block text-sm mb-2 text-camp-gold font-semibold">ملاحظات حول الحالة</label>
@@ -807,11 +840,11 @@
             });
 
             // Validate phone
-            const phoneEl = document.querySelector('[name="Head.PhoneNumber"]');
+            const phoneEl = document.querySelector('[name="PhoneNumber"]');
             if (phoneEl && !validatePhoneField(phoneEl)) { highlightError(phoneEl); valid = false; }
 
             // Validate wallet if provided
-            const walletEl = document.querySelector('[name="Head.Wallet"]');
+            const walletEl = document.querySelector('[name="Wallet"]');
             if (walletEl && walletEl.value.trim() && !validateWalletField(walletEl)) { highlightError(walletEl); valid = false; }
 
             const fieldLabels = {
@@ -820,10 +853,10 @@
                 'Head.ThirdName': 'الاسم الثالث',
                 'Head.LastName': 'اسم العائلة',
                 'Head.IdNumber': 'رقم الهوية',
-                'Head.Sector': 'القاطع',
+                'Sector': 'القاطع',
                 'Head.DateOfBirth': 'تاريخ الميلاد',
-                'Head.PhoneNumber': 'رقم الهاتف',
-                'Head.Wallet': 'المحفظة',
+                'PhoneNumber': 'رقم الهاتف',
+                'Wallet': 'المحفظة',
                 'Head.OriginalGovernorate': 'مكان السكن الأصلي',
                 'Head.MaritalStatus': 'الحالة الاجتماعية',
                 'Head.EmploymentStatus': 'الوظيفة',

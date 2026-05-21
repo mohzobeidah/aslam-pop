@@ -19,12 +19,9 @@ namespace CampRegistrationApp.Models
         [Required]
         public string IdNumber { get; set; } = string.Empty;
         [Required]
-        public string Sector { get; set; } = string.Empty; // A, B, C, D
-        [Required]
         public DateTime DateOfBirth { get; set; }
         [Required]
         public string Gender { get; set; } = string.Empty;
-        public string PhoneNumber { get; set; } = string.Empty;
         public string OriginalGovernorate { get; set; } = string.Empty;
         public string MaritalStatus { get; set; } = string.Empty;
         public string EmploymentStatus { get; set; } = string.Empty;
@@ -44,7 +41,6 @@ namespace CampRegistrationApp.Models
         public DateTime? NursingInfantDOB { get; set; }
         public string? NursingInfantID { get; set; }
         public bool IsPrisoner { get; set; }
-        public string? Wallet { get; set; }
         public string? BathroomStatus { get; set; }
         public string? MotherIdNumber { get; set; }
 

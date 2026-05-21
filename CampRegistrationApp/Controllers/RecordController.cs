@@ -114,7 +114,7 @@ namespace CampRegistrationApp.Controllers
             if (regId == null) return RedirectToAction("Login");
 
             var registration = await _context.FamilyRegistrations
-                .Include(f => f.FamilyHead)
+                .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)
                 .Include(f => f.Members)
                     .ThenInclude(m => m.Person)
                 .Include(f => f.FamilyDesires)
@@ -134,6 +134,7 @@ namespace CampRegistrationApp.Controllers
             }
 
             var model = MapToViewModel(registration);
+            ViewBag.HeadAttachments = registration.FamilyHead.Attachments.ToList();
             return View(model);
         }
 
@@ -176,7 +177,7 @@ namespace CampRegistrationApp.Controllers
             if (regId == null) return RedirectToAction("Login");
 
             var registration = await _context.FamilyRegistrations
-                .Include(f => f.FamilyHead)
+                .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)
                 .Include(f => f.Members)
                     .ThenInclude(m => m.Person)
                 .Include(f => f.FamilyDesires)
@@ -189,6 +190,8 @@ namespace CampRegistrationApp.Controllers
                 HttpContext.Session.Remove("EditRegistrationId");
                 return RedirectToAction("Login");
             }
+
+            ViewBag.HeadAttachments = registration.FamilyHead.Attachments.ToList();
 
             // Check for duplicate IDs
             var currentHeadId = registration.FamilyHead.IdNumber;
@@ -233,10 +236,8 @@ namespace CampRegistrationApp.Controllers
                 head.ThirdName = model.Head.ThirdName;
                 head.LastName = model.Head.LastName;
                 head.IdNumber = model.Head.IdNumber;
-                head.Sector = model.Head.Sector;
                 head.DateOfBirth = model.Head.DateOfBirth;
                 head.Gender = model.Head.Gender;
-                head.PhoneNumber = model.Head.PhoneNumber;
                 head.OriginalGovernorate = model.Head.OriginalGovernorate;
                 head.MaritalStatus = model.Head.MaritalStatus;
                 head.EmploymentStatus = model.Head.EmploymentStatus;
@@ -249,7 +250,6 @@ namespace CampRegistrationApp.Controllers
                 head.InjuryDetails = model.Head.InjuryDetails;
                 head.IsHouseDestroyed = model.Head.IsHouseDestroyed;
                 head.IsPrisoner = model.Head.IsPrisoner;
-                head.Wallet = model.Head.Wallet;
                 head.BathroomStatus = model.Head.BathroomStatus;
                 head.IsPregnant = model.Head.IsPregnant;
                 head.PregnancyMonth = model.Head.PregnancyMonth;
@@ -260,6 +260,10 @@ namespace CampRegistrationApp.Controllers
                 head.MotherIdNumber = model.Head.MotherIdNumber;
 
                 // Update Registration-level fields
+                registration.Sector = model.Sector;
+                registration.PhoneNumber = model.PhoneNumber;
+                registration.Wallet = model.Wallet;
+                registration.WalletType = model.WalletType;
                 registration.IsChildHeaded = model.IsChildHeaded;
                 registration.ChildHeadedDetails = model.ChildHeadedDetails;
                 registration.IsFemaleHeaded = model.IsFemaleHeaded;
@@ -357,7 +361,7 @@ namespace CampRegistrationApp.Controllers
                 await transaction.CommitAsync();
 
                 await _notificationService.NotifyMandoobsAsync(
-                    head.Sector,
+                    registration.Sector,
                     $"تعديل بيانات: {head.FullName} - رقم القيد: {registration.RecordId}",
                     $"/Admin/RefugeeDetails/{registration.Id}");
 
@@ -393,10 +397,8 @@ namespace CampRegistrationApp.Controllers
                     ThirdName = registration.FamilyHead.ThirdName,
                     LastName = registration.FamilyHead.LastName,
                     IdNumber = registration.FamilyHead.IdNumber,
-                    Sector = registration.FamilyHead.Sector,
                     DateOfBirth = registration.FamilyHead.DateOfBirth,
                     Gender = registration.FamilyHead.Gender,
-                    PhoneNumber = registration.FamilyHead.PhoneNumber,
                     OriginalGovernorate = registration.FamilyHead.OriginalGovernorate,
                     MaritalStatus = registration.FamilyHead.MaritalStatus,
                     EmploymentStatus = registration.FamilyHead.EmploymentStatus,
@@ -408,7 +410,6 @@ namespace CampRegistrationApp.Controllers
                     InjuryDate = registration.FamilyHead.InjuryDate,
                     InjuryDetails = registration.FamilyHead.InjuryDetails,
                     IsPrisoner = registration.FamilyHead.IsPrisoner,
-                    Wallet = registration.FamilyHead.Wallet,
                     BathroomStatus = registration.FamilyHead.BathroomStatus,
                     IsHouseDestroyed = registration.FamilyHead.IsHouseDestroyed,
                     IsPregnant = registration.FamilyHead.IsPregnant,
@@ -466,6 +467,10 @@ namespace CampRegistrationApp.Controllers
                 HasMultipleFamiliesInTent = registration.HasMultipleFamiliesInTent,
                 AdditionalFamiliesCount = registration.AdditionalFamiliesCount,
                 StatusNotes = registration.StatusNotes,
+                Sector = registration.Sector,
+                PhoneNumber = registration.PhoneNumber,
+                Wallet = registration.Wallet,
+                WalletType = registration.WalletType,
                 IsHusbandAbroad = registration.IsHusbandAbroad,
                 DesireIds = registration.FamilyDesires
                     .OrderBy(fd => fd.Order)
