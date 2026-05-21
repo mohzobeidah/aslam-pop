@@ -62,7 +62,7 @@
                     <div><span class="text-gray-400">رقم الهوية:</span> <span id="resultIdNumber" class="text-white"></span></div>
                     <div><span class="text-gray-400">الهاتف:</span> <span id="resultPhone" class="text-white"></span></div>
                 </div>
-                <form method="post" asp-action="AddRow" class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+                <form method="post" asp-controller="Nomination" asp-action="AddRow" class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
                     <input type="hidden" name="projectId" value="@Model.ProjectId" />
                     <input type="hidden" name="personId" id="addPersonId" value="" />
                     <div class="flex-1">
@@ -138,7 +138,7 @@
                     <td class="p-3 text-center text-gray-300">@row.Sector</td>
                     <td class="p-3 text-center text-gray-400 text-xs">@row.Notes</td>
                     <td class="p-3 text-center">
-                        <form method="post" asp-action="DeleteRow" asp-route-id="@row.Id" asp-route-projectId="@Model.ProjectId" class="inline"
+                        <form method="post" asp-controller="Nomination" asp-action="DeleteRow" asp-route-id="@row.Id" asp-route-projectId="@Model.ProjectId" class="inline"
                               onsubmit="return confirm('حذف ترشيح @row.PersonName؟')">
                             <button type="submit" class="text-red-400 hover:text-red-300 transition text-sm">حذف</button>
                         </form>

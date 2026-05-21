@@ -119,10 +119,35 @@ namespace CampRegistrationApp.Controllers
                 }
             }
 
-            // Check for duplicate ID
-            if (await _context.Persons.AnyAsync(p => p.IdNumber == model.Head.IdNumber))
+            // Check for duplicate IDs
+            var allIds = new List<string> { model.Head.IdNumber };
+            allIds.AddRange(model.Members.Select(m => m.IdNumber));
+
+            var duplicateInForm = allIds.GroupBy(id => id).Any(g => g.Count() > 1);
+            if (duplicateInForm)
             {
-                ModelState.AddModelError("", "هذا الرقم مسجل مسبقاً. يمكنك <a href='/Record/Login' class='text-camp-gold underline'>تسجيل الدخول</a> لتعديل بياناتك.");
+                ModelState.AddModelError("", "يوجد تكرار في أرقام الهوية داخل نفس الطلب. يجب أن يكون لكل شخص رقم هوية فريد.");
+                return View("Index", model);
+            }
+
+            var existingIds = await _context.Persons
+                .Where(p => allIds.Contains(p.IdNumber))
+                .Select(p => p.IdNumber)
+                .ToListAsync();
+
+            if (existingIds.Any())
+            {
+                if (existingIds.Contains(model.Head.IdNumber))
+                {
+                    ModelState.AddModelError("", "هذا الرقم مسجل مسبقاً. يمكنك <a href='/Record/Login' class='text-camp-gold underline'>تسجيل الدخول</a> لتعديل بياناتك.");
+                }
+                else
+                {
+                    var duplicateMembers = model.Members
+                        .Where(m => existingIds.Contains(m.IdNumber))
+                        .Select(m => $"{m.FirstName} {m.LastName} (رقم: {m.IdNumber})");
+                    ModelState.AddModelError("", $"أرقام الهوية التالية مسجلة مسبقاً لأفراد العائلة: {string.Join("، ", duplicateMembers)}");
+                }
                 return View("Index", model);
             }
 
@@ -246,10 +271,8 @@ namespace CampRegistrationApp.Controllers
                         ThirdName = mViewModel.ThirdName,
                         LastName = mViewModel.LastName,
                         IdNumber = mViewModel.IdNumber,
-                        Sector = mViewModel.Sector,
                         DateOfBirth = mViewModel.DateOfBirth,
                         Gender = mViewModel.Gender,
-                        PhoneNumber = mViewModel.PhoneNumber,
                         OriginalGovernorate = mViewModel.OriginalGovernorate,
                         MaritalStatus = mViewModel.MaritalStatus,
                         EmploymentStatus = mViewModel.EmploymentStatus,
@@ -261,8 +284,6 @@ namespace CampRegistrationApp.Controllers
                         InjuryDate = mViewModel.InjuryDate,
                         InjuryDetails = mViewModel.InjuryDetails,
                         IsPrisoner = mViewModel.IsPrisoner,
-                        Wallet = mViewModel.Wallet,
-                        BathroomStatus = mViewModel.BathroomStatus,
                         MotherIdNumber = mViewModel.MotherIdNumber,
                         IsPregnant = mViewModel.IsPregnant,
                         PregnancyMonth = mViewModel.PregnancyMonth,

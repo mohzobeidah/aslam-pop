@@ -12,8 +12,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews()
     .AddRazorRuntimeCompilation();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+var connStr = builder.Configuration.GetConnectionString("DefaultConnection");
+var skipDb = builder.Configuration.GetValue<bool>("Database:SkipRegistration")
+    || Environment.GetEnvironmentVariable("DATABASE_SKIP") == "true";
+if (!skipDb && !string.IsNullOrEmpty(connStr))
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(connStr));
+}
 
 builder.Services.AddScoped<IRecordIdGenerator, RecordIdGenerator>();
 builder.Services.AddScoped<IAuditService, AuditService>();
@@ -34,6 +40,9 @@ builder.Services.AddSession(options =>
 var app = builder.Build();
 
 // Ensure Database is created for development
+if (!builder.Configuration.GetValue<bool>("Database:SkipRegistration")
+    && Environment.GetEnvironmentVariable("DATABASE_SKIP") != "true")
+{
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -429,8 +438,7 @@ using (var scope = app.Services.CreateScope())
         await dummyDataService.SeedDummyDataAsync();
     }
 }
-
-app.UseExceptionLogging();
+}
 
 if (!app.Environment.IsDevelopment())
 {

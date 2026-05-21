@@ -1088,6 +1088,43 @@ namespace CampRegistrationApp.Controllers
                 return RedirectToAction("RefugeeDetails", new { id = model.Id });
             }
 
+            // Check for duplicate IDs
+            var currentHeadId = registration.FamilyHead.IdNumber;
+            var allIds = new List<string> { model.Head.IdNumber };
+            allIds.AddRange(model.Members.Select(m => m.IdNumber));
+
+            var duplicateInForm = allIds.GroupBy(id => id).Any(g => g.Count() > 1);
+            if (duplicateInForm)
+            {
+                ModelState.AddModelError("", "يوجد تكرار في أرقام الهوية داخل نفس الطلب. يجب أن يكون لكل شخص رقم هوية فريد.");
+                ViewBag.FormAction = "AdminUpdateRegistration";
+                ViewBag.FormController = "Admin";
+                return View("~/Views/Record/Edit.cshtml", model);
+            }
+
+            var existingIds = await _context.Persons
+                .Where(p => allIds.Contains(p.IdNumber) && p.IdNumber != currentHeadId)
+                .Select(p => p.IdNumber)
+                .ToListAsync();
+
+            if (existingIds.Any())
+            {
+                if (existingIds.Contains(model.Head.IdNumber) && model.Head.IdNumber != currentHeadId)
+                {
+                    ModelState.AddModelError("", "رقم الهوية هذا مسجل مسبقاً لرب أسرة آخر.");
+                }
+                else
+                {
+                    var duplicateMembers = model.Members
+                        .Where(m => existingIds.Contains(m.IdNumber))
+                        .Select(m => $"{m.FirstName} {m.LastName} (رقم: {m.IdNumber})");
+                    ModelState.AddModelError("", $"أرقام الهوية التالية مسجلة مسبقاً لأفراد آخرين: {string.Join("، ", duplicateMembers)}");
+                }
+                ViewBag.FormAction = "AdminUpdateRegistration";
+                ViewBag.FormController = "Admin";
+                return View("~/Views/Record/Edit.cshtml", model);
+            }
+
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
@@ -1183,10 +1220,8 @@ namespace CampRegistrationApp.Controllers
                         ThirdName = mViewModel.ThirdName,
                         LastName = mViewModel.LastName,
                         IdNumber = mViewModel.IdNumber,
-                        Sector = mViewModel.Sector,
                         DateOfBirth = mViewModel.DateOfBirth,
                         Gender = mViewModel.Gender,
-                        PhoneNumber = mViewModel.PhoneNumber,
                         OriginalGovernorate = mViewModel.OriginalGovernorate,
                         MaritalStatus = mViewModel.MaritalStatus,
                         EmploymentStatus = mViewModel.EmploymentStatus,
@@ -1198,8 +1233,6 @@ namespace CampRegistrationApp.Controllers
                         InjuryDate = mViewModel.InjuryDate,
                         InjuryDetails = mViewModel.InjuryDetails,
                         IsPrisoner = mViewModel.IsPrisoner,
-                        Wallet = mViewModel.Wallet,
-                        BathroomStatus = mViewModel.BathroomStatus,
                         IsPregnant = mViewModel.IsPregnant,
                         PregnancyMonth = mViewModel.PregnancyMonth,
                         IsNursing = mViewModel.IsNursing,
@@ -1300,10 +1333,8 @@ namespace CampRegistrationApp.Controllers
                     ThirdName = m.Person.ThirdName,
                     LastName = m.Person.LastName,
                     IdNumber = m.Person.IdNumber,
-                    Sector = m.Person.Sector,
                     DateOfBirth = m.Person.DateOfBirth,
                     Gender = m.Person.Gender,
-                    PhoneNumber = m.Person.PhoneNumber,
                     OriginalGovernorate = m.Person.OriginalGovernorate,
                     MaritalStatus = m.Person.MaritalStatus,
                     EmploymentStatus = m.Person.EmploymentStatus,

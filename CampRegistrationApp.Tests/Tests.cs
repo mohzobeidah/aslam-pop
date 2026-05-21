@@ -436,7 +436,8 @@ public class AdminControllerTests
         }
 
         var auditService = new Mock<IAuditService>();
-        var ctrl = new AdminController(db, auditService.Object);
+        var notifService = new Mock<INotificationService>();
+        var ctrl = new AdminController(db, auditService.Object, notifService.Object);
         var http = new DefaultHttpContext();
         http.Session = new TestSession();
         var admin = db.Admins.First();
@@ -521,7 +522,8 @@ public class AdminControllerTests
     {
         var db = Helpers.CreateDbContext("admin_noauth");
         var auditService = new Mock<IAuditService>();
-        var ctrl = new AdminController(db, auditService.Object);
+        var notifService = new Mock<INotificationService>();
+        var ctrl = new AdminController(db, auditService.Object, notifService.Object);
         var http = new DefaultHttpContext();
         http.Session = new TestSession();
         ctrl.ControllerContext = new ControllerContext { HttpContext = http };

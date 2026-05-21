@@ -52,6 +52,14 @@ Camp family registration system in two versions:
 - `uploadFileToDrive(base64Data, fileName)` saves to Drive folder `التقارير الطبية`.
 - Record ID: first 8 chars of `Utilities.getUuid()`.
 
+### Client-Side Validation (Registration wizards)
+- **Step 1 check** (`validateStep1`): 13 required text/select fields + 2 radio groups (Gender, HealthStatus): FirstName, SecondName, ThirdName, LastName, IdNumber, Sector, DateOfBirth, PhoneNumber, Wallet, OriginalGovernorate, MaritalStatus, EmploymentStatus, EducationLevel. Field-specific Arabic error messages listed in alert.
+- **Step 2 check** (`validateStep2`): Per member: FirstName, IdNumber, RelationshipToHead, Gender, DateOfBirth required. Also checks wife requirement if head married, and sick members require at least one disease/disability.
+- **Step 3 check** (`validateStep3`): All desire selects required. Conditionally: if LivesInTent=true, TentType required; if HasBathroom=true, BathroomType + BathroomStatus required.
+- **Step 4 check** (`submitForm`): Calls `validateStep1() || validateStep2() || validateStep3()` before submitting. Also validates password (4+ chars, match), accept responsibility checkbox, ID/phone/wallet format.
+- **Edit.cshtml** (`submitEditForm`): Same field-specific validation as Index.cshtml; uses `highlightError`/`clearHighlight` helpers.
+- `highlightError(el)` adds `.field-error` class (red border); `clearHighlight(el)` removes it.
+
 ## Key Conventions (both versions)
 - All UI text in Arabic, RTL layout, Cairo font, dark theme (`#121212` + `#d4af37` gold).
 - 8-char Record ID from charset `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`.

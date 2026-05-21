@@ -1,0 +1,44 @@
+[6860:34120:0521/095359.794:VERBOSE1:chrome\updater\event_history.cc:167] Failed to write security descriptor for C:\Program Files (x86)\Google\GoogleUpdater\updater_history.jsonl: Access is denied. (0x5)
+[6860:34120:0521/095359.794:VERBOSE1:chrome\updater\updater.cc:352] Version: 149.0.7814.0, opt, x86_64, command line: "C:\Program Files (x86)\Google\Update\GoogleUpdate.exe" /ugc 
+[6860:34120:0521/095359.794:VERBOSE1:chrome\updater\updater.cc:355] OS version: 10.0.26200.8457, arch: x86_64, System uptime (seconds): 4694, parent pid: 19812
+[6860:34120:0521/095359.794:VERBOSE1:chrome\updater\updater.cc:364] Parent process command line: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.EXE -NoLogo -NoProfile -NonInteractive -Command "# Let me try to trigger Chrome update via GoogleUpdate
+$updatePath = \"C:\Program Files (x86)\Google\Update\GoogleUpdate.exe\"
+if (Test-Path $updatePath) {
+    Write-Output \"Found GoogleUpdate.exe\"
+    Start-Process -FilePath $updatePath -ArgumentList \"/ugc\" -NoNewWindow -Wait
+    Start-Sleep -Seconds 5
+    $version = (Get-ItemProperty 'HKLM:\SOFTWARE\Google\Chrome\BLBeacon' -Name version -ErrorAction SilentlyContinue).version
+    Write-Output \"Chrome version after update: $version\"
+} else {
+    Write-Output \"GoogleUpdate.exe not found at $updatePath\"
+    # Try alternate location
+    $updatePath2 = \"C:\Program Files\Google\Update\GoogleUpdate.exe\"
+    if (Test-Path $updatePath2) {
+        Write-Output \"Found at $updatePath2\"
+        Start-Process -FilePath $updatePath2 -ArgumentList \"/ugc\" -NoNewWindow -Wait
+        Start-Sleep -Seconds 5
+        $version = (Get-ItemProperty 'HKLM:\SOFTWARE\Google\Chrome\BLBeacon' -Name version -ErrorAction SilentlyContinue).version
+        Write-Output \"Chrome version after update: $version\"
+    }
+}"
+[6860:34120:0521/095359.796:VERBOSE1:chrome\updater\util\win_util.cc:571] available: 18754M, total: 49019M, phys: 24G
+[6860:34120:0521/095359.796:VERBOSE1:chrome\updater\event_history.cc:238] Failed to write history event: logging not initialized
+[35440:3504:0521/095359.821:VERBOSE1:chrome\updater\event_history.cc:167] Failed to write security descriptor for C:\Program Files (x86)\Google\GoogleUpdater\updater_history.jsonl: Access is denied. (0x5)
+[35440:3504:0521/095359.822:VERBOSE1:chrome\updater\updater.cc:352] Version: 149.0.7814.0, opt, x86_64, command line: "C:\Program Files (x86)\Google\Update\GoogleUpdate.exe" --crash-handler --system "--database=C:\Program Files (x86)\Google\GoogleUpdater\149.0.7814.0\Crashpad" --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=149.0.7814.0 "--attachment=C:\Program Files (x86)\Google\GoogleUpdater\updater.log" "--attachment=C:\Program Files (x86)\Google\GoogleUpdater\updater_history.jsonl" --initial-client-data=0x288,0x28c,0x290,0x268,0x294,0x7ff7312fbd3c,0x7ff7312fbd48,0x7ff7312fbd58
+[35440:3504:0521/095359.822:VERBOSE1:chrome\updater\updater.cc:355] OS version: 10.0.26200.8457, arch: x86_64, System uptime (seconds): 4694, parent pid: 6860
+[35440:3504:0521/095359.822:VERBOSE1:chrome\updater\updater.cc:364] Parent process command line: "C:\Program Files (x86)\Google\Update\GoogleUpdate.exe" /ugc 
+[35440:3504:0521/095359.822:VERBOSE1:chrome\updater\util\win_util.cc:571] available: 18746M, total: 49019M, phys: 24G
+[35440:3504:0521/095359.822:VERBOSE1:chrome\updater\event_history.cc:238] Failed to write history event: logging not initialized
+[6860:34120:0521/095359.824:VERBOSE1:chrome\updater\crash_reporter.cc:124] Crash handler launched and ready.
+[6860:34120:0521/095359.824:ERROR:chrome\updater\crash_client.cc:124] Failed to fetch completed crash reports: 3
+[6860:34120:0521/095359.824:ERROR:chrome\updater\crash_client.cc:140] Failed to fetch pending crash reports: 3
+[6860:34120:0521/095359.825:VERBOSE2:chrome\updater\usage_stats_permissions_win.cc:77] usage stats enabled by app {8a69d345-d564-463c-aff1-a69d9e530f96}
+[6860:34120:0521/095359.825:ERROR:third_party\crashpad\crashpad\util\file\file_io_win.cc:181] CreateFile C:\Program Files (x86)\Google\GoogleUpdater\149.0.7814.0\Crashpad\settings.dat: Access is denied. (0x5)
+[6860:34120:0521/095359.825:ERROR:third_party\crashpad\crashpad\util\file\file_io_win.cc:181] CreateFile C:\Program Files (x86)\Google\GoogleUpdater\149.0.7814.0\Crashpad\settings.dat: Access is denied. (0x5)
+[6860:34120:0521/095359.825:VERBOSE1:chrome\updater\updater.cc:103] Crash reporting initialized.
+[6860:34120:0521/095359.826:VERBOSE1:chrome\updater\updater.cc:153] IsUserAdmin: 0, IsUserNonElevatedAdmin: 1, IsUACOn: 1, IsElevatedWithUACOn: 0, LUA: 1
+[6860:34120:0521/095359.828:VERBOSE1:chrome\updater\updater.cc:243] Unknown command line switch.
+[6860:34120:0521/095359.828:VERBOSE1:chrome\updater\event_history.cc:238] Failed to write history event: logging not initialized
+[6860:34120:0521/095359.828:VERBOSE1:chrome\updater\updater.cc:390] UpdaterMain (--) returned 75009.
+[35440:3504:0521/095359.987:VERBOSE1:chrome\updater\event_history.cc:238] Failed to write history event: logging not initialized
+[35440:3504:0521/095359.987:VERBOSE1:chrome\updater\updater.cc:390] UpdaterMain (--crash-handler) returned 0.

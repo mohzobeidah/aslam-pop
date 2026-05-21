@@ -123,12 +123,12 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">المحفظة</label>
-                            <input name="Head.Wallet" data-ls="Head.Wallet" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" oninput="clearWalletError(this)" />
+                            <input name="Head.Wallet" data-ls="Head.Wallet" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearWalletError(this)" />
                             <span class="wallet-error text-red-500 text-xs hidden">رقم المحفظة يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056</span>
                         </div>
                         <div>
                             <label class="block text-sm mb-1">مكان السكن الأصلي</label>
-                            <select name="Head.OriginalGovernorate" data-ls="Head.OriginalGovernorate" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                            <select name="Head.OriginalGovernorate" data-ls="Head.OriginalGovernorate" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
                                 <option value="">اختر المنطقة...</option>
                                 <option value="غزة">غزة</option>
                                 <option value="خانيونيس">خانيونيس</option>
@@ -141,7 +141,7 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">الحالة الاجتماعية</label>
-                            <select name="Head.MaritalStatus" data-ls="Head.MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                            <select name="Head.MaritalStatus" data-ls="Head.MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
                                 <option value="">اختر الحالة...</option>
                                 <option value="متزوج">متزوج</option>
                                 <option value="أعزب">أعزب</option>
@@ -152,11 +152,11 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">الوظيفة</label>
-                            <input name="Head.EmploymentStatus" data-ls="Head.EmploymentStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                            <input name="Head.EmploymentStatus" data-ls="Head.EmploymentStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
                         </div>
                         <div>
                             <label class="block text-sm mb-1">المستوى التعليمي</label>
-                            <select name="Head.EducationLevel" data-ls="Head.EducationLevel" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                            <select name="Head.EducationLevel" data-ls="Head.EducationLevel" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
                                 <option value="">اختر...</option>
                                 <option value="بدون">بدون</option>
                                 <option value="ابتدائي">ابتدائي</option>
@@ -532,7 +532,15 @@
         // ========== VALIDATION HELPERS (early definition for on* handlers in HTML) ==========
 
         function validatePalestinianId(id) {
-            return /^\d{9}$/.test(id);
+            if (!/^\d{9}$/.test(id)) return false;
+            var weights = [1, 2, 1, 2, 1, 2, 1, 2];
+            var sum = 0;
+            for (var i = 0; i < 8; i++) {
+                var product = parseInt(id[i]) * weights[i];
+                sum += product >= 10 ? Math.floor(product / 10) + (product % 10) : product;
+            }
+            var checkDigit = (10 - (sum % 10)) % 10;
+            return checkDigit === parseInt(id[8]);
         }
 
         function validateIdField(el) {
@@ -551,6 +559,27 @@
 
         function clearIdError(el) {
             const errorSpan = el.parentElement.querySelector('.id-error');
+            if (!errorSpan) return;
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+        }
+
+        function validateMotherIdField(el) {
+            const val = el.value.trim();
+            const errorSpan = el.parentElement.querySelector('.mother-id-error');
+            if (!errorSpan) return true;
+            if (val && !validatePalestinianId(val)) {
+                errorSpan.classList.remove('hidden');
+                el.classList.add('field-error');
+                return false;
+            }
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+            return true;
+        }
+
+        function clearMotherIdError(el) {
+            const errorSpan = el.parentElement.querySelector('.mother-id-error');
             if (!errorSpan) return;
             errorSpan.classList.add('hidden');
             el.classList.remove('field-error');
@@ -930,21 +959,54 @@
         // ========== VALIDATION ==========
 
         function validateStep1() {
-            const required = [
-                'Head.FirstName', 'Head.SecondName', 'Head.ThirdName', 'Head.LastName',
-                'Head.IdNumber', 'Head.Sector', 'Head.DateOfBirth', 'Head.PhoneNumber'
-            ];
+            const fieldLabels = {
+                'Head.FirstName': 'الاسم الأول',
+                'Head.SecondName': 'الاسم الثاني',
+                'Head.ThirdName': 'الاسم الثالث',
+                'Head.LastName': 'اسم العائلة',
+                'Head.IdNumber': 'رقم الهوية',
+                'Head.Sector': 'القاطع',
+                'Head.DateOfBirth': 'تاريخ الميلاد',
+                'Head.PhoneNumber': 'رقم الهاتف',
+                'Head.Wallet': 'المحفظة',
+                'Head.OriginalGovernorate': 'مكان السكن الأصلي',
+                'Head.MaritalStatus': 'الحالة الاجتماعية',
+                'Head.EmploymentStatus': 'الوظيفة',
+                'Head.EducationLevel': 'المستوى التعليمي'
+            };
             let valid = true;
-            for (const key of required) {
+            let missingFields = [];
+            for (const [key, label] of Object.entries(fieldLabels)) {
                 const el = document.querySelector(`[data-ls="${key}"]`);
                 if (!el || !el.value.trim()) {
                     highlightError(el);
+                    missingFields.push(label);
                     valid = false;
                 } else {
                     clearHighlight(el);
                 }
             }
-            // Validate ID format specifically
+            // Validate Gender radio
+            const genderChecked = document.querySelector('[name="Head.Gender"]:checked');
+            if (!genderChecked) {
+                const genderRadios = document.querySelectorAll('[name="Head.Gender"]');
+                genderRadios.forEach(r => highlightError(r.parentElement));
+                missingFields.push('الجنس');
+                valid = false;
+            } else {
+                document.querySelectorAll('[name="Head.Gender"]').forEach(r => clearHighlight(r.parentElement));
+            }
+            // Validate HealthStatus radio
+            const healthChecked = document.querySelector('[name="Head.HealthStatus"]:checked');
+            if (!healthChecked) {
+                const healthRadios = document.querySelectorAll('[name="Head.HealthStatus"]');
+                healthRadios.forEach(r => highlightError(r.parentElement));
+                missingFields.push('الحالة الصحية');
+                valid = false;
+            } else {
+                document.querySelectorAll('[name="Head.HealthStatus"]').forEach(r => clearHighlight(r.parentElement));
+            }
+            // Validate ID format
             const idEl = document.querySelector('[data-ls="Head.IdNumber"]');
             if (idEl && idEl.value && !validateIdField(idEl)) {
                 valid = false;
@@ -952,14 +1014,16 @@
             // Validate phone format
             const phoneEl = document.querySelector('[data-ls="Head.PhoneNumber"]');
             if (phoneEl && phoneEl.value && !validatePhoneField(phoneEl)) {
+                missingFields.push('رقم الهاتف (صيغة غير صحيحة)');
                 valid = false;
             }
-            // Validate wallet format if provided
+            // Validate wallet format
             const walletEl = document.querySelector('[data-ls="Head.Wallet"]');
             if (walletEl && walletEl.value && !validateWalletField(walletEl)) {
+                missingFields.push('المحفظة (صيغة غير صحيحة)');
                 valid = false;
             }
-            // Validate: if sick, require at least one chronic disease or disability
+            // Validate: if sick, require chronic disease or disability
             const healthRadios = document.querySelectorAll('[name="Head.HealthStatus"]');
             let isSick = false;
             healthRadios.forEach(r => { if (r.checked && r.value !== 'سليم') isSick = true; });
@@ -967,12 +1031,12 @@
                 const diseases = document.querySelectorAll('[name="Head.ChronicDiseases"]:checked');
                 const disabilities = document.querySelectorAll('[name="Head.DisabilityTypes"]:checked');
                 if (diseases.length === 0 && disabilities.length === 0) {
-                    alert('يرجى اختيار مرض مزمن أو نوع إعاقة على الأقل لأن الحالة الصحية مريض');
+                    alert('الحالة الصحية مريض، يرجى اختيار مرض مزمن أو نوع إعاقة على الأقل');
                     valid = false;
                 }
             }
-            if (!valid) {
-                alert('يرجى تعبئة جميع الحقول المطلوبة في بيانات رب الأسرة بشكل صحيح');
+            if (!valid && missingFields.length > 0) {
+                alert('الحقول التالية مطلوبة:\n- ' + missingFields.join('\n- '));
             }
             return valid;
         }
@@ -981,16 +1045,25 @@
             const cards = document.querySelectorAll('.member-card');
             if (cards.length === 0) return true;
             let valid = true;
+            const memberLabels = ['الاسم الأول', 'رقم الهوية', 'صلة القرابة', 'الجنس', 'تاريخ الميلاد'];
+            const memberKeys = ['.FirstName', '.IdNumber', '.RelationshipToHead', '.Gender', '.DateOfBirth'];
             cards.forEach((card, idx) => {
-                const name = card.querySelector('[name$=".FirstName"]');
-                const idNum = card.querySelector('[name$=".IdNumber"]');
-                const relation = card.querySelector('[name$=".RelationshipToHead"]');
-                if (!name || !name.value.trim()) { highlightError(name); valid = false; }
-                else { clearHighlight(name); }
-                if (!idNum || !idNum.value.trim()) { highlightError(idNum); valid = false; }
-                else { clearHighlight(idNum); if (!validateIdField(idNum)) valid = false; }
-                if (!relation || !relation.value) { highlightError(relation); valid = false; }
-                else { clearHighlight(relation); }
+                let memberMissing = [];
+                memberKeys.forEach((key, ki) => {
+                    const el = card.querySelector(`[name$="${key}"]`);
+                    if (!el || !el.value.trim()) {
+                        highlightError(el);
+                        memberMissing.push(memberLabels[ki]);
+                        valid = false;
+                    } else {
+                        clearHighlight(el);
+                    }
+                });
+                // Validate member ID format
+                const idEl = card.querySelector('[name$=".IdNumber"]');
+                if (idEl && idEl.value && !validateIdField(idEl)) {
+                    valid = false;
+                }
                 // Validate: if sick, require disease/disability
                 const healthRadios = card.querySelectorAll('[name$=".HealthStatus"]');
                 let isSick = false;
@@ -1003,7 +1076,18 @@
                         valid = false;
                     }
                 }
+                if (memberMissing.length > 0) {
+                    alert(`الفرد رقم ${idx + 1}: الحقول التالية مطلوبة:\n- ` + memberMissing.join('\n- '));
+                }
             });
+
+            // Validate: no duplicate ID numbers among members and head
+            const allIdEls = [document.querySelector('[name="Head.IdNumber"]'), ...Array.from(cards).map(c => c.querySelector('[name$=".IdNumber"]'))];
+            const idValues = allIdEls.map(el => el?.value?.trim()).filter(v => v);
+            if (new Set(idValues).size !== idValues.length) {
+                alert('يوجد تكرار في أرقام الهوية. يجب أن يكون لكل شخص رقم هوية فريد.');
+                valid = false;
+            }
 
             // Validate: if married, require a wife member
             const maritalRadios = document.querySelectorAll('[name="Head.MaritalStatus"]');
@@ -1020,7 +1104,6 @@
                 }
             }
 
-            if (!valid) alert('يرجى تعبئة الاسم ورقم الهوية وصلة القرابة لكل فرد بشكل صحيح');
             return valid;
         }
 
@@ -1035,6 +1118,9 @@
         }
 
         function validateStep3() {
+            let valid = true;
+
+            // Validate desires (all must be selected)
             const selects = document.querySelectorAll('.desire-select');
             let allSelected = true;
             selects.forEach(sel => {
@@ -1042,9 +1128,44 @@
             });
             if (!allSelected) {
                 alert('يرجى ترتيب جميع الرغبات (اختيار قيمة لكل رغبة)');
-                return false;
+                valid = false;
             }
-            return true;
+
+            // Validate LivesInTent radio
+            const livesInTentYes = document.querySelector('[name="LivesInTent"][value="true"]');
+            if (livesInTentYes && livesInTentYes.checked) {
+                const tentType = document.querySelector('[name="TentType"]');
+                if (!tentType || !tentType.value) {
+                    highlightError(tentType);
+                    alert('يرجى اختيار نوع الخيمة');
+                    valid = false;
+                } else {
+                    clearHighlight(tentType);
+                }
+            }
+
+            // Validate HasBathroom radio -> requires BathroomType + BathroomStatus
+            const hasBathroomYes = document.querySelector('[name="HasBathroom"][value="true"]');
+            if (hasBathroomYes && hasBathroomYes.checked) {
+                const bathroomTypeChecked = document.querySelector('[name="BathroomType"]:checked');
+                if (!bathroomTypeChecked) {
+                    document.querySelectorAll('[name="BathroomType"]').forEach(r => highlightError(r.parentElement));
+                    alert('يرجى اختيار نوع الحمام');
+                    valid = false;
+                } else {
+                    document.querySelectorAll('[name="BathroomType"]').forEach(r => clearHighlight(r.parentElement));
+                }
+                const bathStatus = document.querySelector('[data-ls="Head.BathroomStatus"]');
+                if (!bathStatus || !bathStatus.value) {
+                    highlightError(bathStatus);
+                    alert('يرجى اختيار حالة الحمام');
+                    valid = false;
+                } else {
+                    clearHighlight(bathStatus);
+                }
+            }
+
+            return valid;
         }
 
         // ========== REVIEW ==========
@@ -1185,13 +1306,14 @@
                     </div>
                     <div>
                         <label class="block text-xs mb-1">رقم هوية الأم</label>
-                        <input name="Members[${idx}].MotherIdNumber" value="${data?.MotherIdNumber || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                        <input name="Members[${idx}].MotherIdNumber" value="${data?.MotherIdNumber || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onblur="validateMotherIdField(this)" oninput="clearMotherIdError(this)" />
+                        <span class="mother-id-error text-red-500 text-xs hidden">رقم هوية الأم يجب أن يتكون من 9 أرقام صحيحة</span>
                     </div>
                     <div>
                         <label class="block text-xs mb-1">صلة القرابة</label>
                 <select name="Members[${idx}].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
                     <option value="">اختر...</option>
-                    ${['زوج','زوجة','ابن','ابنة','أم','أب','أخ','أخت','جدة/جد','حفيد/حفيدة','أخ غير شقيق','أخت غير شقيقة','Other'].map(r => '<option value="'+r+'">'+r+'</option>').join('')}
+                    ${['زوج','زوجة','ابن','ابنة','أم','أب','أخ','أخت','جدة/جد','حفيد/حفيدة','أخ غير شقيق','أخت غير شقيقة','Other'].map(r => '<option value="'+r+'" '+(data?.RelationshipToHead === r ? 'selected' : '')+'>'+r+'</option>').join('')}
                 </select>
                     </div>
                     <div>
@@ -1454,7 +1576,7 @@
             if (!valid) return false;
 
             // Validate all IDs before submit
-            if (!validateStep1() || !validateStep2()) return false;
+            if (!validateStep1() || !validateStep2() || !validateStep3()) return false;
 
             saveToLocalStorage();
 
@@ -1470,64 +1592,100 @@
             }
             pw.value = password;
 
-            // Join multi-value checkboxes into comma-separated strings
-            const multiValueFields = [
-                { selector: '[name="Head.ChronicDiseases"]:checked', hiddenName: 'Head.ChronicDiseases' },
-                { selector: '[name="Head.DisabilityTypes"]:checked', hiddenName: 'Head.DisabilityTypes' }
-            ];
-
-            multiValueFields.forEach(field => {
-                const checked = form.querySelectorAll(field.selector);
-                const values = Array.from(checked).map(cb => cb.value);
-                const existing = form.querySelector(`input[type="hidden"][name="${field.hiddenName}"]`);
-                if (existing) existing.remove();
-                const hidden = document.createElement('input');
-                hidden.type = 'hidden';
-                hidden.name = field.hiddenName;
-                hidden.value = values.join('، ');
-                form.appendChild(hidden);
-            });
-
-            // Members: join ChronicDiseases/DisabilityTypes per member
-            const memberCards = document.querySelectorAll('.member-card');
-            memberCards.forEach((card, idx) => {
-                ['ChronicDiseases', 'DisabilityTypes'].forEach(field => {
-                    const checked = card.querySelectorAll(`[name="Members[${idx}].${field}"]:checked`);
-                    const values = Array.from(checked).map(cb => cb.value);
-                    const existing = form.querySelector(`input[type="hidden"][name="Members[${idx}].${field}"]`);
-                    if (existing) existing.remove();
+            // Snapshot all visible input/select/textarea values into hidden inputs
+            // to ensure they survive any browser quirks with steps inside display:none.
+            form.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea').forEach(el => {
+                if (el.name) {
                     const hidden = document.createElement('input');
                     hidden.type = 'hidden';
-                    hidden.name = `Members[${idx}].${field}`;
-                    hidden.value = values.join('، ');
-                    form.appendChild(hidden);
-                });
-            });
-
-            // Handle unchecked bool checkboxes for head (IsHouseDestroyed, IsPrisoner, NeedsDiapers, HasMultipleFamiliesInTent)
-            ['Head.IsHouseDestroyed', 'Head.IsPrisoner', 'NeedsDiapers', 'HasMultipleFamiliesInTent'].forEach(field => {
-                const cb = form.querySelector(`[name="${field}"]`);
-                if (cb && !cb.checked) {
-                    const hidden = document.createElement('input');
-                    hidden.type = 'hidden';
-                    hidden.name = field;
-                    hidden.value = 'false';
+                    hidden.name = el.name;
+                    hidden.value = el.value;
                     form.appendChild(hidden);
                 }
             });
 
-            // Handle unchecked bool checkboxes for members (HasInjury, IsPregnant, IsNursing, IsPrisoner)
-            memberCards.forEach((card, idx) => {
+            // Disable ALL checkboxes + radios so only hidden inputs submit values
+            form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
+            form.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
+
+            // Head radio values (Gender, HealthStatus)
+            ['Head.Gender', 'Head.HealthStatus'].forEach(field => {
+                const checked = document.querySelector(`[name="${field}"]:checked`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = field;
+                hidden.value = checked?.value || '';
+                form.appendChild(hidden);
+            });
+
+            // Members radio values (HealthStatus)
+            document.querySelectorAll('.member-card').forEach((card, idx) => {
+                const checked = card.querySelector(`[name="Members[${idx}].HealthStatus"]:checked`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = `Members[${idx}].HealthStatus`;
+                hidden.value = checked?.value || '';
+                form.appendChild(hidden);
+            });
+
+            // Registration radio values (LivesInTent, HasBathroom, BathroomType)
+            ['LivesInTent', 'HasBathroom', 'BathroomType'].forEach(field => {
+                const checked = document.querySelector(`[name="${field}"]:checked`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = field;
+                hidden.value = checked?.value || 'false';
+                form.appendChild(hidden);
+            });
+
+            // Head multi-value: ChronicDiseases, DisabilityTypes
+            [['Head.ChronicDiseases'], ['Head.DisabilityTypes']].forEach(([name]) => {
+                const checked = Array.from(form.querySelectorAll(`[name="${name}"]:checked`)).map(cb => cb.value);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = name;
+                hidden.value = checked.join('، ');
+                form.appendChild(hidden);
+            });
+
+            // Members multi-value + bools
+            document.querySelectorAll('.member-card').forEach((card, idx) => {
+                ['ChronicDiseases', 'DisabilityTypes'].forEach(field => {
+                    const checked = Array.from(card.querySelectorAll(`[name="Members[${idx}].${field}"]:checked`)).map(cb => cb.value);
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = `Members[${idx}].${field}`;
+                    hidden.value = checked.join('، ');
+                    form.appendChild(hidden);
+                });
                 ['HasInjury', 'IsPregnant', 'IsNursing', 'IsPrisoner'].forEach(field => {
                     const cb = card.querySelector(`[name="Members[${idx}].${field}"]`);
-                    if (cb && !cb.checked) {
-                        const hidden = document.createElement('input');
-                        hidden.type = 'hidden';
-                        hidden.name = `Members[${idx}].${field}`;
-                        hidden.value = 'false';
-                        form.appendChild(hidden);
-                    }
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = `Members[${idx}].${field}`;
+                    hidden.value = cb?.checked ? 'true' : 'false';
+                    form.appendChild(hidden);
                 });
+            });
+
+            // Head bools
+            ['Head.IsHouseDestroyed', 'Head.IsPrisoner', 'Head.HasInjury', 'Head.IsPregnant', 'Head.IsNursing'].forEach(field => {
+                const cb = form.querySelector(`[name="${field}"]`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = field;
+                hidden.value = cb?.checked ? 'true' : 'false';
+                form.appendChild(hidden);
+            });
+
+            // Registration-level bools
+            ['NeedsDiapers', 'HasMultipleFamiliesInTent', 'IsChildHeaded', 'IsFemaleHeaded', 'SupportsOutsidePerson', 'IsHusbandAbroad'].forEach(field => {
+                const cb = form.querySelector(`[name="${field}"]`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = field;
+                hidden.value = cb?.checked ? 'true' : 'false';
+                form.appendChild(hidden);
             });
 
             // Sync desires from dropdowns to hidden input before submission

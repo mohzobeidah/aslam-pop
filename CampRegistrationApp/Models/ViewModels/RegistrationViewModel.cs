@@ -94,8 +94,47 @@ namespace CampRegistrationApp.Models.ViewModels
         public List<string> UploadedFiles { get; set; } = new();
     }
 
-    public class MemberViewModel : PersonViewModel
+    public class MemberViewModel
     {
+        [Required(ErrorMessage = "الاسم الأول مطلوب")]
+        public string FirstName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "الاسم الثاني مطلوب")]
+        public string SecondName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "الاسم الثالث مطلوب")]
+        public string ThirdName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "اسم العائلة مطلوب")]
+        public string LastName { get; set; } = string.Empty;
+
+        public string FullName => $"{FirstName} {SecondName} {ThirdName} {LastName}";
+
+        [Required(ErrorMessage = "رقم الهوية مطلوب")]
+        [RegularExpression(@"^\d{9}$", ErrorMessage = "رقم الهوية يجب أن يتكون من 9 أرقام")]
+        public string IdNumber { get; set; } = string.Empty;
+        [Required(ErrorMessage = "تاريخ الميلاد مطلوب")]
+        public DateTime DateOfBirth { get; set; } = DateTime.Today;
+        [Required(ErrorMessage = "الجنس مطلوب")]
+        public string Gender { get; set; } = "ذكر";
+        public string OriginalGovernorate { get; set; } = string.Empty;
+        public string MaritalStatus { get; set; } = string.Empty;
+        public string EmploymentStatus { get; set; } = string.Empty;
+        public string EducationLevel { get; set; } = string.Empty;
+        [Required(ErrorMessage = "الحالة الصحية مطلوبة")]
+        public string HealthStatus { get; set; } = "سليم";
+        public string? ChronicDiseases { get; set; }
+        public string? DisabilityTypes { get; set; }
+        public bool HasInjury { get; set; }
+        public DateTime? InjuryDate { get; set; }
+        public string? InjuryDetails { get; set; }
+        public bool? IsPregnant { get; set; }
+        public int? PregnancyMonth { get; set; }
+        public bool? IsNursing { get; set; }
+        public string? NursingInfantName { get; set; }
+        public DateTime? NursingInfantDOB { get; set; }
+        public string? NursingInfantID { get; set; }
+        public bool IsPrisoner { get; set; }
+        public string? BathroomStatus { get; set; }
+        public string? MotherIdNumber { get; set; }
+
         [Required(ErrorMessage = "صلة القرابة مطلوبة")]
         public string RelationshipToHead { get; set; } = string.Empty;
     }

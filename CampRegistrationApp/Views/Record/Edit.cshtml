@@ -93,12 +93,12 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">المحفظة</label>
-                            <input name="Head.Wallet" value="@Model.Head.Wallet" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" oninput="clearWalletError(this)" />
+                            <input name="Head.Wallet" value="@Model.Head.Wallet" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearWalletError(this)" />
                             <span class="wallet-error text-red-500 text-xs hidden">رقم المحفظة يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056</span>
                         </div>
                         <div>
                             <label class="block text-sm mb-1">مكان السكن الأصلي</label>
-                            <select name="Head.OriginalGovernorate" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                            <select name="Head.OriginalGovernorate" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
                                 <option value="">اختر المنطقة...</option>
                                 @foreach (var g in new[] { "غزة", "خانيونيس", "شمال غزة", "رفح", "دير البلح", "النصيرات", "المغازي" })
                                 {
@@ -108,7 +108,7 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">الحالة الاجتماعية</label>
-                            <select name="Head.MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                            <select name="Head.MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
                                 <option value="">اختر الحالة...</option>
                                 @foreach (var s in new[] { "متزوج", "أعزب", "أرمل", "مطلق", "منفصل" })
                                 {
@@ -118,11 +118,11 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">الوظيفة</label>
-                            <input name="Head.EmploymentStatus" value="@Model.Head.EmploymentStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                            <input name="Head.EmploymentStatus" value="@Model.Head.EmploymentStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
                         </div>
                         <div>
                             <label class="block text-sm mb-1">المستوى التعليمي</label>
-                            <select name="Head.EducationLevel" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                            <select name="Head.EducationLevel" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
                                 <option value="">اختر...</option>
                                 @foreach (var e in new[] { "بدون", "ابتدائي", "إعدادي", "ثانوي", "جامعي", "دراسات عليا" })
                                 {
@@ -568,8 +568,19 @@
 
         // ========== VALIDATION HELPERS ==========
 
+        function highlightError(el) { if (el) { el.classList.add('field-error'); } }
+        function clearHighlight(el) { if (el) { el.classList.remove('field-error'); } }
+
         function validatePalestinianId(id) {
-            return /^\d{9}$/.test(id);
+            if (!/^\d{9}$/.test(id)) return false;
+            var weights = [1, 2, 1, 2, 1, 2, 1, 2];
+            var sum = 0;
+            for (var i = 0; i < 8; i++) {
+                var product = parseInt(id[i]) * weights[i];
+                sum += product >= 10 ? Math.floor(product / 10) + (product % 10) : product;
+            }
+            var checkDigit = (10 - (sum % 10)) % 10;
+            return checkDigit === parseInt(id[8]);
         }
 
         function validateIdField(el) {
@@ -588,6 +599,27 @@
 
         function clearIdError(el) {
             const errorSpan = el.parentElement.querySelector('.id-error');
+            if (!errorSpan) return;
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+        }
+
+        function validateMotherIdField(el) {
+            const val = el.value.trim();
+            const errorSpan = el.parentElement.querySelector('.mother-id-error');
+            if (!errorSpan) return true;
+            if (val && !validatePalestinianId(val)) {
+                errorSpan.classList.remove('hidden');
+                el.classList.add('field-error');
+                return false;
+            }
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+            return true;
+        }
+
+        function clearMotherIdError(el) {
+            const errorSpan = el.parentElement.querySelector('.mother-id-error');
             if (!errorSpan) return;
             errorSpan.classList.add('hidden');
             el.classList.remove('field-error');
@@ -677,6 +709,7 @@
                             <option value="ذكر">ذكر</option><option value="أنثى">أنثى</option>
                         </select>
                     </div>
+                    <div><label class="block text-xs mb-1">رقم هوية الأم</label><input name="Members[\${idx}].MotherIdNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onblur="validateMotherIdField(this)" oninput="clearMotherIdError(this)" /><span class="mother-id-error text-red-500 text-xs hidden">رقم هوية الأم يجب أن يتكون من 9 أرقام صحيحة</span></div>
                     <div><label class="block text-xs mb-1">صلة القرابة</label>
                 <select name="Members[\${idx}].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
                     <option value="">اختر...</option>
@@ -766,33 +799,68 @@
         }
 
         function submitEditForm() {
-            // Validate IDs
             let valid = true;
+
+            // Validate IDs
             document.querySelectorAll('[name$=".IdNumber"], [name="Head.IdNumber"]').forEach(el => {
                 if (!validateIdField(el)) valid = false;
             });
 
             // Validate phone
             const phoneEl = document.querySelector('[name="Head.PhoneNumber"]');
-            if (phoneEl && !validatePhoneField(phoneEl)) valid = false;
+            if (phoneEl && !validatePhoneField(phoneEl)) { highlightError(phoneEl); valid = false; }
 
             // Validate wallet if provided
             const walletEl = document.querySelector('[name="Head.Wallet"]');
-            if (walletEl && walletEl.value.trim() && !validateWalletField(walletEl)) valid = false;
+            if (walletEl && walletEl.value.trim() && !validateWalletField(walletEl)) { highlightError(walletEl); valid = false; }
 
-            const required = ['Head.FirstName', 'Head.SecondName', 'Head.ThirdName', 'Head.LastName', 'Head.IdNumber', 'Head.Sector'];
-            required.forEach(key => {
+            const fieldLabels = {
+                'Head.FirstName': 'الاسم الأول',
+                'Head.SecondName': 'الاسم الثاني',
+                'Head.ThirdName': 'الاسم الثالث',
+                'Head.LastName': 'اسم العائلة',
+                'Head.IdNumber': 'رقم الهوية',
+                'Head.Sector': 'القاطع',
+                'Head.DateOfBirth': 'تاريخ الميلاد',
+                'Head.PhoneNumber': 'رقم الهاتف',
+                'Head.Wallet': 'المحفظة',
+                'Head.OriginalGovernorate': 'مكان السكن الأصلي',
+                'Head.MaritalStatus': 'الحالة الاجتماعية',
+                'Head.EmploymentStatus': 'الوظيفة',
+                'Head.EducationLevel': 'المستوى التعليمي'
+            };
+            let missingFields = [];
+            for (const [key, label] of Object.entries(fieldLabels)) {
                 const el = document.querySelector(`[name="${key}"]`);
                 if (!el || !el.value.trim()) {
-                    el?.classList.add('field-error');
+                    highlightError(el);
+                    missingFields.push(label);
                     valid = false;
                 } else {
-                    el?.classList.remove('field-error');
+                    clearHighlight(el);
                 }
-            });
+            }
+            // Validate Gender radio
+            const genderChecked = document.querySelector('[name="Head.Gender"]:checked');
+            if (!genderChecked) {
+                document.querySelectorAll('[name="Head.Gender"]').forEach(r => highlightError(r.parentElement));
+                missingFields.push('الجنس');
+                valid = false;
+            } else {
+                document.querySelectorAll('[name="Head.Gender"]').forEach(r => clearHighlight(r.parentElement));
+            }
+            // Validate HealthStatus radio
+            const healthChecked = document.querySelector('[name="Head.HealthStatus"]:checked');
+            if (!healthChecked) {
+                document.querySelectorAll('[name="Head.HealthStatus"]').forEach(r => highlightError(r.parentElement));
+                missingFields.push('الحالة الصحية');
+                valid = false;
+            } else {
+                document.querySelectorAll('[name="Head.HealthStatus"]').forEach(r => clearHighlight(r.parentElement));
+            }
 
             if (!valid) {
-                alert('يرجى تعبئة جميع الحقول المطلوبة بشكل صحيح');
+                alert('الحقول التالية مطلوبة:\n- ' + missingFields.join('\n- '));
                 return false;
             }
 
@@ -819,6 +887,35 @@
                     return false;
                 }
             }
+
+            // Validate member required fields
+            const memberFields = ['FirstName', 'IdNumber', 'RelationshipToHead', 'Gender', 'DateOfBirth'];
+            document.querySelectorAll('.member-card').forEach((card, idx) => {
+                let memberMissing = [];
+                memberFields.forEach(field => {
+                    const el = card.querySelector(`[name$=".${field}"]`);
+                    if (!el || !el.value.trim()) {
+                        highlightError(el);
+                        memberMissing.push(field === 'FirstName' ? 'الاسم الأول' : field === 'IdNumber' ? 'رقم الهوية' : field === 'RelationshipToHead' ? 'صلة القرابة' : field === 'Gender' ? 'الجنس' : 'تاريخ الميلاد');
+                        valid = false;
+                    } else {
+                        clearHighlight(el);
+                    }
+                });
+                if (memberMissing.length > 0) {
+                    alert(`الفرد رقم ${idx + 1}: الحقول التالية مطلوبة:\n- ` + memberMissing.join('\n- '));
+                }
+            });
+
+            // Validate: no duplicate ID numbers among members and head
+            const allIdEls = [document.querySelector('[name="Head.IdNumber"]'), ...Array.from(document.querySelectorAll('.member-card')).map(c => c.querySelector('[name$=".IdNumber"]'))];
+            const idValues = allIdEls.map(el => el?.value?.trim()).filter(v => v);
+            if (new Set(idValues).size !== idValues.length) {
+                alert('يوجد تكرار في أرقام الهوية. يجب أن يكون لكل شخص رقم هوية فريد.');
+                valid = false;
+            }
+
+            if (!valid) return false;
 
             // Validate: if member is sick, require disease/disability
             document.querySelectorAll('.member-card').forEach((card, idx) => {
