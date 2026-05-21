@@ -280,7 +280,7 @@ using (var scope = app.Services.CreateScope())
     }
 
     // Seed Desires
-    var essentialDesires = new[] { "خيم", "اغطية", "فرشات", "ادوات مطبخ", "شوادر", "ملابس", "طرد صحي" };
+    var essentialDesires = new[] { "خيم", "اغطية", "فرشات", "ادوات مطبخ", "شوادر", "ملابس", "طرد صحي", "طرد غذائي" };
     foreach (var name in essentialDesires)
     {
         if (!db.Desires.Any(d => d.Name == name))
