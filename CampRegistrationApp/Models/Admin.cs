@@ -22,7 +22,6 @@ namespace CampRegistrationApp.Models
         [Required]
         public string Mobile { get; set; } = string.Empty;
 
-        [Required]
         public string PasswordHash { get; set; } = string.Empty;
 
         [Required]

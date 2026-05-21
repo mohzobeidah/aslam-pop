@@ -290,6 +290,11 @@ namespace CampRegistrationApp.Controllers
         {
             if (!IsAuthenticated() || !IsSuperAdmin()) return RedirectToAction("Dashboard");
 
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                ModelState.AddModelError("password", "كلمة المرور مطلوبة");
+            }
+
             if (await _context.Admins.AnyAsync(a => a.NationalId == admin.NationalId))
             {
                 ModelState.AddModelError("NationalId", "رقم الهوية موجود مسبقاً");

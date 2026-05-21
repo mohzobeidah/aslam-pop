@@ -4,7 +4,8 @@ using System.Text;
 using Microsoft.Data.SqlClient;
 
 const string OldConnStr = "Server=localhost\\SQLEXPRESS;Database=AslamDbNew;Trusted_Connection=True;TrustServerCertificate=True;";
-const string NewConnStr = "Server=localhost\\SQLEXPRESS;Database=CampRegistrationDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+//const string NewConnStr = "Server=localhost\\SQLEXPRESS;Database=CampRegistrationDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+const string NewConnStr = "Server=db53123.public.databaseasp.net; Database=db53123; User Id=db53123; Password=cW@5C8t%b?6X; Encrypt=True; TrustServerCertificate=True; MultipleActiveResultSets=True;   ";
 
 Console.WriteLine("=== Camp Registration Data Migrator ===");
 Console.WriteLine($"From: AslamDbNew  To: CampRegistrationDb");
