@@ -251,12 +251,14 @@ using (var scope = app.Services.CreateScope())
     if (!db.ChronicDiseases.Any())
     {
         db.ChronicDiseases.AddRange(
-            new ChronicDisease { Name = "سكري" },
-            new ChronicDisease { Name = "ضغط" },
-            new ChronicDisease { Name = "قلب" },
-            new ChronicDisease { Name = "ربو" },
-            new ChronicDisease { Name = "فشل كلوي" },
-            new ChronicDisease { Name = "سرطان" },
+            new ChronicDisease { Name = "السكري" },
+            new ChronicDisease { Name = "ضغط الدم المرتفع" },
+            new ChronicDisease { Name = "أمراض القلب" },
+            new ChronicDisease { Name = "الربو" },
+            new ChronicDisease { Name = "السرطان" },
+            new ChronicDisease { Name = "أمراض الكلى المزمنة" },
+            new ChronicDisease { Name = "التصلب اللويحي" },
+            new ChronicDisease { Name = "الصرع" },
             new ChronicDisease { Name = "ثلاسيميا" },
             new ChronicDisease { Name = "أخرى" }
         );
@@ -266,10 +268,13 @@ using (var scope = app.Services.CreateScope())
     if (!db.DisabilityTypes.Any())
     {
         db.DisabilityTypes.AddRange(
-            new DisabilityType { Name = "حركية" },
-            new DisabilityType { Name = "سمعية" },
-            new DisabilityType { Name = "بصرية" },
-            new DisabilityType { Name = "إصابة حرب" }
+            new DisabilityType { Name = "شلل نصفي أو كلي" },
+            new DisabilityType { Name = "بتر الأطراف" },
+            new DisabilityType { Name = "ضعف أو فقدان البصر" },
+            new DisabilityType { Name = "ضعف أو فقدان السمع" },
+            new DisabilityType { Name = "التوحد" },
+            new DisabilityType { Name = "متلازمة داون" },
+            new DisabilityType { Name = "إعاقة ذهنية" }
         );
         db.SaveChanges();
     }
