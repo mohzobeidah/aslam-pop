@@ -133,7 +133,8 @@
 
         <div id="searchResults" class="hidden">
             <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+                <div id="resultList" class="space-y-1 max-h-60 overflow-y-auto mb-3"></div>
+                <div id="selectedPersonInfo" class="hidden grid grid-cols-2 gap-2 text-sm mb-3 p-3 bg-gray-700/50 rounded">
                     <div><span class="text-gray-400">الاسم:</span> <span id="resultName" class="text-white"></span></div>
                     <div><span class="text-gray-400">رقم الهوية:</span> <span id="resultIdNumber" class="text-white"></span></div>
                     <div><span class="text-gray-400">الهاتف:</span> <span id="resultPhone" class="text-white"></span></div>
@@ -141,41 +142,6 @@
                 <form method="post" asp-controller="Nomination" asp-action="AddRow" class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
                     <input type="hidden" name="projectId" value="@Model.ProjectId" />
                     <input type="hidden" name="personId" id="addPersonId" value="" />
-                    <div class="flex-1">
-                        <label class="block text-camp-gold mb-1 text-xs">القاطع</label>
-                        @if (ViewBag.IsSuperAdmin == true)
-                        {
-                            <select name="sectorId" id="sectorSelect" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none" onchange="updateQuotaWarning()">
-                                @foreach (var s in sectors)
-                                {
-                                    var sq = Model.SectorQuotas.FirstOrDefault(q => q.SectorId == s.Id);
-                                    var disabled = sq != null && sq.MaxCount > 0 && sq.CurrentCount >= sq.MaxCount;
-                                    <option value="@s.Id" data-remaining="@(sq?.Remaining ?? -1)" disabled="@disabled">
-                                        @s.Name @(sq != null && sq.MaxCount > 0 ? $"({sq.Remaining}/{sq.MaxCount})" : "")
-                                    </option>
-                                }
-                            </select>
-                            <div id="quotaWarning" class="text-red-400 text-xs mt-1 hidden">هذا القطاع وصل للحد الأقصى</div>
-                        }
-                        else
-                        {
-                            var delegateSector = sectors.FirstOrDefault(s => s.Id == ViewBag.DelegateSectorId);
-                            var sq = Model.SectorQuotas.FirstOrDefault(q => q.SectorId == delegateSector?.Id);
-                            var quotaFull = sq != null && sq.MaxCount > 0 && sq.CurrentCount >= sq.MaxCount;
-                            <input type="hidden" name="sectorId" value="@(delegateSector?.Id)" />
-                            <div class="bg-gray-700 text-gray-300 border border-gray-600 rounded-lg p-2 text-sm">
-                                @(delegateSector?.Name ?? "—")
-                                @if (sq != null && sq.MaxCount > 0)
-                                {
-                                    <span class="text-xs @(sq.Remaining <= 0 ? "text-red-400" : "text-gray-400")">(@sq.Remaining/@sq.MaxCount)</span>
-                                }
-                            </div>
-                            @if (quotaFull)
-                            {
-                                <div class="text-red-400 text-xs mt-1">تم الوصول للحد الأقصى لترشيحات هذا القطاع</div>
-                            }
-                        }
-                    </div>
                     <div class="flex-1">
                         <label class="block text-camp-gold mb-1 text-xs">ملاحظات</label>
                         <input name="notes" placeholder="اختياري" class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none" />
@@ -233,28 +199,7 @@
 
 @section Scripts {
     <script>
-        let lastSearchResult = null;
-
-        function updateQuotaWarning() {
-            const select = document.getElementById('sectorSelect');
-            if (!select) return;
-            const opt = select.options[select.selectedIndex];
-            const remaining = parseInt(opt?.dataset?.remaining ?? '-1');
-            const warning = document.getElementById('quotaWarning');
-            if (warning) {
-                warning.classList.toggle('hidden', remaining !== 0);
-            }
-        }
-
-        function checkQuotaAndEnable() {
-            const select = document.getElementById('sectorSelect');
-            if (select) {
-                const opt = select.options[select.selectedIndex];
-                const remaining = parseInt(opt?.dataset?.remaining ?? '-1');
-                if (remaining === 0) return false;
-            }
-            return true;
-        }
+        let selectedPersonId = null;
 
         async function searchPerson() {
             const query = document.getElementById('personSearch').value.trim();
@@ -263,10 +208,14 @@
             const resultsDiv = document.getElementById('searchResults');
             const notFoundDiv = document.getElementById('notFound');
             const addBtn = document.getElementById('addBtn');
+            const resultList = document.getElementById('resultList');
+            const selectedInfo = document.getElementById('selectedPersonInfo');
 
             resultsDiv.classList.add('hidden');
             notFoundDiv.classList.add('hidden');
             addBtn.disabled = true;
+            selectedInfo.classList.add('hidden');
+            selectedPersonId = null;
 
             try {
                 const res = await fetch(`/Nomination/SearchPerson?query=${encodeURIComponent(query)}`);
@@ -277,22 +226,32 @@
                     return;
                 }
 
-                const person = data[0];
-                document.getElementById('resultName').textContent = person.name;
-                document.getElementById('resultIdNumber').textContent = person.idNumber;
-                document.getElementById('resultPhone').textContent = person.phone || '—';
-                document.getElementById('addPersonId').value = person.id;
+                const items = data.slice(0, 10);
 
-                // Check if already nominated
-                const checkRes = await fetch(`/Nomination/CheckPersonInProject?projectId=@Model.ProjectId&personId=${person.id}`);
-                const checkData = await checkRes.json();
+                const checkPromises = items.map(p =>
+                    fetch(`/Nomination/CheckPersonInProject?projectId=@Model.ProjectId&personId=${p.id}`)
+                        .then(r => r.json())
+                        .then(d => ({ id: p.id, exists: d.exists }))
+                );
+                const checks = await Promise.all(checkPromises);
+                const nominatedMap = Object.fromEntries(checks.map(c => [c.id, c.exists]));
 
-                if (checkData.exists) {
-                    document.getElementById('resultName').innerHTML = person.name + ' <span class="text-yellow-400 text-xs">(مرشح مسبقاً)</span>';
-                    addBtn.disabled = true;
-                } else {
-                    addBtn.disabled = !checkQuotaAndEnable();
-                }
+                resultList.innerHTML = items.map(p => `
+                    <div class="result-item cursor-pointer p-2 rounded hover:bg-gray-700 transition border border-transparent hover:border-camp-gold ${nominatedMap[p.id] ? 'opacity-50' : ''}"
+                         onclick="${nominatedMap[p.id] ? '' : `selectPerson(${p.id}, '${p.name.replace(/'/g, "\\'")}', '${p.idNumber}', '${(p.phone || '')}', this)`}"
+                         data-person-id="${p.id}">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-white font-bold">${p.name}</span>
+                                <span class="text-gray-400 mr-2" dir="ltr">${p.idNumber}</span>
+                            </div>
+                            ${nominatedMap[p.id]
+                                ? '<span class="text-yellow-400 text-xs">مرشح مسبقاً</span>'
+                                : '<span class="text-camp-gold text-xs">اختيار</span>'}
+                        </div>
+                        ${p.phone ? `<div class="text-gray-500 text-xs" dir="ltr">${p.phone}</div>` : ''}
+                    </div>
+                `).join('');
 
                 resultsDiv.classList.remove('hidden');
             } catch {
@@ -301,24 +260,27 @@
             }
         }
 
+        function selectPerson(id, name, idNumber, phone, el) {
+            document.querySelectorAll('.result-item').forEach(item => {
+                item.classList.remove('border-camp-gold', 'bg-gray-700');
+                item.classList.add('border-transparent');
+            });
+            el.classList.add('border-camp-gold', 'bg-gray-700');
+            el.classList.remove('border-transparent');
+
+            selectedPersonId = id;
+            document.getElementById('resultName').textContent = name;
+            document.getElementById('resultIdNumber').textContent = idNumber;
+            document.getElementById('resultPhone').textContent = phone || '—';
+            document.getElementById('addPersonId').value = id;
+            document.getElementById('selectedPersonInfo').classList.remove('hidden');
+            document.getElementById('addBtn').disabled = false;
+        }
+
         document.getElementById('personSearch').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 searchPerson();
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const select = document.getElementById('sectorSelect');
-            if (select) {
-                select.addEventListener('change', function() {
-                    updateQuotaWarning();
-                    const addBtn = document.getElementById('addBtn');
-                    if (!addBtn.disabled) {
-                        addBtn.disabled = !checkQuotaAndEnable();
-                    }
-                });
-                updateQuotaWarning();
             }
         });
     </script>

@@ -59,7 +59,7 @@ public class NominationController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddRow(int projectId, int personId, int sectorId, string? description, string? notes)
+    public async Task<IActionResult> AddRow(int projectId, int personId, string? description, string? notes)
     {
         if (!IsAuthenticated()) return RedirectToAction("Login", "Admin");
 
@@ -67,8 +67,30 @@ public class NominationController : Controller
 
         try
         {
-            await _nominationService.AddOrUpdateRowAsync(projectId, personId, sectorId, delegateId, description, notes);
-            await _audit.LogAsync(delegateId, "AddNomination", "Nominations", $"project:{projectId},person:{personId}", null, new { projectId, personId, sectorId });
+            var sector = await _context.FamilyRegistrations
+                .Where(fr => fr.FamilyHeadId == personId)
+                .Select(fr => fr.Sector)
+                .FirstOrDefaultAsync();
+
+            if (sector == null)
+            {
+                sector = await _context.FamilyMembers
+                    .Where(fm => fm.PersonId == personId)
+                    .Select(fm => fm.Registration.Sector)
+                    .FirstOrDefaultAsync();
+            }
+
+            if (sector == null)
+                throw new InvalidOperationException("لم يتم العثور على قطاع للشخص");
+
+            var sectorEntity = await _context.Sectors
+                .FirstOrDefaultAsync(s => s.Name == sector);
+
+            if (sectorEntity == null)
+                throw new InvalidOperationException("لم يتم العثور على القطاع في النظام");
+
+            await _nominationService.AddOrUpdateRowAsync(projectId, personId, sectorEntity.Id, delegateId, description, notes);
+            await _audit.LogAsync(delegateId, "AddNomination", "Nominations", $"project:{projectId},person:{personId}", null, new { projectId, personId, sectorId = sectorEntity.Id });
             TempData["Success"] = "تمت إضافة الترشيح بنجاح";
         }
         catch (Exception ex)
@@ -107,11 +129,18 @@ public class NominationController : Controller
         }
 
         var persons = await _nominationService.SearchPersonsAsync(query, sectorName);
+
+        var personIds = persons.Select(p => p.Id).ToList();
+        var phones = await _context.FamilyRegistrations
+            .Where(fr => personIds.Contains(fr.FamilyHeadId))
+            .ToDictionaryAsync(fr => fr.FamilyHeadId, fr => fr.PhoneNumber);
+
         return Json(persons.Select(p => new
         {
             p.Id,
             name = p.FullName,
-            p.IdNumber
+            p.IdNumber,
+            phone = phones.GetValueOrDefault(p.Id, "")
         }));
     }
 
