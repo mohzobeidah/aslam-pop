@@ -1,3 +1,6 @@
+## Visual Studio
+.vs/
+
 ## .NET
 bin/
 obj/
@@ -6,6 +9,7 @@ obj/
 *.sln.docstates
 *.userprefs
 *.csproj.user
+*.csproj.lscache
 **/Debug/
 **/Release/
 **/packages/

@@ -65,6 +65,9 @@ namespace CampRegistrationApp.Controllers
 
             if (admin == null || admin.PasswordHash != HashPassword(password))
             {
+                await _audit.LogAsync(0, "LoginFailed", "Admins", null,
+                    new { nationalId, reason = "رقم الهوية أو كلمة المرور غير صحيحة" },
+                    null);
                 ModelState.AddModelError("", "رقم الهوية أو كلمة المرور غير صحيحة");
                 return View();
             }
@@ -72,6 +75,10 @@ namespace CampRegistrationApp.Controllers
             HttpContext.Session.SetInt32("AdminId", admin.Id);
             HttpContext.Session.SetString("AdminName", admin.Name);
             HttpContext.Session.SetString("AdminRole", admin.Role.ToString());
+
+            await _audit.LogAsync(admin.Id, "Login", "Admins", null,
+                null,
+                new { admin.Name, admin.NationalId, role = admin.Role.ToString(), sector = admin.Sector?.Name });
 
             return RedirectToAction("Dashboard");
         }

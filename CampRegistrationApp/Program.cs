@@ -467,6 +467,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
 app.UseSession();
+app.UseExceptionLogging();
 app.MapStaticAssets();
 app.MapControllerRoute(
     name: "default",

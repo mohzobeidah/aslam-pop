@@ -12,12 +12,14 @@ namespace CampRegistrationApp.Controllers
     public class RecordController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAuditService _audit;
         private readonly INotificationService _notificationService;
         private readonly IWebHostEnvironment _env;
 
-        public RecordController(ApplicationDbContext context, INotificationService notificationService, IWebHostEnvironment env)
+        public RecordController(ApplicationDbContext context, IAuditService audit, INotificationService notificationService, IWebHostEnvironment env)
         {
             _context = context;
+            _audit = audit;
             _notificationService = notificationService;
             _env = env;
         }
@@ -74,6 +76,9 @@ namespace CampRegistrationApp.Controllers
         {
             if (string.IsNullOrEmpty(idNumber) || string.IsNullOrEmpty(password))
             {
+                await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", null,
+                    new { idNumber, reason = "حقول فارغة" },
+                    null);
                 ModelState.AddModelError("", "يرجى إدخال رقم الهوية وكلمة المرور");
                 return View();
             }
@@ -88,23 +93,37 @@ namespace CampRegistrationApp.Controllers
 
             if (registration == null)
             {
+                await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", null,
+                    new { idNumber, reason = "رقم الهوية أو كلمة المرور غير صحيحة" },
+                    null);
                 ModelState.AddModelError("", "رقم الهوية أو كلمة المرور غير صحيحة");
                 return View();
             }
 
             if (registration.ApprovalStatus == RegistrationApprovalStatus.Pending)
             {
+                await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", registration.RecordId,
+                    new { idNumber, reason = "طلب التسجيل لم يتم الموافقة عليه بعد" },
+                    null);
                 ModelState.AddModelError("", "طلب التسجيل لم يتم الموافقة عليه بعد. يرجى مراجعة المسؤول المختص.");
                 return View();
             }
 
             if (registration.ApprovalStatus == RegistrationApprovalStatus.Rejected)
             {
+                await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", registration.RecordId,
+                    new { idNumber, reason = "تم رفض طلب التسجيل" },
+                    null);
                 ModelState.AddModelError("", "عذراً، تم رفض طلب التسجيل الخاص بك. يرجى التواصل مع المسؤول.");
                 return View();
             }
 
             HttpContext.Session.SetInt32("EditRegistrationId", registration.Id);
+
+            await _audit.LogAsync(0, "Login", "FamilyRegistrations", registration.RecordId,
+                null,
+                new { headName = registration.FamilyHead.FullName, idNumber, sector = registration.Sector });
+
             return RedirectToAction("Edit");
         }
 
