@@ -1,4 +1,4 @@
-@model Assistance
+@model EditAssistanceViewModel
 @{
     ViewData["Title"] = "تعديل مساعدة";
     var sectors = ViewBag.Sectors as List<Sector> ?? new();
@@ -11,6 +11,7 @@
 
     <form method="post" class="bg-camp-accent-grey p-6 rounded-xl border border-gray-700 space-y-4">
         <input type="hidden" asp-for="Id">
+        <div asp-validation-summary="ModelOnly" class="text-red-400 text-sm mb-4"></div>
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm text-gray-400 mb-1">اسم المساعدة</label>
@@ -44,8 +45,10 @@
         <div>
             <label class="block text-sm text-gray-400 mb-1">القاطع</label>
             <select asp-for="SectorId" class="w-full bg-camp-dark-grey border border-gray-600 rounded p-2 text-sm outline-none focus:border-camp-gold text-white">
+                <option value="">اختر القاطع</option>
                 @foreach (var s in sectors) { <option value="@s.Id">@s.Name</option> }
             </select>
+            <span asp-validation-for="SectorId" class="text-red-400 text-xs"></span>
         </div>
         <div>
             <label class="block text-sm text-gray-400 mb-1">وصف المساعدة</label>
@@ -60,5 +63,5 @@
 @section Scripts {
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
 }

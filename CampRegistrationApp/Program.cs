@@ -28,6 +28,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IDummyDataService, DummyDataService>();
 builder.Services.AddScoped<IAssistanceService, AssistanceService>();
 builder.Services.AddScoped<IImportService, ImportService>();
+builder.Services.AddScoped<IComplaintIdGenerator, ComplaintIdGenerator>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -129,7 +130,10 @@ using (var scope = app.Services.CreateScope())
         IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'SectorId')
         AND EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'Sector')
         BEGIN
-            UPDATE [FamilyRegistrations] SET [SectorId] = COALESCE((SELECT [Id] FROM [Sectors] WHERE [Name] = [FamilyRegistrations].[Sector]), (SELECT TOP 1 [Id] FROM [Sectors]));
+            DECLARE @sql nvarchar(max) = N'
+                UPDATE [FamilyRegistrations] SET [SectorId] = COALESCE((SELECT [Id] FROM [Sectors] WHERE [Name] = f.[Sector]), (SELECT TOP 1 [Id] FROM [Sectors]))
+                FROM [FamilyRegistrations] f';
+            EXEC sp_executesql @sql;
             ALTER TABLE [FamilyRegistrations] ALTER COLUMN [SectorId] int NOT NULL;
         END");
     db.Database.ExecuteSqlRaw(@"
@@ -446,6 +450,28 @@ using (var scope = app.Services.CreateScope())
     db.Database.ExecuteSqlRaw(@"
         IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Notifications_AdminId_IsRead')
         CREATE INDEX [IX_Notifications_AdminId_IsRead] ON [Notifications] ([AdminId], [IsRead])");
+
+    // Create Complaints table for existing databases
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Complaints')
+        CREATE TABLE [Complaints] (
+            [Id] int IDENTITY(1,1) PRIMARY KEY,
+            [TicketId] nvarchar(8) NOT NULL,
+            [Subject] nvarchar(200) NOT NULL,
+            [Message] nvarchar(max) NOT NULL,
+            [SenderName] nvarchar(100) NULL,
+            [SenderPhone] nvarchar(20) NULL,
+            [Status] int NOT NULL DEFAULT 0,
+            [AdminResponse] nvarchar(max) NULL,
+            [ResolvedById] int NULL,
+            [ResolvedAt] datetime2 NULL,
+            [CreatedAt] datetime2 NOT NULL DEFAULT GETUTCDATE(),
+            [IsDeleted] bit NOT NULL DEFAULT 0,
+            CONSTRAINT [FK_Complaints_Admins_ResolvedById] FOREIGN KEY ([ResolvedById]) REFERENCES [Admins]([Id])
+        )");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Complaints_TicketId')
+        CREATE UNIQUE INDEX [IX_Complaints_TicketId] ON [Complaints] ([TicketId])");
 
     // Seed default super admin if none exist
     if (!db.Admins.Any())

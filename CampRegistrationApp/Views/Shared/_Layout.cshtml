@@ -64,8 +64,10 @@
                     </button>
                     <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Registration" asp-action="Index">تسجيل جديد</a>
                     <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Record" asp-action="Login">تسجيل الدخول</a>
+                    <a class="text-gray-300 hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Complaint" asp-action="Create">تقديم شكوى</a>
                     @if (isLoggedIn)
                     {
+                        <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Complaint" asp-action="Index">الشكاوى</a>
                         <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Project" asp-action="Index">المشاريع</a>
                         <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Assistance" asp-action="Index">المساعدات</a>
                         <a class="text-camp-gold hover:text-yellow-500 transition-colors px-3 py-2 rounded text-sm font-bold" asp-controller="Admin" asp-action="Dashboard">لوحة التحكم</a>
@@ -95,8 +97,10 @@
                 </a>
                 <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Registration" asp-action="Index">تسجيل جديد</a>
                 <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Record" asp-action="Login">تسجيل الدخول</a>
+                <a class="block text-gray-300 hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Complaint" asp-action="Create">تقديم شكوى</a>
                 @if (isLoggedIn)
                 {
+                    <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Complaint" asp-action="Index">الشكاوى</a>
                     <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Project" asp-action="Index">المشاريع</a>
                     <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" asp-controller="Assistance" asp-action="Index">المساعدات</a>
                     <a class="block text-camp-gold hover:text-yellow-500 transition-colors px-3 py-2 rounded text-sm font-bold" asp-controller="Admin" asp-action="Dashboard">لوحة التحكم</a>

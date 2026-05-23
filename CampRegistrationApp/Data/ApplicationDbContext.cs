@@ -32,6 +32,9 @@ namespace CampRegistrationApp.Data
         public DbSet<AssistanceBeneficiary> AssistanceBeneficiaries { get; set; } = null!;
         public DbSet<AssistanceImport> AssistanceImports { get; set; } = null!;
 
+        // Complaint / Ticket System
+        public DbSet<Complaint> Complaints { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // ── FamilyRegistration ──
@@ -267,6 +270,20 @@ namespace CampRegistrationApp.Data
                 .WithMany()
                 .HasForeignKey(i => i.SectorId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // ── Complaint / Ticket System ──
+            modelBuilder.Entity<Complaint>()
+                .HasIndex(c => c.TicketId)
+                .IsUnique();
+
+            modelBuilder.Entity<Complaint>()
+                .HasOne(c => c.ResolvedBy)
+                .WithMany()
+                .HasForeignKey(c => c.ResolvedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Complaint>()
+                .HasQueryFilter(c => !c.IsDeleted);
 
             base.OnModelCreating(modelBuilder);
         }

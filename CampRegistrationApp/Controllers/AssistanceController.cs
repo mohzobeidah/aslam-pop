@@ -1,5 +1,6 @@
 using CampRegistrationApp.Data;
 using CampRegistrationApp.Models;
+using CampRegistrationApp.Models.ViewModels;
 using CampRegistrationApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -83,16 +84,19 @@ public class AssistanceController : Controller
         if (!IsAuthenticated() || IsViewer()) return RedirectToAction("Index");
 
         ViewBag.Sectors = await _context.Sectors.OrderBy(s => s.Name).ToListAsync();
-        return View(new Assistance { AssistanceDate = DateTime.Today });
+        return View(new CreateAssistanceViewModel { AssistanceDate = DateTime.Today });
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Assistance model)
+    public async Task<IActionResult> Create(CreateAssistanceViewModel model)
     {
         if (!IsAuthenticated() || IsViewer()) return RedirectToAction("Index");
 
         if (!IsSuperAdmin())
+        {
             model.SectorId = await GetUserSectorId();
+            ModelState.Remove(nameof(model.SectorId));
+        }
 
         if (!ModelState.IsValid)
         {
@@ -100,7 +104,17 @@ public class AssistanceController : Controller
             return View(model);
         }
 
-        await _assistanceService.CreateAsync(model, GetUserId());
+        var assistance = new Assistance
+        {
+            Name = model.Name,
+            AssistanceType = model.AssistanceType,
+            Source = model.Source,
+            AssistanceDate = model.AssistanceDate,
+            Description = model.Description,
+            SectorId = model.SectorId ?? 0
+        };
+
+        await _assistanceService.CreateAsync(assistance, GetUserId());
         TempData["Success"] = "تم إنشاء المساعدة بنجاح";
         return RedirectToAction("Index");
     }
@@ -118,11 +132,20 @@ public class AssistanceController : Controller
         if (assistance == null) return NotFound();
 
         ViewBag.Sectors = await _context.Sectors.OrderBy(s => s.Name).ToListAsync();
-        return View(assistance);
+        return View(new EditAssistanceViewModel
+        {
+            Id = assistance.Id,
+            Name = assistance.Name,
+            AssistanceType = assistance.AssistanceType,
+            Source = assistance.Source,
+            AssistanceDate = assistance.AssistanceDate,
+            Description = assistance.Description,
+            SectorId = assistance.SectorId
+        });
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(Assistance model)
+    public async Task<IActionResult> Edit(EditAssistanceViewModel model)
     {
         if (!IsAuthenticated() || IsViewer()) return RedirectToAction("Index");
 
@@ -132,7 +155,18 @@ public class AssistanceController : Controller
             return View(model);
         }
 
-        await _assistanceService.UpdateAsync(model, GetUserId());
+        var assistance = new Assistance
+        {
+            Id = model.Id,
+            Name = model.Name,
+            AssistanceType = model.AssistanceType,
+            Source = model.Source,
+            AssistanceDate = model.AssistanceDate,
+            Description = model.Description,
+            SectorId = model.SectorId ?? 0
+        };
+
+        await _assistanceService.UpdateAsync(assistance, GetUserId());
         TempData["Success"] = "تم تعديل المساعدة بنجاح";
         return RedirectToAction("Index");
     }
@@ -181,7 +215,10 @@ public class AssistanceController : Controller
         if (!IsAuthenticated() || IsViewer()) return Unauthorized();
 
         if (!IsSuperAdmin())
+        {
             model.SectorId = await GetUserSectorId();
+            ModelState.Remove(nameof(model.SectorId));
+        }
 
         if (!ModelState.IsValid)
         {

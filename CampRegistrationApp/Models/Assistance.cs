@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace CampRegistrationApp.Models;
 
@@ -27,12 +28,15 @@ public class Assistance
 
     public string? Description { get; set; }
 
+    [Range(1, int.MaxValue, ErrorMessage = "يرجى اختيار القاطع")]
     public int SectorId { get; set; }
+    [BindNever]
     public virtual Sector Sector { get; set; } = null!;
 
     public AssistanceStatus Status { get; set; } = AssistanceStatus.Draft;
 
     public int CreatedById { get; set; }
+    [BindNever]
     public virtual Admin CreatedBy { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

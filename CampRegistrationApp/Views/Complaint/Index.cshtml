@@ -1,0 +1,87 @@
+@model List<ComplaintListViewModel>
+@{
+    ViewData["Title"] = "إدارة الشكاوى";
+    var currentStatus = ViewBag.CurrentStatus as string;
+}
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl text-camp-gold font-bold">الشكاوى</h1>
+</div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@successMsg</div>
+}
+
+<!-- Status filter tabs -->
+<div class="flex flex-wrap gap-2 mb-6">
+    <a asp-action="Index" asp-route-status=""
+       class="px-4 py-2 rounded-lg text-sm transition @(string.IsNullOrEmpty(currentStatus) ? "bg-camp-gold text-black font-bold" : "bg-camp-accent-grey text-gray-300 hover:bg-gray-700")">
+        الكل
+    </a>
+    <a asp-action="Index" asp-route-status="Pending"
+       class="px-4 py-2 rounded-lg text-sm transition @(currentStatus == "Pending" ? "bg-camp-gold text-black font-bold" : "bg-camp-accent-grey text-gray-300 hover:bg-gray-700")">
+        قيد الانتظار
+    </a>
+    <a asp-action="Index" asp-route-status="InProgress"
+       class="px-4 py-2 rounded-lg text-sm transition @(currentStatus == "InProgress" ? "bg-camp-gold text-black font-bold" : "bg-camp-accent-grey text-gray-300 hover:bg-gray-700")">
+        قيد المعالجة
+    </a>
+    <a asp-action="Index" asp-route-status="Resolved"
+       class="px-4 py-2 rounded-lg text-sm transition @(currentStatus == "Resolved" ? "bg-camp-gold text-black font-bold" : "bg-camp-accent-grey text-gray-300 hover:bg-gray-700")">
+        تم الحل
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="bg-camp-accent-grey p-8 rounded-xl border border-gray-700 text-center text-gray-400">
+        لا توجد شكاوى
+    </div>
+}
+else
+{
+    <div class="overflow-x-auto">
+        <table class="w-full bg-camp-accent-grey rounded-xl border border-gray-700">
+            <thead>
+                <tr class="border-b border-gray-700 text-camp-gold text-sm">
+                    <th class="p-3 text-center">رقم التتبع</th>
+                    <th class="p-3 text-right">الموضوع</th>
+                    <th class="p-3 text-right">مقدم الشكوى</th>
+                    <th class="p-3 text-center">الحالة</th>
+                    <th class="p-3 text-center">التاريخ</th>
+                    <th class="p-3 text-center">إجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    var statusColor = c.Status switch
+                    {
+                        "Pending" => "bg-yellow-900/50 text-yellow-300",
+                        "InProgress" => "bg-blue-900/50 text-blue-300",
+                        "Resolved" => "bg-green-900/50 text-green-300",
+                        _ => "bg-gray-900/50 text-gray-300"
+                    };
+                    var statusText = c.Status switch
+                    {
+                        "Pending" => "قيد الانتظار",
+                        "InProgress" => "قيد المعالجة",
+                        "Resolved" => "تم الحل",
+                        _ => c.Status
+                    };
+                    <tr class="border-b border-gray-700 hover:bg-gray-800/50 text-sm">
+                        <td class="p-3 text-center font-mono text-camp-gold" dir="ltr">@c.TicketId</td>
+                        <td class="p-3 text-white font-semibold">@c.Subject</td>
+                        <td class="p-3 text-gray-300">@(c.SenderName ?? "—")</td>
+                        <td class="p-3 text-center"><span class="@statusColor px-2 py-1 rounded font-semibold text-xs">@statusText</span></td>
+                        <td class="p-3 text-center text-gray-400">@c.CreatedAt.ToString("yyyy/MM/dd")</td>
+                        <td class="p-3 text-center">
+                            <a asp-action="Details" asp-route-id="@c.Id" class="text-camp-gold hover:text-yellow-500 transition text-sm">عرض</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
