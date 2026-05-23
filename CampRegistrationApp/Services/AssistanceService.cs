@@ -143,6 +143,31 @@ public class AssistanceService : IAssistanceService
             id.ToString(), null, new { Status = "Cancelled" });
     }
 
+    // ── Person Search ──
+
+    public async Task<List<Person>> SearchPersonsAsync(string query, string? sectorName)
+    {
+        var q = _context.Persons.AsQueryable();
+
+        if (!string.IsNullOrEmpty(sectorName))
+        {
+            q = q.Where(p =>
+                _context.FamilyRegistrations
+                    .Where(fr => fr.FamilyHeadId == p.Id && fr.Sector.Name == sectorName)
+                    .Any() ||
+                _context.FamilyMembers
+                    .Where(fm => fm.PersonId == p.Id && fm.Registration.Sector.Name == sectorName)
+                    .Any());
+        }
+
+        if (query.All(char.IsDigit))
+            q = q.Where(p => p.IdNumber.Contains(query));
+        else
+            q = q.Where(p => (p.FirstName + " " + p.SecondName + " " + p.ThirdName + " " + p.LastName).Contains(query));
+
+        return await q.Take(20).ToListAsync();
+    }
+
     // ── Beneficiaries ──
 
     public async Task<AssistanceBeneficiary> AddBeneficiaryAsync(AssistanceBeneficiary beneficiary, int userId)
@@ -163,6 +188,59 @@ public class AssistanceService : IAssistanceService
         return beneficiary;
     }
 
+    public async Task<AssistanceBeneficiary> AddBeneficiaryFromPersonAsync(int personId, int assistanceId, int userId)
+    {
+        var person = await _context.Persons.FindAsync(personId)
+            ?? throw new InvalidOperationException("الشخص غير موجود");
+
+        var exists = await _context.AssistanceBeneficiaries
+            .AnyAsync(b => b.NationalId == person.IdNumber && b.AssistanceId == assistanceId && !b.IsDeleted);
+        if (exists)
+            throw new InvalidOperationException("رقم الهوية موجود مسبقاً في هذه المساعدة");
+
+        string? sectorName = null;
+        var headRegistration = await _context.FamilyRegistrations
+            .Include(fr => fr.Sector)
+            .FirstOrDefaultAsync(fr => fr.FamilyHeadId == personId);
+        if (headRegistration != null)
+            sectorName = headRegistration.Sector?.Name;
+
+        if (sectorName == null)
+        {
+            var memberRegistration = await _context.FamilyMembers
+                .Include(fm => fm.Registration).ThenInclude(fr => fr.Sector)
+                .FirstOrDefaultAsync(fm => fm.PersonId == personId);
+            sectorName = memberRegistration?.Registration.Sector?.Name;
+        }
+
+        var sector = !string.IsNullOrEmpty(sectorName)
+            ? await _context.Sectors.FirstOrDefaultAsync(s => s.Name == sectorName)
+            : null;
+
+        var beneficiary = new AssistanceBeneficiary
+        {
+            AssistanceId = assistanceId,
+            FullName = person.FullName,
+            NationalId = person.IdNumber,
+            Phone = _context.FamilyRegistrations
+                .Where(fr => fr.FamilyHeadId == personId)
+                .Select(fr => fr.PhoneNumber)
+                .FirstOrDefault() ?? "",
+            SectorId = sector?.Id ?? 0,
+            Status = BeneficiaryStatus.Active,
+            CreatedById = userId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.AssistanceBeneficiaries.Add(beneficiary);
+        await _context.SaveChangesAsync();
+
+        await _audit.LogAsync(userId, "إضافة مستفيد", "AssistanceBeneficiaries",
+            beneficiary.Id.ToString(), null, new { beneficiary.FullName, beneficiary.NationalId, source = "Person" });
+
+        return beneficiary;
+    }
+
     public async Task<AssistanceBeneficiary> UpdateBeneficiaryAsync(AssistanceBeneficiary updated, int userId)
     {
         var existing = await _context.AssistanceBeneficiaries.FindAsync(updated.Id)
@@ -172,10 +250,6 @@ public class AssistanceService : IAssistanceService
 
         existing.FullName = updated.FullName;
         existing.Phone = updated.Phone;
-        existing.FileNumber = updated.FileNumber;
-        existing.FamilyName = updated.FamilyName;
-        existing.City = updated.City;
-        existing.FamilyCount = updated.FamilyCount;
         existing.BenefitType = updated.BenefitType;
         existing.Notes = updated.Notes;
         existing.Status = updated.Status;

@@ -257,6 +257,54 @@ public class AssistanceController : Controller
         return RedirectToAction("Details", new { id = model.AssistanceId });
     }
 
+    [HttpGet]
+    public async Task<IActionResult> SearchPerson(string query)
+    {
+        if (!IsAuthenticated()) return Unauthorized();
+
+        string? sectorName = null;
+        if (!IsSuperAdmin())
+        {
+            var admin = await _context.Admins
+                .Include(a => a.Sector)
+                .FirstOrDefaultAsync(a => a.Id == GetUserId());
+            sectorName = admin?.Sector?.Name;
+        }
+
+        var persons = await _assistanceService.SearchPersonsAsync(query, sectorName);
+
+        var personIds = persons.Select(p => p.Id).ToList();
+        var phones = await _context.FamilyRegistrations
+            .Where(fr => personIds.Contains(fr.FamilyHeadId))
+            .ToDictionaryAsync(fr => fr.FamilyHeadId, fr => fr.PhoneNumber);
+
+        return Json(persons.Select(p => new
+        {
+            p.Id,
+            name = p.FullName,
+            p.IdNumber,
+            phone = phones.GetValueOrDefault(p.Id, "")
+        }));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddBeneficiaryFromPerson(int personId, int assistanceId)
+    {
+        if (!IsAuthenticated() || IsViewer()) return Unauthorized();
+
+        try
+        {
+            await _assistanceService.AddBeneficiaryFromPersonAsync(personId, assistanceId, GetUserId());
+            TempData["Success"] = "تم إضافة المستفيد بنجاح";
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+
+        return RedirectToAction("Details", new { id = assistanceId });
+    }
+
     [HttpPost]
     public async Task<IActionResult> DeleteBeneficiary(int id, int assistanceId)
     {
@@ -378,7 +426,7 @@ public class AssistanceController : Controller
         using var workbook = new ClosedXML.Excel.XLWorkbook();
         var ws = workbook.Worksheets.Add("المستفيدين");
 
-        var headers = new[] { "الاسم", "رقم الهوية", "الجوال", "رقم الملف", "اسم العائلة", "المحافظة", "القاطع", "عدد الأسرة", "نوع الاستفادة", "تاريخ الإضافة" };
+        var headers = new[] { "الاسم", "رقم الهوية", "الجوال", "القاطع", "نوع الاستفادة", "تاريخ الإضافة" };
         for (int c = 0; c < headers.Length; c++)
         {
             ws.Cell(1, c + 1).Value = headers[c];
@@ -392,13 +440,9 @@ public class AssistanceController : Controller
             ws.Cell(row, 1).Value = b.FullName;
             ws.Cell(row, 2).Value = b.NationalId;
             ws.Cell(row, 3).Value = b.Phone;
-            ws.Cell(row, 4).Value = b.FileNumber;
-            ws.Cell(row, 5).Value = b.FamilyName;
-            ws.Cell(row, 6).Value = b.City;
-            ws.Cell(row, 7).Value = b.Sector?.Name ?? "";
-            ws.Cell(row, 8).Value = b.FamilyCount;
-            ws.Cell(row, 9).Value = b.BenefitType;
-            ws.Cell(row, 10).Value = b.CreatedAt.ToString("yyyy-MM-dd");
+            ws.Cell(row, 4).Value = b.Sector?.Name ?? "";
+            ws.Cell(row, 5).Value = b.BenefitType;
+            ws.Cell(row, 6).Value = b.CreatedAt.ToString("yyyy-MM-dd");
             row++;
         }
 

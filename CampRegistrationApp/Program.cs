@@ -392,11 +392,11 @@ using (var scope = app.Services.CreateScope())
             [FullName] nvarchar(200) NOT NULL,
             [NationalId] nvarchar(50) NOT NULL,
             [Phone] nvarchar(50) NOT NULL DEFAULT '',
-            [FileNumber] nvarchar(100) NOT NULL DEFAULT '',
-            [FamilyName] nvarchar(200) NOT NULL DEFAULT '',
-            [City] nvarchar(200) NOT NULL DEFAULT '',
+            [FileNumber] nvarchar(100) NULL,
+            [FamilyName] nvarchar(200) NULL,
+            [City] nvarchar(200) NULL,
+            [FamilyCount] int NULL,
             [SectorId] int NOT NULL,
-            [FamilyCount] int NOT NULL DEFAULT 0,
             [BenefitType] nvarchar(200) NOT NULL DEFAULT '',
             [Status] int NOT NULL DEFAULT 0,
             [Notes] nvarchar(max) NULL,
@@ -412,6 +412,15 @@ using (var scope = app.Services.CreateScope())
     db.Database.ExecuteSqlRaw(@"
         IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_AB_NationalId_AssistanceId')
         CREATE UNIQUE INDEX [IX_AB_NationalId_AssistanceId] ON [AssistanceBeneficiaries] ([NationalId], [AssistanceId]) WHERE [IsDeleted] = 0");
+    db.Database.ExecuteSqlRaw(@"
+        IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('AssistanceBeneficiaries') AND name = 'FileNumber' AND is_nullable = 0)
+        ALTER TABLE [AssistanceBeneficiaries] ALTER COLUMN [FileNumber] nvarchar(100) NULL;
+        IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('AssistanceBeneficiaries') AND name = 'FamilyName' AND is_nullable = 0)
+        ALTER TABLE [AssistanceBeneficiaries] ALTER COLUMN [FamilyName] nvarchar(200) NULL;
+        IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('AssistanceBeneficiaries') AND name = 'City' AND is_nullable = 0)
+        ALTER TABLE [AssistanceBeneficiaries] ALTER COLUMN [City] nvarchar(200) NULL;
+        IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('AssistanceBeneficiaries') AND name = 'FamilyCount' AND is_nullable = 0)
+        ALTER TABLE [AssistanceBeneficiaries] ALTER COLUMN [FamilyCount] int NULL;");
     db.Database.ExecuteSqlRaw(@"
         IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AssistanceImports')
         CREATE TABLE [AssistanceImports] (

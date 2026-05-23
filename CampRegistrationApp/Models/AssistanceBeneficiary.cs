@@ -28,22 +28,17 @@ public class AssistanceBeneficiary
     [MaxLength(50)]
     public string Phone { get; set; } = string.Empty;
 
-    [MaxLength(100)]
-    public string FileNumber { get; set; } = string.Empty;
-
-    [MaxLength(200)]
-    public string FamilyName { get; set; } = string.Empty;
-
-    [MaxLength(200)]
-    public string City { get; set; } = string.Empty;
-
     public int SectorId { get; set; }
     public virtual Sector Sector { get; set; } = null!;
 
-    public int FamilyCount { get; set; }
-
     [MaxLength(200)]
     public string BenefitType { get; set; } = string.Empty;
+
+    // Legacy columns kept nullable for DB compatibility
+    public string? FileNumber { get; set; }
+    public string? FamilyName { get; set; }
+    public string? City { get; set; }
+    public int? FamilyCount { get; set; }
 
     public BeneficiaryStatus Status { get; set; } = BeneficiaryStatus.Draft;
 

@@ -82,6 +82,15 @@ Camp family registration system in two versions:
   - Check digit = `(10 - (sum % 10)) % 10`
   - Compared with the 9th digit
 
+### Assistance System (Beneficiary Management)
+- **Assistance**: Aid campaign with Name, Type, Source, Date, Sector, Status (Draft/Approved/Cancelled), soft delete.
+- **AssistanceBeneficiary**: Standalone beneficiary record (not linked to Person entity) with FullName, NationalId, Phone, SectorId, BenefitType, Notes, Status.
+- **Add Beneficiary**: Search by NationalId/name on Details page → selects from existing `Person` records (refugees + family members) → adds with one click (`AddBeneficiaryFromPerson`). No manual data entry.
+- **Import**: Excel (.xlsx) bulk import with template download, duplicate NationalId detection per assistance, error reporting.
+- **Export**: Download beneficiary list as Excel from Details page.
+- **Controller**: `AssistanceController` with CRUD + `SearchPerson`/`AddBeneficiaryFromPerson`/`DeleteBeneficiary` + `Import`/`ExportBeneficiaries`.
+- **Service**: `AssistanceService` handles business logic including `SearchPersonsAsync` and `AddBeneficiaryFromPersonAsync` (copies Person data → beneficiary); `ImportService` handles Excel parsing.
+
 ### MotherIdNumber Validation
 - Added field to `Edit.cshtml` member template (was missing entirely)
 - Added `onblur="validateMotherIdField(this)"` + `oninput="clearMotherIdError(this)"` + error span in both Index.cshtml and Edit.cshtml

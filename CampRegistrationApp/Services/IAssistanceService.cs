@@ -14,7 +14,11 @@ public interface IAssistanceService
 
     // Beneficiaries
     Task<AssistanceBeneficiary> AddBeneficiaryAsync(AssistanceBeneficiary beneficiary, int userId);
+    Task<AssistanceBeneficiary> AddBeneficiaryFromPersonAsync(int personId, int assistanceId, int userId);
     Task<AssistanceBeneficiary> UpdateBeneficiaryAsync(AssistanceBeneficiary beneficiary, int userId);
     Task DeleteBeneficiaryAsync(int id, int userId);
     Task<List<AssistanceBeneficiary>> GetBeneficiariesAsync(int assistanceId);
+
+    // Person search
+    Task<List<Person>> SearchPersonsAsync(string query, string? sectorName);
 }

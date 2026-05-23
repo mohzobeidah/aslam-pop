@@ -22,7 +22,7 @@ public class ImportService : IImportService
         using var workbook = new XLWorkbook();
         var ws = workbook.Worksheets.Add("المستفيدين");
 
-        var headers = new[] { "FullName", "NationalId", "Phone", "FileNumber", "FamilyName", "Sector", "City", "FamilyCount" };
+        var headers = new[] { "FullName", "NationalId", "Phone", "Sector" };
         int col = 1;
         foreach (var h in headers)
         {
@@ -85,11 +85,7 @@ public class ImportService : IImportService
                     FullName = row.Cell(1).GetString().Trim(),
                     NationalId = nationalId,
                     Phone = row.Cell(3).GetString().Trim(),
-                    FileNumber = row.Cell(4).GetString().Trim(),
-                    FamilyName = row.Cell(5).GetString().Trim(),
-                    City = row.Cell(7).GetString().Trim(),
                     SectorId = sectorId,
-                    FamilyCount = row.Cell(8).TryGetValue(out int fc) ? fc : 0,
                     Status = BeneficiaryStatus.Active,
                     CreatedById = userId,
                     CreatedAt = DateTime.UtcNow,
