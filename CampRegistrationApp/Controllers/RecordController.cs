@@ -431,6 +431,11 @@ namespace CampRegistrationApp.Controllers
                     .Where(s => s.Id == model.SectorId)
                     .Select(s => s.Name)
                     .FirstAsync();
+                await _audit.LogAsync(0, "RecordEdit", "FamilyRegistrations",
+                    registration.RecordId,
+                    new { action = "تم تعديل بيانات العائلة بواسطة رب الأسرة" },
+                    new { headName = head.FullName, sector = sectorName },
+                    source: "Web");
                 await _notificationService.NotifyMandoobsAsync(
                     sectorName,
                     $"تعديل بيانات: {head.FullName} - رقم القيد: {registration.RecordId}",

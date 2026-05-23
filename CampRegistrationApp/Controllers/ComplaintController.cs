@@ -11,11 +11,13 @@ namespace CampRegistrationApp.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IComplaintIdGenerator _idGenerator;
+        private readonly IAuditService _audit;
 
-        public ComplaintController(ApplicationDbContext context, IComplaintIdGenerator idGenerator)
+        public ComplaintController(ApplicationDbContext context, IComplaintIdGenerator idGenerator, IAuditService audit)
         {
             _context = context;
             _idGenerator = idGenerator;
+            _audit = audit;
         }
 
         private bool IsAuthenticated()
@@ -57,6 +59,9 @@ namespace CampRegistrationApp.Controllers
 
             _context.Complaints.Add(complaint);
             await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(0, "CreateComplaint", "Complaints",
+                complaint.Id.ToString(), null, new { complaint.TicketId, complaint.Subject, complaint.SenderName });
 
             TempData["TicketId"] = ticketId;
             return RedirectToAction("Confirmation");
@@ -141,6 +146,9 @@ namespace CampRegistrationApp.Controllers
             var complaint = await _context.Complaints.FirstOrDefaultAsync(c => c.Id == id);
             if (complaint == null) return NotFound();
 
+            var oldStatus = complaint.Status;
+            var oldResponse = complaint.AdminResponse;
+
             if (!string.IsNullOrEmpty(adminResponse))
                 complaint.AdminResponse = adminResponse;
 
@@ -156,6 +164,11 @@ namespace CampRegistrationApp.Controllers
 
             await _context.SaveChangesAsync();
 
+            await _audit.LogAsync(GetCurrentAdminId(), "RespondComplaint", "Complaints",
+                id.ToString(),
+                new { status = oldStatus.ToString(), responseLength = oldResponse?.Length ?? 0 },
+                new { status = complaint.Status.ToString(), responseLength = (complaint.AdminResponse?.Length ?? 0) });
+
             TempData["Success"] = "تم حفظ الرد بنجاح";
             return RedirectToAction("Details", new { id });
         }
@@ -169,8 +182,12 @@ namespace CampRegistrationApp.Controllers
             var complaint = await _context.Complaints.FirstOrDefaultAsync(c => c.Id == id);
             if (complaint == null) return NotFound();
 
+            var old = new { complaint.TicketId, complaint.SenderName, complaint.SenderPhone, complaint.Status };
             complaint.IsDeleted = true;
             await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(GetCurrentAdminId(), "DeleteComplaint", "Complaints",
+                id.ToString(), old, new { isDeleted = true });
 
             TempData["Success"] = "تم حذف الشكوى";
             return RedirectToAction("Index");

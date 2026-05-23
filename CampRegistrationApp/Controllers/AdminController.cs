@@ -245,6 +245,8 @@ namespace CampRegistrationApp.Controllers
             {
                 notification.IsRead = true;
                 await _context.SaveChangesAsync();
+                await _audit.LogAsync(GetCurrentAdminId(), "MarkNotificationRead", "Notifications",
+                    id.ToString(), new { isRead = false }, new { isRead = true });
             }
 
             return RedirectToAction("Notifications");
@@ -260,8 +262,12 @@ namespace CampRegistrationApp.Controllers
                 .Where(n => n.AdminId == adminId && !n.IsRead)
                 .ToListAsync();
 
+            var count = unread.Count;
             foreach (var n in unread) n.IsRead = true;
             await _context.SaveChangesAsync();
+            if (count > 0)
+                await _audit.LogAsync(adminId, "MarkAllNotificationsRead", "Notifications",
+                    null, new { count }, new { count = 0 });
 
             return RedirectToAction("Notifications");
         }
@@ -352,6 +358,7 @@ namespace CampRegistrationApp.Controllers
                 return View(admin);
             }
 
+            var old = new { existing.Name, existing.NationalId, existing.Mobile, existing.Role, existing.SectorId };
             existing.Name = admin.Name;
             existing.NationalId = admin.NationalId;
             existing.Mobile = admin.Mobile;
@@ -364,6 +371,8 @@ namespace CampRegistrationApp.Controllers
             }
 
             await _context.SaveChangesAsync();
+            await _audit.LogAsync(GetCurrentAdminId(), "EditAdmin", "Admins",
+                admin.Id.ToString(), old, new { existing.Name, existing.NationalId, existing.Mobile, existing.Role, existing.SectorId });
             TempData["Success"] = "تم تعديل بيانات المسؤول بنجاح";
             return RedirectToAction("Index");
         }
@@ -376,8 +385,11 @@ namespace CampRegistrationApp.Controllers
             var admin = await _context.Admins.FindAsync(id);
             if (admin != null)
             {
+                var old = new { admin.Name, admin.NationalId, admin.Role, admin.Mobile };
                 _context.Admins.Remove(admin);
                 await _context.SaveChangesAsync();
+                await _audit.LogAsync(GetCurrentAdminId(), "DeleteAdmin", "Admins",
+                    id.ToString(), old, null);
                 TempData["Success"] = "تم حذف المسؤول بنجاح";
             }
 
@@ -422,6 +434,8 @@ namespace CampRegistrationApp.Controllers
 
             _context.Sectors.Add(sector);
             await _context.SaveChangesAsync();
+            await _audit.LogAsync(GetCurrentAdminId(), "CreateSector", "Sectors",
+                sector.Id.ToString(), null, new { sector.Name, sector.Camp, sector.Coordinate, sector.Area });
             TempData["Success"] = "تم إضافة القاطع بنجاح";
             return RedirectToAction("Sectors");
         }
@@ -460,6 +474,7 @@ namespace CampRegistrationApp.Controllers
 
             if (!ModelState.IsValid) return View(sector);
 
+            var old = new { existing.Name, existing.Camp, existing.Coordinate, existing.Area };
             existing.Name = sector.Name;
             existing.Camp = sector.Camp;
             existing.Coordinate = sector.Coordinate;
@@ -469,6 +484,8 @@ namespace CampRegistrationApp.Controllers
             existing.BathroomsCount = sector.BathroomsCount;
 
             await _context.SaveChangesAsync();
+            await _audit.LogAsync(GetCurrentAdminId(), "EditSector", "Sectors",
+                sector.Id.ToString(), old, new { existing.Name, existing.Camp, existing.Coordinate, existing.Area });
             TempData["Success"] = "تم تعديل القاطع بنجاح";
             return RedirectToAction("Sectors");
         }
@@ -478,11 +495,17 @@ namespace CampRegistrationApp.Controllers
         {
             if (!IsAuthenticated() || !IsSuperAdmin()) return RedirectToAction("Dashboard");
 
-            var admin = await _context.Admins.FindAsync(adminId);
+            var admin = await _context.Admins.Include(a => a.Sector).FirstOrDefaultAsync(a => a.Id == adminId);
             if (admin != null && admin.Role == AdminRole.Mandoob)
             {
+                var oldSector = admin.Sector?.Name;
+                var sector = await _context.Sectors.FindAsync(sectorId);
                 admin.SectorId = sectorId;
                 await _context.SaveChangesAsync();
+                await _audit.LogAsync(GetCurrentAdminId(), "AssignMandoob", "Admins",
+                    adminId.ToString(),
+                    new { admin.Name, sectorName = oldSector },
+                    new { admin.Name, sectorName = sector?.Name });
                 TempData["Success"] = "تم تعيين المندوب للقاطع";
             }
 
@@ -494,11 +517,14 @@ namespace CampRegistrationApp.Controllers
         {
             if (!IsAuthenticated() || !IsSuperAdmin()) return RedirectToAction("Dashboard");
 
-            var admin = await _context.Admins.FindAsync(adminId);
+            var admin = await _context.Admins.Include(a => a.Sector).FirstOrDefaultAsync(a => a.Id == adminId);
             if (admin != null)
             {
+                var old = new { admin.Name, admin.NationalId, sectorName = admin.Sector?.Name };
                 admin.SectorId = null;
                 await _context.SaveChangesAsync();
+                await _audit.LogAsync(GetCurrentAdminId(), "RemoveMandoob", "Admins",
+                    adminId.ToString(), old, new { admin.Name, sectorId = (int?)null });
                 TempData["Success"] = "تم إزالة المندوب من القاطع";
             }
 
@@ -558,6 +584,10 @@ namespace CampRegistrationApp.Controllers
             _context.Admins.Add(admin);
             await _context.SaveChangesAsync();
 
+            var sector = await _context.Sectors.FindAsync(sectorId);
+            await _audit.LogAsync(GetCurrentAdminId(), "AssignPersonAsMandoob", "Admins",
+                admin.Id.ToString(), null, new { admin.Name, admin.NationalId, admin.Mobile, sectorName = sector?.Name });
+
             TempData["Success"] = $"تم تعيين {admin.Name} كمندوب للقاطع";
             return RedirectToAction("EditSector", new { id = sectorId });
         }
@@ -570,8 +600,11 @@ namespace CampRegistrationApp.Controllers
             var sector = await _context.Sectors.FindAsync(id);
             if (sector != null)
             {
+                var old = new { sector.Name, sector.Camp, sector.Coordinate };
                 _context.Sectors.Remove(sector);
                 await _context.SaveChangesAsync();
+                await _audit.LogAsync(GetCurrentAdminId(), "DeleteSector", "Sectors",
+                    id.ToString(), old, null);
                 TempData["Success"] = "تم حذف القاطع بنجاح";
             }
 
