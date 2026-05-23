@@ -237,6 +237,7 @@ namespace CampRegistrationApp.Controllers
 
             // Check for duplicate IDs
             var currentHeadId = registration.FamilyHead.IdNumber;
+            var currentMemberIds = registration.Members.Select(m => m.Person.IdNumber).ToHashSet();
             var allIds = new List<string> { model.Head.IdNumber };
             allIds.AddRange(model.Members.Select(m => m.IdNumber));
 
@@ -248,7 +249,7 @@ namespace CampRegistrationApp.Controllers
             }
 
             var existingIds = await _context.Persons
-                .Where(p => allIds.Contains(p.IdNumber) && p.IdNumber != currentHeadId)
+                .Where(p => allIds.Contains(p.IdNumber) && p.IdNumber != currentHeadId && !currentMemberIds.Contains(p.IdNumber))
                 .Select(p => p.IdNumber)
                 .ToListAsync();
 
