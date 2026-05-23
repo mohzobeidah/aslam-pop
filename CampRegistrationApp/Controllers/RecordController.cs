@@ -327,7 +327,7 @@ namespace CampRegistrationApp.Controllers
                 }
 
                 // Update Registration-level fields
-                registration.SectorId = model.SectorId;
+                registration.SectorId = model.SectorId ?? 0;
                 registration.PhoneNumber = model.PhoneNumber;
                 registration.Wallet = model.Wallet;
                 registration.WalletType = model.WalletType;

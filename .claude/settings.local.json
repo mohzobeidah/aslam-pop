@@ -18,7 +18,8 @@
       "PowerShell(Get-NetTCPConnection *)",
       "PowerShell(dotnet build *)",
       "PowerShell(dotnet run *)",
-      "Bash(dotnet test *)"
+      "Bash(dotnet test *)",
+      "Bash(findstr :5392)"
     ]
   }
 }

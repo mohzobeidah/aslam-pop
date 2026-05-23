@@ -48,8 +48,8 @@ private string RegisterAndGetRecordId()
     var head = new Person
     {
         FirstName = "محمد", SecondName = "أحمد", ThirdName = "علي", LastName = "السيد",
-        IdNumber = headId, Sector = "A", DateOfBirth = new DateTime(1990, 1, 1),
-        Gender = "ذكر", PhoneNumber = "0591234567", Wallet = "0591234567",
+        IdNumber = headId, DateOfBirth = new DateTime(1990, 1, 1),
+        Gender = "ذكر",
         OriginalGovernorate = "غزة", MaritalStatus = "متزوج", EmploymentStatus = "موظف",
         EducationLevel = "جامعي", HealthStatus = "سليم"
     };
@@ -65,11 +65,15 @@ private string RegisterAndGetRecordId()
     db.Persons.Add(member);
     db.SaveChanges();
 
+    var sectorA = db.Sectors.First(s => s.Name == "A");
     var registration = new FamilyRegistration
     {
         RecordId = recordId,
         FamilyHeadId = head.Id,
         ApprovalStatus = RegistrationApprovalStatus.Pending,
+        SectorId = sectorA.Id,
+        PhoneNumber = "0591234567",
+        Wallet = "0591234567",
         LivesInTent = true, TentType = "Installation",
         HasBathroom = true, BathroomType = "Private",
         RegistrationTimestamp = DateTime.UtcNow

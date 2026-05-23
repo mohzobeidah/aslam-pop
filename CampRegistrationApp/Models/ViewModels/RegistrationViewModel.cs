@@ -36,7 +36,7 @@ namespace CampRegistrationApp.Models.ViewModels
         public string? StatusNotes { get; set; }
 
         [Required(ErrorMessage = "القاطع مطلوب")]
-        public int SectorId { get; set; }
+        public int? SectorId { get; set; }
         [Required(ErrorMessage = "رقم الهاتف مطلوب")]
         [RegularExpression(@"^(059|056)\d{7}$", ErrorMessage = "رقم الهاتف يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056")]
         public string PhoneNumber { get; set; } = string.Empty;

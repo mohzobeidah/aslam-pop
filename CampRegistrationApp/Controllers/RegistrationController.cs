@@ -230,7 +230,7 @@ namespace CampRegistrationApp.Controllers
                     LivesInTent = model.LivesInTent,
                     TentType = model.TentType,
                     OtherTentType = model.OtherTentType,
-                    SectorId = model.SectorId,
+                    SectorId = model.SectorId ?? 0,
                     PhoneNumber = model.PhoneNumber,
                     Wallet = model.Wallet,
                     WalletType = model.WalletType,

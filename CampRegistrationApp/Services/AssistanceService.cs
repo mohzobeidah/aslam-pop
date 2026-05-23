@@ -39,8 +39,17 @@ public class AssistanceService : IAssistanceService
                 a.Name.Contains(search) ||
                 a.Source.Contains(search));
 
-        if (!string.IsNullOrEmpty(status) && Enum.TryParse<AssistanceStatus>(status, true, out var st))
-            query = query.Where(a => a.Status == st);
+        if (!string.IsNullOrEmpty(status))
+        {
+            if (status == "Deleted")
+                query = query.Where(a => a.IsDeleted);
+            else if (Enum.TryParse<AssistanceStatus>(status, true, out var st))
+                query = query.Where(a => a.Status == st && !a.IsDeleted);
+        }
+        else
+        {
+            query = query.Where(a => !a.IsDeleted);
+        }
 
         return await query
             .OrderByDescending(a => a.CreatedAt)

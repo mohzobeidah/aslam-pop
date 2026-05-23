@@ -85,11 +85,13 @@ public class Helpers
             Head = new PersonViewModel
             {
                 FirstName = "محمد", SecondName = "أحمد", ThirdName = "علي",
-                LastName = "السيد", IdNumber = "123456789", Sector = "A",
+                LastName = "السيد", IdNumber = "123456789",
                 DateOfBirth = new DateTime(1990, 1, 1), Gender = "ذكر",
                 HealthStatus = "سليم"
             },
-            CurrentStep = 1
+            CurrentStep = 1,
+            SectorId = 1,
+            PhoneNumber = "0591234567"
         };
     }
 }
@@ -125,7 +127,7 @@ public class RecordIdGeneratorTests
         db.FamilyRegistrations.Add(new FamilyRegistration
         {
             RecordId = "XXXXXXX1",
-            FamilyHead = new Person { FirstName = "A", IdNumber = "111111111", Sector = "A", DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم" }
+            FamilyHead = new Person { FirstName = "A", IdNumber = "111111111", DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم" }
         });
         db.SaveChanges();
 
@@ -181,7 +183,7 @@ public class RegistrationControllerTests
         Helpers.SeedLookups(db);
         var head = new Person
         {
-            FirstName = "A", IdNumber = "123456789", Sector = "A",
+            FirstName = "A", IdNumber = "123456789",
             DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم"
         };
         db.Persons.Add(head);
@@ -207,7 +209,7 @@ public class RegistrationControllerTests
         Helpers.SeedLookups(db);
         db.Persons.Add(new Person
         {
-            FirstName = "Existing", IdNumber = "123456789", Sector = "A",
+            FirstName = "Existing", IdNumber = "123456789",
             DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم"
         });
         db.SaveChanges();
@@ -243,9 +245,9 @@ public class RegistrationControllerTests
             .Returns(Task.CompletedTask);
 
         var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object);
+        Helpers.SetupControllerContext(ctrl);
 
         var model = Helpers.GetValidViewModel();
-        model.Head.PhoneNumber = "0591234567";
 
         ViewResult? view;
         try
@@ -281,7 +283,7 @@ public class RecordControllerTests
         var head = new Person
         {
             FirstName = "رب", LastName = "الأسرة", IdNumber = "999999999",
-            Sector = "A", DateOfBirth = new DateTime(1980, 1, 1),
+            DateOfBirth = new DateTime(1980, 1, 1),
             Gender = "ذكر", HealthStatus = "سليم"
         };
         db.Persons.Add(head);
@@ -293,6 +295,8 @@ public class RecordControllerTests
             FamilyHeadId = head.Id,
             PasswordHash = Helpers.HashPassword("mypassword"),
             ApprovalStatus = status,
+            SectorId = 1,
+            PhoneNumber = "0591234567",
             IsChildHeaded = false, LivesInTent = false, HasBathroom = false,
             NeedsDiapers = false, HasMultipleFamiliesInTent = false
         };
@@ -305,8 +309,10 @@ public class RecordControllerTests
     public async Task Login_Approved_RedirectsToEdit()
     {
         var db = SetupDbWithRegistration(RegistrationApprovalStatus.Approved);
+        var audit = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
-        var ctrl = new RecordController(db, notifService.Object);
+        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object);
         Helpers.SetupControllerContext(ctrl);
 
         var result = await ctrl.Login("999999999", "mypassword");
@@ -318,8 +324,10 @@ public class RecordControllerTests
     public async Task Login_Pending_ShowsError()
     {
         var db = SetupDbWithRegistration(RegistrationApprovalStatus.Pending);
+        var audit = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
-        var ctrl = new RecordController(db, notifService.Object);
+        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object);
         Helpers.SetupControllerContext(ctrl);
 
         var result = await ctrl.Login("999999999", "mypassword");
@@ -331,8 +339,10 @@ public class RecordControllerTests
     public async Task Login_Rejected_ShowsError()
     {
         var db = SetupDbWithRegistration(RegistrationApprovalStatus.Rejected);
+        var audit = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
-        var ctrl = new RecordController(db, notifService.Object);
+        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object);
         Helpers.SetupControllerContext(ctrl);
 
         var result = await ctrl.Login("999999999", "mypassword");
@@ -344,8 +354,10 @@ public class RecordControllerTests
     public async Task Login_WrongPassword_ShowsError()
     {
         var db = SetupDbWithRegistration(RegistrationApprovalStatus.Approved);
+        var audit = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
-        var ctrl = new RecordController(db, notifService.Object);
+        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object);
         Helpers.SetupControllerContext(ctrl);
 
         var result = await ctrl.Login("999999999", "wrongpassword");
@@ -358,8 +370,10 @@ public class RecordControllerTests
     {
         var db = SetupDbWithRegistration(RegistrationApprovalStatus.Approved);
         Helpers.SeedLookups(db);
+        var audit = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
-        var ctrl = new RecordController(db, notifService.Object);
+        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object);
         var reg = db.FamilyRegistrations.First();
         Helpers.SetupControllerContext(ctrl, reg.Id, "EditRegistrationId");
 
@@ -373,8 +387,10 @@ public class RecordControllerTests
     {
         var db = SetupDbWithRegistration(RegistrationApprovalStatus.Pending);
         Helpers.SeedLookups(db);
+        var audit = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
-        var ctrl = new RecordController(db, notifService.Object);
+        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object);
         var reg = db.FamilyRegistrations.First();
         Helpers.SetupControllerContext(ctrl, reg.Id, "EditRegistrationId");
 
@@ -389,8 +405,10 @@ public class RecordControllerTests
     {
         var db = Helpers.CreateDbContext("rec_no_sesh");
         Helpers.SeedLookups(db);
+        var audit = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
-        var ctrl = new RecordController(db, notifService.Object);
+        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object);
         Helpers.SetupControllerContext(ctrl);
 
         var result = await ctrl.Edit();
@@ -402,8 +420,10 @@ public class RecordControllerTests
     public async Task Login_EmptyFields_ShowsError()
     {
         var db = Helpers.CreateDbContext("rec_empty");
+        var audit = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
-        var ctrl = new RecordController(db, notifService.Object);
+        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object);
         Helpers.SetupControllerContext(ctrl);
 
         var result = await ctrl.Login("", "");
@@ -451,10 +471,11 @@ public class AdminControllerTests
 
     private static FamilyRegistration CreateReg(ApplicationDbContext db, string sector, RegistrationApprovalStatus status = RegistrationApprovalStatus.Pending)
     {
+        var sectorEntity = db.Sectors.First(s => s.Name == sector);
         var head = new Person
         {
             FirstName = "رب", LastName = "عائلة", IdNumber = Guid.NewGuid().ToString()[..9],
-            Sector = sector, DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم"
+            DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم"
         };
         db.Persons.Add(head);
         db.SaveChanges();
@@ -463,6 +484,8 @@ public class AdminControllerTests
         {
             RecordId = Guid.NewGuid().ToString()[..8],
             FamilyHeadId = head.Id,
+            SectorId = sectorEntity.Id,
+            PhoneNumber = "0591234567",
             ApprovalStatus = status,
             PasswordHash = "x",
             IsChildHeaded = false, LivesInTent = false, HasBathroom = false,

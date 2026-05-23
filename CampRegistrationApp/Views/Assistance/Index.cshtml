@@ -38,6 +38,7 @@
                 <option value="Draft" selected="@(ViewBag.CurrentStatus == "Draft")">مسودة</option>
                 <option value="Approved" selected="@(ViewBag.CurrentStatus == "Approved")">معتمدة</option>
                 <option value="Cancelled" selected="@(ViewBag.CurrentStatus == "Cancelled")">ملغية</option>
+                <option value="Deleted" selected="@(ViewBag.CurrentStatus == "Deleted")">محذوفة</option>
             </select>
         </div>
         <button type="submit" class="bg-camp-gold text-black px-4 py-2 rounded font-bold text-sm hover:bg-yellow-500 transition">بحث</button>
@@ -62,10 +63,12 @@
         <tbody>
             @foreach (var a in Model)
             {
-                var statusColor = a.Status == AssistanceStatus.Approved ? "text-green-400" : a.Status == AssistanceStatus.Cancelled ? "text-red-400" : "text-yellow-400";
-                var statusText = a.Status == AssistanceStatus.Approved ? "معتمدة" : a.Status == AssistanceStatus.Cancelled ? "ملغية" : "مسودة";
-                <tr class="border-b border-gray-700 hover:bg-camp-dark-grey/50 transition">
-                    <td class="p-3 font-bold text-white">@a.Name</td>
+                var isDeleted = a.IsDeleted;
+                var statusColor = isDeleted ? "text-gray-500" : a.Status == AssistanceStatus.Approved ? "text-green-400" : a.Status == AssistanceStatus.Cancelled ? "text-red-400" : "text-yellow-400";
+                var statusText = isDeleted ? "محذوفة" : a.Status == AssistanceStatus.Approved ? "معتمدة" : a.Status == AssistanceStatus.Cancelled ? "ملغية" : "مسودة";
+                var rowClass = isDeleted ? "border-b border-gray-700 opacity-50" : "border-b border-gray-700 hover:bg-camp-dark-grey/50 transition";
+                <tr class="@rowClass">
+                    <td class="p-3 font-bold @(isDeleted ? "text-gray-500 line-through" : "text-white")">@a.Name</td>
                     <td class="p-3 text-gray-300">@a.AssistanceType</td>
                     <td class="p-3 text-gray-300">@a.Source</td>
                     <td class="p-3 text-camp-gold">@a.Sector?.Name</td>
@@ -74,7 +77,7 @@
                     <td class="p-3 text-center text-gray-400 text-xs">@a.CreatedAt.ToString("yyyy/MM/dd")</td>
                     <td class="p-3 text-center">
                         <a asp-action="Details" asp-route-id="@a.Id" class="text-camp-gold hover:text-yellow-500 transition text-sm ml-2">عرض</a>
-                        @if (!ViewBag.IsViewer)
+                        @if (!ViewBag.IsViewer && !isDeleted)
                         {
                             <a asp-action="Edit" asp-route-id="@a.Id" class="text-blue-400 hover:text-blue-300 transition text-sm ml-2">تعديل</a>
                             if (ViewBag.IsSuperAdmin && a.Status == AssistanceStatus.Draft)
@@ -86,6 +89,10 @@
                             <form method="post" asp-action="Delete" asp-route-id="@a.Id" class="inline" onsubmit="return confirm('حذف المساعدة؟')">
                                 <button type="submit" class="text-red-400 hover:text-red-300 transition text-sm">حذف</button>
                             </form>
+                        }
+                        @if (isDeleted && ViewBag.IsSuperAdmin)
+                        {
+                            <span class="text-gray-500 text-sm">محذوفة</span>
                         }
                     </td>
                 </tr>
