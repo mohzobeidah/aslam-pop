@@ -473,7 +473,7 @@
                         <div id="tent-details" class="@(Model.LivesInTent ? "" : "hidden") p-4 bg-camp-dark-grey rounded border border-gray-700 space-y-4">
                             <select name="TentType" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
                                 <option value="">اختر النوع...</option>
-                                @foreach (var t in new[] { "Installation", "Dome", "Emirati", "Qatari", "Other" })
+                                @foreach (var t in new[] { "تركيب", "قبة", "إماراتية", "قطرية", "أخرى" })
                                 {
                                     <option value="@t" selected="@(Model.TentType == t )">@t</option>
                                 }
