@@ -230,7 +230,7 @@ namespace CampRegistrationApp.Controllers
                     LivesInTent = model.LivesInTent,
                     TentType = model.TentType,
                     OtherTentType = model.OtherTentType,
-                    Sector = model.Sector,
+                    SectorId = model.SectorId,
                     PhoneNumber = model.PhoneNumber,
                     Wallet = model.Wallet,
                     WalletType = model.WalletType,
@@ -307,15 +307,20 @@ namespace CampRegistrationApp.Controllers
 
                 await transaction.CommitAsync();
 
+                var sectorName = await _context.Sectors
+                    .Where(s => s.Id == model.SectorId)
+                    .Select(s => s.Name)
+                    .FirstAsync();
+
                 await _audit.LogAsync(0, "Create", "FamilyRegistrations", recordId, null, new
                 {
-                    head.IdNumber, head.FullName, Sector = model.Sector,
+                    head.IdNumber, head.FullName, Sector = sectorName,
                     memberCount = model.Members.Count,
                     registrationId = registration.Id
                 }, source: "Web");
 
                 await _notificationService.NotifyMandoobsAsync(
-                    model.Sector,
+                    sectorName,
                     $"تسجيل جديد: {head.FullName} - رقم القيد: {recordId}",
                     $"/Admin/RefugeeDetails/{registration.Id}");
 

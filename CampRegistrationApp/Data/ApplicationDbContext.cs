@@ -46,6 +46,12 @@ namespace CampRegistrationApp.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<FamilyRegistration>()
+                .HasOne(f => f.Sector)
+                .WithMany()
+                .HasForeignKey(f => f.SectorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FamilyRegistration>()
                 .HasOne(f => f.ApprovedBy)
                 .WithMany()
                 .HasForeignKey(f => f.ApprovedById)

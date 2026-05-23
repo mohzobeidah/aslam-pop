@@ -89,6 +89,7 @@ namespace CampRegistrationApp.Controllers
                 .Include(f => f.FamilyHead)
                 .Include(f => f.Members)
                     .ThenInclude(m => m.Person)
+                .Include(f => f.Sector)
                 .FirstOrDefaultAsync(f => f.FamilyHead.IdNumber == idNumber && f.PasswordHash == hash);
 
             if (registration == null)
@@ -122,7 +123,7 @@ namespace CampRegistrationApp.Controllers
 
             await _audit.LogAsync(0, "Login", "FamilyRegistrations", registration.RecordId,
                 null,
-                new { headName = registration.FamilyHead.FullName, idNumber, sector = registration.Sector });
+                new { headName = registration.FamilyHead.FullName, idNumber, sector = registration.Sector?.Name });
 
             return RedirectToAction("Edit");
         }
@@ -326,7 +327,7 @@ namespace CampRegistrationApp.Controllers
                 }
 
                 // Update Registration-level fields
-                registration.Sector = model.Sector;
+                registration.SectorId = model.SectorId;
                 registration.PhoneNumber = model.PhoneNumber;
                 registration.Wallet = model.Wallet;
                 registration.WalletType = model.WalletType;
@@ -426,8 +427,12 @@ namespace CampRegistrationApp.Controllers
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
+                var sectorName = await _context.Sectors
+                    .Where(s => s.Id == model.SectorId)
+                    .Select(s => s.Name)
+                    .FirstAsync();
                 await _notificationService.NotifyMandoobsAsync(
-                    registration.Sector,
+                    sectorName,
                     $"تعديل بيانات: {head.FullName} - رقم القيد: {registration.RecordId}",
                     $"/Admin/RefugeeDetails/{registration.Id}");
 
@@ -533,7 +538,7 @@ namespace CampRegistrationApp.Controllers
                 HasMultipleFamiliesInTent = registration.HasMultipleFamiliesInTent,
                 AdditionalFamiliesCount = registration.AdditionalFamiliesCount,
                 StatusNotes = registration.StatusNotes,
-                Sector = registration.Sector,
+                SectorId = registration.SectorId,
                 PhoneNumber = registration.PhoneNumber,
                 Wallet = registration.Wallet,
                 WalletType = registration.WalletType,

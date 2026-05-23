@@ -63,11 +63,11 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">القاطع</label>
-                            <select name="Sector" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
+                            <select name="SectorId" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
                                 <option value="">اختر القاطع...</option>
                                 @foreach (var s in ViewBag.Sectors)
                                 {
-                                    <option value="@s.Name" selected="@(Model.Sector == s.Name)">@s.Name</option>
+                                    <option value="@s.Id" selected="@(Model.SectorId == s.Id)">@s.Name</option>
                                 }
                             </select>
                         </div>
@@ -897,7 +897,7 @@
                 'Head.ThirdName': 'الاسم الثالث',
                 'Head.LastName': 'اسم العائلة',
                 'Head.IdNumber': 'رقم الهوية',
-                'Sector': 'القاطع',
+                'SectorId': 'القاطع',
                 'Head.DateOfBirth': 'تاريخ الميلاد',
                 'PhoneNumber': 'رقم الهاتف',
                 'Wallet': 'المحفظة',

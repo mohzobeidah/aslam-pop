@@ -197,7 +197,7 @@ public class NominationService : INominationService
         if (!string.IsNullOrEmpty(sectorName))
         {
             var sectorPersonIds = _context.FamilyRegistrations
-                .Where(fr => fr.Sector == sectorName)
+                .Where(fr => fr.Sector.Name == sectorName)
                 .Select(fr => fr.FamilyHeadId);
             q = q.Where(p => sectorPersonIds.Contains(p.Id));
         }

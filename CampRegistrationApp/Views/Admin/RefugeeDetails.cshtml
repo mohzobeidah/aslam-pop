@@ -22,7 +22,7 @@
         <div class="grid grid-cols-2 gap-3 text-sm">
             <div><span class="text-gray-400">الاسم:</span> <span class="text-white">@head.FullName</span></div>
             <div><span class="text-gray-400">رقم الهوية:</span> <span class="text-white">@head.IdNumber</span></div>
-            <div><span class="text-gray-400">القاطع:</span> <span class="text-white">@Model.Sector</span></div>
+            <div><span class="text-gray-400">القاطع:</span> <span class="text-white">@Model.Sector?.Name</span></div>
             <div><span class="text-gray-400">تاريخ الميلاد:</span> <span class="text-white">@head.DateOfBirth.ToString("yyyy/MM/dd")</span></div>
             <div><span class="text-gray-400">الجنس:</span> <span class="text-white">@head.Gender</span></div>
             <div><span class="text-gray-400">الهاتف:</span> <span class="text-white" dir="ltr">@Model.PhoneNumber</span></div>

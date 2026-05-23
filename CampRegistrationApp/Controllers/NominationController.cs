@@ -67,18 +67,18 @@ public class NominationController : Controller
 
         try
         {
-            var sector = await _context.FamilyRegistrations
-                .Where(fr => fr.FamilyHeadId == personId)
-                .Select(fr => fr.Sector)
-                .FirstOrDefaultAsync();
-
-            if (sector == null)
-            {
-                sector = await _context.FamilyMembers
-                    .Where(fm => fm.PersonId == personId)
-                    .Select(fm => fm.Registration.Sector)
+                var sector = await _context.FamilyRegistrations
+                    .Where(fr => fr.FamilyHeadId == personId)
+                    .Select(fr => fr.Sector.Name)
                     .FirstOrDefaultAsync();
-            }
+
+                if (string.IsNullOrEmpty(sector))
+                {
+                    sector = await _context.FamilyMembers
+                        .Where(fm => fm.PersonId == personId)
+                        .Select(fm => fm.Registration.Sector.Name)
+                        .FirstOrDefaultAsync();
+                }
 
             if (sector == null)
                 throw new InvalidOperationException("لم يتم العثور على قطاع للشخص");

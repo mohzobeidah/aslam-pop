@@ -123,8 +123,21 @@ using (var scope = app.Services.CreateScope())
         IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'IsHusbandAbroad')
         ALTER TABLE [FamilyRegistrations] ADD [IsHusbandAbroad] bit NOT NULL DEFAULT 0");
     db.Database.ExecuteSqlRaw(@"
-        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'Sector')
-        ALTER TABLE [FamilyRegistrations] ADD [Sector] nvarchar(max) NOT NULL DEFAULT ''");
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'SectorId')
+            EXEC('ALTER TABLE [FamilyRegistrations] ADD [SectorId] int NULL')");
+    db.Database.ExecuteSqlRaw(@"
+        IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'SectorId')
+        AND EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'Sector')
+        BEGIN
+            UPDATE [FamilyRegistrations] SET [SectorId] = COALESCE((SELECT [Id] FROM [Sectors] WHERE [Name] = [FamilyRegistrations].[Sector]), (SELECT TOP 1 [Id] FROM [Sectors]));
+            ALTER TABLE [FamilyRegistrations] ALTER COLUMN [SectorId] int NOT NULL;
+        END");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_FamilyRegistrations_Sectors_SectorId')
+            ALTER TABLE [FamilyRegistrations] ADD CONSTRAINT [FK_FamilyRegistrations_Sectors_SectorId] FOREIGN KEY ([SectorId]) REFERENCES [Sectors]([Id]) ON DELETE CASCADE");
+    db.Database.ExecuteSqlRaw(@"
+        IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'Sector')
+            ALTER TABLE [FamilyRegistrations] DROP COLUMN [Sector]");
     db.Database.ExecuteSqlRaw(@"
         IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'PhoneNumber')
         ALTER TABLE [FamilyRegistrations] ADD [PhoneNumber] nvarchar(max) NOT NULL DEFAULT ''");

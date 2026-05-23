@@ -93,11 +93,11 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">القاطع</label>
-                            <select name="Sector" data-ls="Sector" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
+                            <select name="SectorId" data-ls="Sector" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
                                 <option value="">اختر القاطع...</option>
                                 @foreach (var s in ViewBag.Sectors)
                                 {
-                                    <option value="@s.Name">@s.Name</option>
+                                    <option value="@s.Id">@s.Name</option>
                                 }
                             </select>
                         </div>
@@ -688,7 +688,11 @@
                         data[el.getAttribute('data-ls')] = el.checked;
                     }
                 } else {
-                    data[el.getAttribute('data-ls')] = el.value;
+                    if (el.getAttribute('data-ls') === 'Sector') {
+                        data['Sector'] = el.options[el.selectedIndex]?.text || '';
+                    } else {
+                        data[el.getAttribute('data-ls')] = el.value;
+                    }
                 }
             });
 
@@ -978,7 +982,7 @@
                 'Head.ThirdName': 'الاسم الثالث',
                 'Head.LastName': 'اسم العائلة',
                 'Head.IdNumber': 'رقم الهوية',
-                'Sector': 'القاطع',
+                'SectorId': 'القاطع',
                 'Head.DateOfBirth': 'تاريخ الميلاد',
                 'PhoneNumber': 'رقم الهاتف',
                 'Wallet': 'المحفظة',

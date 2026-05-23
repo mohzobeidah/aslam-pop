@@ -99,7 +99,7 @@ namespace CampRegistrationApp.Services
                 {
                     RecordId = await _idGenerator.GenerateUniqueIdAsync(),
                     FamilyHeadId = head.Id,
-                    Sector = sectorName,
+                    SectorId = sector.Id,
                     PhoneNumber = "059" + _random.Next(1000000, 9999999),
                     Wallet = _random.Next(0, 2) == 0 ? "" : _random.Next(100, 999).ToString(),
                     RegistrationTimestamp = DateTime.UtcNow.AddDays(-_random.Next(1, 365)),
