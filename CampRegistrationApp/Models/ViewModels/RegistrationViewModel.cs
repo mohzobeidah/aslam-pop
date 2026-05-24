@@ -134,6 +134,7 @@ namespace CampRegistrationApp.Models.ViewModels
         public DateTime? NursingInfantDOB { get; set; }
         public string? NursingInfantID { get; set; }
         public bool IsPrisoner { get; set; }
+        public bool IsHusbandPrisoner { get; set; }
         public string? BathroomStatus { get; set; }
         public string? MotherIdNumber { get; set; }
 

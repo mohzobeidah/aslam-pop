@@ -86,6 +86,9 @@ using (var scope = app.Services.CreateScope())
         IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Persons') AND name = 'IsPrisoner')
         ALTER TABLE [Persons] ADD [IsPrisoner] bit NOT NULL DEFAULT 0");
     db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Persons') AND name = 'IsHusbandPrisoner')
+        ALTER TABLE [Persons] ADD [IsHusbandPrisoner] bit NOT NULL DEFAULT 0");
+    db.Database.ExecuteSqlRaw(@"
         IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Persons') AND name = 'Nationality')
         ALTER TABLE [Persons] ADD [Nationality] nvarchar(256) NULL");
     db.Database.ExecuteSqlRaw(@"

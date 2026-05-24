@@ -314,7 +314,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-xs mb-1">الجنس</label>
-                                        <select name="Members[@i].Gender" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                        <select name="Members[@i].Gender" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onchange="toggleFemaleFields(this, @i)">
                                             <option value="ذكر" selected="@(m.Gender == "ذكر" )">ذكر</option>
                                             <option value="أنثى" selected="@(m.Gender == "أنثى" )">أنثى</option>
                                         </select>
@@ -329,10 +329,28 @@
                         }
                     </select>
                                     </div>
-                                    <div class="flex items-center gap-2">
-                                        <input type="checkbox" name="Members[@i].IsPrisoner" value="true" class="accent-camp-gold" @(m.IsPrisoner ? "checked" : "") />
-                                        <label class="text-xs">أسير</label>
+                                    <div>
+                                        <label class="block text-xs mb-1">الحالة الاجتماعية <span class="text-red-500">*</span></label>
+                                        <select name="Members[@i].MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" required>
+                                            <option value="">اختر...</option>
+                                            <option value="متزوج" selected="@(m.MaritalStatus == "متزوج")">متزوج</option>
+                                            <option value="أعزب" selected="@(m.MaritalStatus == "أعزب")">أعزب</option>
+                                            <option value="أرمل" selected="@(m.MaritalStatus == "أرمل")">أرمل</option>
+                                            <option value="مطلق" selected="@(m.MaritalStatus == "مطلق")">مطلق</option>
+                                            <option value="منفصل" selected="@(m.MaritalStatus == "منفصل")">منفصل</option>
+                                        </select>
+                                        <span class="marital-status-error text-red-500 text-xs hidden">الحالة الاجتماعية مطلوبة</span>
                                     </div>
+                                </div>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="Members[@i].IsPrisoner" value="true" class="accent-camp-gold" @(m.IsPrisoner ? "checked" : "") />
+                                        <span class="text-xs">أسير</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer female-only-@i @(m.Gender == "أنثى" ? "" : "hidden")">
+                                        <input type="checkbox" name="Members[@i].IsHusbandPrisoner" value="true" class="accent-camp-gold" @(m.IsHusbandPrisoner ? "checked" : "") />
+                                        <span class="text-xs">زوجها مسجون</span>
+                                    </label>
                                 </div>
 
                                 <!-- Member Health -->
@@ -812,7 +830,7 @@
                     <div><label class="block text-xs mb-1">رقم الهوية</label><input name="Members[\${idx}].IdNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onblur="validateIdField(this)" oninput="clearIdError(this)" /><span class="id-error text-red-500 text-xs hidden">رقم الهوية يجب أن يتكون من 9 أرقام</span></div>
                     <div><label class="block text-xs mb-1">تاريخ الميلاد</label><input type="date" name="Members[\${idx}].DateOfBirth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
                     <div><label class="block text-xs mb-1">الجنس</label>
-                        <select name="Members[\${idx}].Gender" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                        <select name="Members[\${idx}].Gender" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onchange="toggleFemaleFields(this, \${idx})">
                             <option value="ذكر">ذكر</option><option value="أنثى">أنثى</option>
                         </select>
                     </div>
@@ -823,10 +841,27 @@
                     ${['زوج','زوجة','ابن','ابنة','أم','أب','أخ','أخت','جدة/جد','حفيد/حفيدة','أخ غير شقيق','أخت غير شقيقة','Other'].map(r => '<option value="'+r+'">'+r+'</option>').join('')}
                 </select>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" name="Members[\${idx}].IsPrisoner" value="true" class="accent-camp-gold" />
-                        <label class="text-xs">أسير</label>
+                    <div><label class="block text-xs mb-1">الحالة الاجتماعية <span class="text-red-500">*</span></label>
+                        <select name="Members[\${idx}].MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" required>
+                            <option value="">اختر...</option>
+                            <option value="متزوج">متزوج</option>
+                            <option value="أعزب">أعزب</option>
+                            <option value="أرمل">أرمل</option>
+                            <option value="مطلق">مطلق</option>
+                            <option value="منفصل">منفصل</option>
+                        </select>
+                        <span class="marital-status-error text-red-500 text-xs hidden">الحالة الاجتماعية مطلوبة</span>
                     </div>
+                </div>
+                <div class="flex items-center gap-4 mt-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="Members[\${idx}].IsPrisoner" value="true" class="accent-camp-gold" />
+                        <span class="text-xs">أسير</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer female-only-\${idx} hidden">
+                        <input type="checkbox" name="Members[\${idx}].IsHusbandPrisoner" value="true" class="accent-camp-gold" />
+                        <span class="text-xs">زوجها مسجون</span>
+                    </label>
                 </div>
                 <div class="border-t border-gray-700 pt-4">
                     <h4 class="text-md font-semibold text-camp-gold mb-3">الحالة الصحية</h4>
@@ -898,6 +933,13 @@
         function toggleMemberInjury(idx) {
             const section = document.getElementById(`member-injury-${idx}`);
             if (section) section.classList.toggle('hidden');
+        }
+
+        function toggleFemaleFields(select, idx) {
+            const label = document.querySelector(`.female-only-${idx}`);
+            if (label) {
+                label.classList.toggle('hidden', select.value !== 'أنثى');
+            }
         }
 
         function toggleMemberSection(idx, type) {
@@ -1096,7 +1138,7 @@
                     hidden.value = checked.join('، ');
                     form.appendChild(hidden);
                 });
-                ['HasInjury', 'IsPregnant', 'IsNursing', 'IsPrisoner'].forEach(field => {
+                ['HasInjury', 'IsPregnant', 'IsNursing', 'IsPrisoner', 'IsHusbandPrisoner'].forEach(field => {
                     const cb = card.querySelector(`[name="Members[${idx}].${field}"]`);
                     const hidden = document.createElement('input');
                     hidden.type = 'hidden';
