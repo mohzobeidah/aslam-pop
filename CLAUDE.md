@@ -34,6 +34,7 @@ This repository contains two versions of a Camp Family Registration application:
 - **Static Assets**: Managed in `wwwroot/`, uploaded files stored under `wwwroot/uploads/registrations/`.
 - **Session**: Used for admin authentication (`AdminId`, `AdminName`, `AdminRole`), refugee edit access (`EditRegistrationId`), and multi-step registration flow.
 - **Port**: HTTP on `localhost:5392`, HTTPS on `localhost:7126`.
+- **Production Error Page**: Custom themed error page at `/Home/Error` for production environments, displaying the Request ID for troubleshooting.
 
 ## ASP.NET Core Data Model (Entity Relationships)
 ```
@@ -54,7 +55,7 @@ Notification >── (0..1) Link (URL string)
 - **Sector**: Camp sector entity with name, camp, coordinate, area, tent/bathroom counts. Has `Admins` collection.
 - **Project**: Campaign/project entity for nominations. Fields: Name, StartDate, EndDate, RequiredCount, Status (Draft/Active/Closed), Notes. Has `CreatedBy` (Admin), soft delete + RowVersion.
 - **Nomination**: Links a Person to a Project for a specific Sector. Status (Draft/Submitted/Approved/Rejected/Cancelled). Has `Delegate` (Admin submitter) and optional `ApprovedBy`. Soft delete + RowVersion.
-- **AuditLog**: Immutable audit trail with UserId, Action, TableName, RecordId, OldValues/NewValues (JSON), CreatedAt.
+- **AuditLog**: Immutable audit trail with UserId, Action, TableName, RecordId, OldValues/NewValues (JSON), CreatedAt. Includes source tracking (Web/Mobile via `GetRequestSource` in `RecordController`).
 - **Notification**: Per-admin notification with Message, Link (URL), IsRead, CreatedAt.
 
 ## Navigation & Routes
@@ -190,3 +191,4 @@ Notification >── (0..1) Link (URL string)
 - **No cascade deletes**: `FamilyHeadId` uses `Restrict` delete behavior — can't delete a Person that's a family head.
 - **Sequential tabs**: User cannot skip registration steps by clicking tab headers — each step must be completed before advancing.
 - **Nominations use N+1 on initial load**: The nomination grid loads persons via service call; no batching yet.
+- **NullReferenceException in Update**: Prevented by recovering the `RegistrationViewModel` from the session and loading attachments if model binding fails during POST `/Record/Update`.

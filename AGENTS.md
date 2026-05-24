@@ -96,7 +96,15 @@ Camp family registration system in two versions:
 - Added `onblur="validateMotherIdField(this)"` + `oninput="clearMotherIdError(this)"` + error span in both Index.cshtml and Edit.cshtml
 - If provided, must be a valid Palestinian ID (9 digits + check digit); empty is allowed (optional field)
 
-## Key Conventions (both versions)
+    ### NullReferenceException in Record Update
+    - Fixed crash in `Edit.cshtml` during POST `/Record/Update` when model binding fails.
+    - Added logic to recover `RegistrationViewModel` from session and ensure `ViewBag.HeadAttachments` are populated when returning to the view.
+
+    ### Production Error Page
+    - Implemented a professional, themed error view at `/Home/Error` for non-development environments.
+    - Displays a user-friendly Arabic message and the Request ID for support tracking.
+
+    ## Key Conventions (both versions)
 - All UI text in Arabic, RTL layout, Cairo font, dark theme (`#121212` + `#d4af37` gold).
 - 8-char Record ID from charset `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`.
 - No input sanitization; no migrations (`EnsureCreated()` + raw SQL).
