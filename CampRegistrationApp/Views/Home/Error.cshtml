@@ -1,0 +1,48 @@
+@model CampRegistrationApp.Models.ErrorViewModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen bg-camp-dark-grey text-white font-cairo" dir="rtl">
+    <div class="container mx-auto px-4 py-16 flex flex-col items-center justify-center text-center">
+        <div class="max-w-2xl w-full space-y-8">
+            <!-- Icon / Image -->
+            <div class="flex justify-center mb-8">
+                <div class="p-6 rounded-full bg-red-900/20 border-2 border-red-500/50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 9h13.856c1.54 0 2.502-1.667 1.732-3L13.173 4.631c-1.541-1.333-3.645-1.333-5.183 0L3.132 16c-0.77 1.333.194 3 1.732 3z" />
+                    </svg>
+                </div>
+            </div>
+
+            <h1 class="text-4xl md:text-5xl font-bold text-camp-gold mb-4">حدث خطأ غير متوقع!</h1>
+
+            <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+                نعتذر عن هذا الخلل. لقد تم إخطار الفريق التقني تلقائياً ونحن نعمل على حل المشكلة في أسرع وقت ممكن.
+            </p>
+
+            <div class="bg-camp-accent-grey p-6 rounded-lg border-r-4 border-camp-gold shadow-xl mb-8">
+                <p class="text-sm text-gray-400 mb-2">معرف الطلب (Request ID):</p>
+                <code class="text-camp-gold font-mono text-lg">@Model.RequestId</code>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/" class="px-8 py-3 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors text-lg">
+                    العودة للرئيسية
+                </a>
+                <button onclick="reportIssue()" class="px-8 py-3 rounded border border-gray-600 text-gray-400 hover:text-white hover:border-camp-gold transition-colors text-lg">
+                    إبلاغ عن المشكلة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function reportIssue() {
+            const requestId = '@Model.RequestId';
+            alert('شكراً لتواصلك معنا. يرجى إرسال معرف الطلب (' + requestId + ') إلى الدعم الفني عبر واتساب أو البريد الإلكتروني.');
+            // If there was a real ticket system, we would redirect here:
+            // window.location.href = '/Complaints/Create?requestId=' + requestId;
+        }
+    </script>
+</div>

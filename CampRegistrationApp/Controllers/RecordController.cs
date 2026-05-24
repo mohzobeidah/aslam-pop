@@ -71,14 +71,24 @@ namespace CampRegistrationApp.Controllers
             return View();
         }
 
+        private string GetRequestSource()
+        {
+            var userAgent = Request.Headers["User-Agent"].ToString();
+            if (string.IsNullOrEmpty(userAgent)) return "Web";
+            userAgent = userAgent.ToLowerInvariant();
+            string[] mobileKeywords = { "mobile", "android", "iphone", "ipad", "ipod", "blackberry", "windows phone", "opera mini", "iemobile" };
+            return mobileKeywords.Any(k => userAgent.Contains(k)) ? "Mobile" : "Web";
+        }
+
         [HttpPost]
         public async Task<IActionResult> Login(string idNumber, string password)
         {
+            var source = GetRequestSource();
             if (string.IsNullOrEmpty(idNumber) || string.IsNullOrEmpty(password))
             {
                 await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", null,
                     new { idNumber, reason = "حقول فارغة" },
-                    null);
+                    null, source: source);
                 ModelState.AddModelError("", "يرجى إدخال رقم الهوية وكلمة المرور");
                 return View();
             }
@@ -96,7 +106,7 @@ namespace CampRegistrationApp.Controllers
             {
                 await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", null,
                     new { idNumber, reason = "رقم الهوية أو كلمة المرور غير صحيحة" },
-                    null);
+                    null, source: source);
                 ModelState.AddModelError("", "رقم الهوية أو كلمة المرور غير صحيحة");
                 return View();
             }
@@ -105,7 +115,7 @@ namespace CampRegistrationApp.Controllers
             {
                 await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", registration.RecordId,
                     new { idNumber, reason = "طلب التسجيل لم يتم الموافقة عليه بعد" },
-                    null);
+                    null, source: source);
                 ModelState.AddModelError("", "طلب التسجيل لم يتم الموافقة عليه بعد. يرجى مراجعة المسؤول المختص.");
                 return View();
             }
@@ -114,7 +124,7 @@ namespace CampRegistrationApp.Controllers
             {
                 await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", registration.RecordId,
                     new { idNumber, reason = "تم رفض طلب التسجيل" },
-                    null);
+                    null, source: source);
                 ModelState.AddModelError("", "عذراً، تم رفض طلب التسجيل الخاص بك. يرجى التواصل مع المسؤول.");
                 return View();
             }
@@ -123,7 +133,8 @@ namespace CampRegistrationApp.Controllers
 
             await _audit.LogAsync(0, "Login", "FamilyRegistrations", registration.RecordId,
                 null,
-                new { headName = registration.FamilyHead.FullName, idNumber, sector = registration.Sector?.Name });
+                new { headName = registration.FamilyHead.FullName, idNumber, sector = registration.Sector?.Name },
+                source: source);
 
             return RedirectToAction("Edit");
         }
@@ -230,26 +241,6 @@ namespace CampRegistrationApp.Controllers
                     return View("Edit", model);
                 }
             }
-
-            var regId = HttpContext.Session.GetInt32("EditRegistrationId");
-            if (regId == null) return RedirectToAction("Login");
-
-            var registration = await _context.FamilyRegistrations
-                .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)
-                .Include(f => f.Members)
-                    .ThenInclude(m => m.Person)
-                .Include(f => f.FamilyDesires)
-                .FirstOrDefaultAsync(f => f.Id == regId);
-
-            if (registration == null) return RedirectToAction("Login");
-
-            if (registration.ApprovalStatus != RegistrationApprovalStatus.Approved)
-            {
-                HttpContext.Session.Remove("EditRegistrationId");
-                return RedirectToAction("Login");
-            }
-
-            ViewBag.HeadAttachments = registration.FamilyHead.Attachments.ToList();
 
             // Check for duplicate IDs
             var currentHeadId = registration.FamilyHead.IdNumber;
