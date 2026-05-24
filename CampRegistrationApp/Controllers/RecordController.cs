@@ -185,7 +185,21 @@ namespace CampRegistrationApp.Controllers
         public async Task<IActionResult> Update(RegistrationViewModel model)
         {
             await PopulateLookupViewBags();
-            ViewBag.HeadAttachments = new List<Attachment>();
+            var regId = HttpContext.Session.GetInt32("EditRegistrationId");
+            if (regId == null) return RedirectToAction("Login");
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)
+                .Include(f => f.Members).ThenInclude(m => m.Person)
+                .Include(f => f.FamilyDesires)
+                .FirstOrDefaultAsync(f => f.Id == regId);
+            if (registration == null) return RedirectToAction("Login");
+            if (registration.ApprovalStatus != RegistrationApprovalStatus.Approved)
+            {
+                HttpContext.Session.Remove("EditRegistrationId");
+                return RedirectToAction("Login");
+            }
+            if (model == null) model = MapToViewModel(registration);
+            ViewBag.HeadAttachments = registration.FamilyHead.Attachments.ToList();
             if (!ModelState.IsValid)
             {
                 ModelState.AddModelError("", "يرجى تصحيح الأخطاء في البيانات");
