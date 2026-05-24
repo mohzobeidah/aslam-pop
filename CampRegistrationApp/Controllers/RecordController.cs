@@ -185,6 +185,7 @@ namespace CampRegistrationApp.Controllers
         public async Task<IActionResult> Update(RegistrationViewModel model)
         {
             await PopulateLookupViewBags();
+            ViewBag.HeadAttachments = new List<Attachment>();
             if (!ModelState.IsValid)
             {
                 ModelState.AddModelError("", "يرجى تصحيح الأخطاء في البيانات");

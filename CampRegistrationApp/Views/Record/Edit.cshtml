@@ -272,7 +272,8 @@
                     </div>
 
                     @{
-                        var firstHealthName = ((List<CampRegistrationApp.Models.HealthStatus>)ViewBag.HealthStatuses)[0].Name;
+                        var healthStatusList = ViewBag.HealthStatuses as List<CampRegistrationApp.Models.HealthStatus> ?? new List<CampRegistrationApp.Models.HealthStatus>();
+                        var firstHealthName = healthStatusList.FirstOrDefault()?.Name ?? "";
                     }
                     <div id="members-container" class="space-y-6">
                         @for (int i = 0; i < Model.Members.Count; i++)
@@ -609,10 +610,16 @@
 
     <script>
         // ========== LOOKUP DATA FROM DB ==========
-        const HEALTH_STATUSES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.HealthStatus>)ViewBag.HealthStatuses).Select(h => h.Name)));
-        const CHRONIC_DISEASES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.ChronicDisease>)ViewBag.ChronicDiseases).Select(c => c.Name)));
-        const DISABILITY_TYPES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.DisabilityType>)ViewBag.DisabilityTypes).Select(d => d.Name)));
-        const DESIRES = @Html.Raw(Json.Serialize(((List<CampRegistrationApp.Models.Desire>)ViewBag.Desires).Select(d => new { d.Id, d.Name })));
+        @{
+            var hsList = ViewBag.HealthStatuses as List<CampRegistrationApp.Models.HealthStatus> ?? new();
+            var cdList = ViewBag.ChronicDiseases as List<CampRegistrationApp.Models.ChronicDisease> ?? new();
+            var dtList = ViewBag.DisabilityTypes as List<CampRegistrationApp.Models.DisabilityType> ?? new();
+            var dList = ViewBag.Desires as List<CampRegistrationApp.Models.Desire> ?? new();
+        }
+        const HEALTH_STATUSES = @Html.Raw(Json.Serialize(hsList.Select(h => h.Name)));
+        const CHRONIC_DISEASES = @Html.Raw(Json.Serialize(cdList.Select(c => c.Name)));
+        const DISABILITY_TYPES = @Html.Raw(Json.Serialize(dtList.Select(d => d.Name)));
+        const DESIRES = @Html.Raw(Json.Serialize(dList.Select(d => new { d.Id, d.Name })));
 
         let memberIdx = @Model.Members.Count;
 
