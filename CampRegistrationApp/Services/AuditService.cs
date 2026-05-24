@@ -8,7 +8,7 @@ namespace CampRegistrationApp.Services;
 public interface IAuditService
 {
     Task LogAsync(int userId, string action, string tableName, string? recordId, object? oldValues, object? newValues,
-        string? ipAddress = null, string source = "Web");
+        string? ipAddress = null, string? source = null);
 }
 
 public class AuditService : IAuditService
@@ -23,10 +23,24 @@ public class AuditService : IAuditService
     }
 
     public async Task LogAsync(int userId, string action, string tableName, string? recordId, object? oldValues, object? newValues,
-        string? ipAddress = null, string source = "Web")
+        string? ipAddress = null, string? source = null)
     {
         var httpContext = _httpAccessor.HttpContext;
         var admin = await _context.Admins.AsNoTracking().FirstOrDefaultAsync(a => a.Id == userId);
+
+        if (source == null)
+        {
+            var userAgent = httpContext?.Request.Headers["User-Agent"].ToString()?.ToLowerInvariant();
+            if (string.IsNullOrEmpty(userAgent))
+            {
+                source = "Web";
+            }
+            else
+            {
+                string[] mobileKeywords = { "mobile", "android", "iphone", "ipad", "ipod", "blackberry", "windows phone", "opera mini", "iemobile" };
+                source = mobileKeywords.Any(k => userAgent.Contains(k)) ? "Mobile" : "Web";
+            }
+        }
 
         _context.AuditLogs.Add(new AuditLog
         {

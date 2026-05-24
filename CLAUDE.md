@@ -55,7 +55,7 @@ Notification >── (0..1) Link (URL string)
 - **Sector**: Camp sector entity with name, camp, coordinate, area, tent/bathroom counts. Has `Admins` collection.
 - **Project**: Campaign/project entity for nominations. Fields: Name, StartDate, EndDate, RequiredCount, Status (Draft/Active/Closed), Notes. Has `CreatedBy` (Admin), soft delete + RowVersion.
 - **Nomination**: Links a Person to a Project for a specific Sector. Status (Draft/Submitted/Approved/Rejected/Cancelled). Has `Delegate` (Admin submitter) and optional `ApprovedBy`. Soft delete + RowVersion.
-- **AuditLog**: Immutable audit trail with UserId, Action, TableName, RecordId, OldValues/NewValues (JSON), CreatedAt. Includes source tracking (Web/Mobile via `GetRequestSource` in `RecordController`).
+- **AuditLog**: Immutable audit trail with UserId, Action, TableName, RecordId, OldValues/NewValues (JSON), CreatedAt. Includes automatic source tracking (Web/Mobile) via `AuditService`.
 - **Notification**: Per-admin notification with Message, Link (URL), IsRead, CreatedAt.
 
 ## Navigation & Routes

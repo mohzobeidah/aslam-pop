@@ -5,10 +5,15 @@
 
 <div class="min-h-screen bg-camp-dark-grey text-white font-cairo" dir="rtl">
     <div class="container mx-auto px-4 py-8">
-        <header class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-camp-gold mb-2">تعديل بيانات العائلة</h1>
-            <p class="text-gray-400">معرف التسجيل: <span class="font-mono text-camp-gold">@Model.RecordId</span></p>
-        </header>
+            <header class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-camp-gold mb-2">تعديل بيانات العائلة</h1>
+                <p class="text-gray-400">معرف التسجيل: <span class="font-mono text-camp-gold">@Model.RecordId</span></p>
+                <div class="mt-4">
+                    <a href="@Url.Action("ChangePassword")" class="inline-block px-6 py-2 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors text-sm">
+                        تغيير كلمة المرور
+                    </a>
+                </div>
+            </header>
 
         <div class="max-w-4xl mx-auto">
             @if (TempData["Success"] != null)

@@ -71,24 +71,14 @@ namespace CampRegistrationApp.Controllers
             return View();
         }
 
-        private string GetRequestSource()
-        {
-            var userAgent = Request.Headers["User-Agent"].ToString();
-            if (string.IsNullOrEmpty(userAgent)) return "Web";
-            userAgent = userAgent.ToLowerInvariant();
-            string[] mobileKeywords = { "mobile", "android", "iphone", "ipad", "ipod", "blackberry", "windows phone", "opera mini", "iemobile" };
-            return mobileKeywords.Any(k => userAgent.Contains(k)) ? "Mobile" : "Web";
-        }
-
         [HttpPost]
         public async Task<IActionResult> Login(string idNumber, string password)
         {
-            var source = GetRequestSource();
             if (string.IsNullOrEmpty(idNumber) || string.IsNullOrEmpty(password))
             {
                 await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", null,
                     new { idNumber, reason = "حقول فارغة" },
-                    null, source: source);
+                    null);
                 ModelState.AddModelError("", "يرجى إدخال رقم الهوية وكلمة المرور");
                 return View();
             }
@@ -106,7 +96,7 @@ namespace CampRegistrationApp.Controllers
             {
                 await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", null,
                     new { idNumber, reason = "رقم الهوية أو كلمة المرور غير صحيحة" },
-                    null, source: source);
+                    null);
                 ModelState.AddModelError("", "رقم الهوية أو كلمة المرور غير صحيحة");
                 return View();
             }
@@ -115,7 +105,7 @@ namespace CampRegistrationApp.Controllers
             {
                 await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", registration.RecordId,
                     new { idNumber, reason = "طلب التسجيل لم يتم الموافقة عليه بعد" },
-                    null, source: source);
+                    null);
                 ModelState.AddModelError("", "طلب التسجيل لم يتم الموافقة عليه بعد. يرجى مراجعة المسؤول المختص.");
                 return View();
             }
@@ -124,7 +114,7 @@ namespace CampRegistrationApp.Controllers
             {
                 await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", registration.RecordId,
                     new { idNumber, reason = "تم رفض طلب التسجيل" },
-                    null, source: source);
+                    null);
                 ModelState.AddModelError("", "عذراً، تم رفض طلب التسجيل الخاص بك. يرجى التواصل مع المسؤول.");
                 return View();
             }
@@ -133,8 +123,7 @@ namespace CampRegistrationApp.Controllers
 
             await _audit.LogAsync(0, "Login", "FamilyRegistrations", registration.RecordId,
                 null,
-                new { headName = registration.FamilyHead.FullName, idNumber, sector = registration.Sector?.Name },
-                source: source);
+                new { headName = registration.FamilyHead.FullName, idNumber, sector = registration.Sector?.Name });
 
             return RedirectToAction("Edit");
         }
@@ -440,8 +429,7 @@ namespace CampRegistrationApp.Controllers
                 await _audit.LogAsync(0, "RecordEdit", "FamilyRegistrations",
                     registration.RecordId,
                     new { action = "تم تعديل بيانات العائلة بواسطة رب الأسرة" },
-                    new { headName = head.FullName, sector = sectorName },
-                    source: "Web");
+                    new { headName = head.FullName, sector = sectorName });
                 await _notificationService.NotifyMandoobsAsync(
                     sectorName,
                     $"تعديل بيانات: {head.FullName} - رقم القيد: {registration.RecordId}",
@@ -456,6 +444,68 @@ namespace CampRegistrationApp.Controllers
                 TempData["Error"] = "حدث خطأ أثناء حفظ التعديلات: " + ex.Message;
                 return View("Edit", model);
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ChangePassword()
+        {
+            var regId = HttpContext.Session.GetInt32("EditRegistrationId");
+            if (regId == null) return RedirectToAction("Login");
+
+            var registration = await _context.FamilyRegistrations
+                .FirstOrDefaultAsync(f => f.Id == regId);
+            if (registration == null) return RedirectToAction("Login");
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword, string confirmPassword)
+        {
+            var regId = HttpContext.Session.GetInt32("EditRegistrationId");
+            if (regId == null) return RedirectToAction("Login");
+
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
+                .FirstOrDefaultAsync(f => f.Id == regId);
+            if (registration == null) return RedirectToAction("Login");
+
+            if (string.IsNullOrEmpty(oldPassword) || string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(confirmPassword))
+            {
+                ModelState.AddModelError("", "جميع الحقول مطلوبة");
+                return View();
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                ModelState.AddModelError("", "كلمة المرور الجديدة وتأكيدها غير متطابقين");
+                return View();
+            }
+
+            if (newPassword.Length < 4)
+            {
+                ModelState.AddModelError("", "كلمة المرور يجب أن تكون 4 أحرف على الأقل");
+                return View();
+            }
+
+            var oldHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(oldPassword)));
+            if (registration.PasswordHash != oldHash)
+            {
+                ModelState.AddModelError("", "كلمة المرور القديمة غير صحيحة");
+                return View();
+            }
+
+            var newHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(newPassword)));
+            registration.PasswordHash = newHash;
+            await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(0, "ChangePassword", "FamilyRegistrations", registration.RecordId,
+                new { action = "تم تغيير كلمة المرور بواسطة رب الأسرة" },
+                new { headName = registration.FamilyHead.FullName },
+                source: "Web");
+
+            TempData["Success"] = "تم تغيير كلمة المرور بنجاح";
+            return RedirectToAction("Edit");
         }
 
         [HttpPost]

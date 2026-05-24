@@ -25,7 +25,7 @@ Camp family registration system in two versions:
 - **Admin**: Login with `AdminRole` (`Admin`=super, `Mandoob`=sector-limited), session-based auth, SHA256 password hashing.
 - **Sector**: Camp sector with name, camp, coordinates, area, tent/bathroom counts.
 - **Project/Nomination**: Campaign system for aid distribution with approval workflow, soft delete, rowversion concurrency.
-- **AuditLog**: Immutable audit trail with JSON old/new values.
+- **AuditLog**: Immutable audit trail with JSON old/new values and automatic source tracking (Web/Mobile).
 - **Notification**: Per-admin notification system with bell icon polling.
 
 ### Registration Flow (4 Steps + Submit)
