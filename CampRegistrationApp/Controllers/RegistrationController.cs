@@ -15,14 +15,16 @@ namespace CampRegistrationApp.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly INotificationService _notificationService;
         private readonly IAuditService _audit;
+        private readonly IRegistrationValidationService _validator;
 
-        public RegistrationController(ApplicationDbContext context, IRecordIdGenerator idGenerator, IWebHostEnvironment env, INotificationService notificationService, IAuditService audit)
+        public RegistrationController(ApplicationDbContext context, IRecordIdGenerator idGenerator, IWebHostEnvironment env, INotificationService notificationService, IAuditService audit, IRegistrationValidationService validator)
         {
             _context = context;
             _idGenerator = idGenerator;
             _env = env;
             _notificationService = notificationService;
             _audit = audit;
+            _validator = validator;
         }
 
         private async Task PopulateLookupViewBags()
@@ -94,30 +96,12 @@ namespace CampRegistrationApp.Controllers
             await PopulateLookupViewBags();
             if (!ModelState.IsValid) return View("Index", model);
 
-            // Server-side validation: married requires wife member
-            if (model.Head.MaritalStatus == "متزوج" && !model.Members.Any(m => m.RelationshipToHead == "زوجة"))
+            if (!_validator.ValidateRegistration(model, ModelState))
             {
-                ModelState.AddModelError("", "بما أن الحالة الاجتماعية متزوج، يجب إضافة فرد بصفة زوجة");
                 return View("Index", model);
             }
 
-            // Server-side validation: sick requires disease or disability for head
-            if (model.Head.HealthStatus == "مريض" && string.IsNullOrEmpty(model.Head.ChronicDiseases) && string.IsNullOrEmpty(model.Head.DisabilityTypes))
-            {
-                ModelState.AddModelError("", "بما أن الحالة الصحية مريض، يجب اختيار مرض مزمن أو نوع إعاقة على الأقل لرب الأسرة");
-                return View("Index", model);
-            }
-
-            // Server-side validation: sick requires disease or disability for each member
-            for (int i = 0; i < model.Members.Count; i++)
-            {
-                var m = model.Members[i];
-                if (m.HealthStatus == "مريض" && string.IsNullOrEmpty(m.ChronicDiseases) && string.IsNullOrEmpty(m.DisabilityTypes))
-                {
-                    ModelState.AddModelError("", $"الفرد رقم {i + 1}: بما أن الحالة الصحية مريض، يجب اختيار مرض مزمن أو نوع إعاقة على الأقل");
-                    return View("Index", model);
-                }
-            }
+            // Check for duplicate IDs
 
             // Check for duplicate IDs
             var allIds = new List<string> { model.Head.IdNumber };

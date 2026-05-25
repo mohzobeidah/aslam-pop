@@ -16,12 +16,14 @@ namespace CampRegistrationApp.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IAuditService _audit;
         private readonly INotificationService _notificationService;
+        private readonly IRegistrationValidationService _validator;
 
-        public AdminController(ApplicationDbContext context, IAuditService audit, INotificationService notificationService)
+        public AdminController(ApplicationDbContext context, IAuditService audit, INotificationService notificationService, IRegistrationValidationService validator)
         {
             _context = context;
             _audit = audit;
             _notificationService = notificationService;
+            _validator = validator;
         }
 
         private static string HashPassword(string password)
@@ -1116,34 +1118,14 @@ namespace CampRegistrationApp.Controllers
                 return View("~/Views/Record/Edit.cshtml", model);
             }
 
-            // Server-side validations
-            if (model.Head.MaritalStatus == "متزوج" && !model.Members.Any(m => m.RelationshipToHead == "زوجة"))
+            if (!_validator.ValidateRegistration(model, ModelState, "~/Views/Record/Edit.cshtml"))
             {
-                ModelState.AddModelError("", "بما أن الحالة الاجتماعية متزوج، يجب إضافة فرد بصفة زوجة");
                 ViewBag.FormAction = "AdminUpdateRegistration";
                 ViewBag.FormController = "Admin";
                 return View("~/Views/Record/Edit.cshtml", model);
             }
 
-            if (model.Head.HealthStatus == "مريض" && string.IsNullOrEmpty(model.Head.ChronicDiseases) && string.IsNullOrEmpty(model.Head.DisabilityTypes))
-            {
-                ModelState.AddModelError("", "بما أن الحالة الصحية مريض، يجب اختيار مرض مزمن أو نوع إعاقة على الأقل لرب الأسرة");
-                ViewBag.FormAction = "AdminUpdateRegistration";
-                ViewBag.FormController = "Admin";
-                return View("~/Views/Record/Edit.cshtml", model);
-            }
-
-            for (int i = 0; i < model.Members.Count; i++)
-            {
-                var m = model.Members[i];
-                if (m.HealthStatus == "مريض" && string.IsNullOrEmpty(m.ChronicDiseases) && string.IsNullOrEmpty(m.DisabilityTypes))
-                {
-                    ModelState.AddModelError("", $"الفرد رقم {i + 1}: بما أن الحالة الصحية مريض، يجب اختيار مرض مزمن أو نوع إعاقة على الأقل");
-                    ViewBag.FormAction = "AdminUpdateRegistration";
-                    ViewBag.FormController = "Admin";
-                    return View("~/Views/Record/Edit.cshtml", model);
-                }
-            }
+            // Check for duplicate IDs
 
             var registration = await _context.FamilyRegistrations
                 .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)

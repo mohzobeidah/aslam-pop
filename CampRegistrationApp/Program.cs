@@ -28,6 +28,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IDummyDataService, DummyDataService>();
 builder.Services.AddScoped<IAssistanceService, AssistanceService>();
 builder.Services.AddScoped<IImportService, ImportService>();
+builder.Services.AddScoped<IRegistrationValidationService, RegistrationValidationService>();
 builder.Services.AddScoped<IComplaintIdGenerator, ComplaintIdGenerator>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
