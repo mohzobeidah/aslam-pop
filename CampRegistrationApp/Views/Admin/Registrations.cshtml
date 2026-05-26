@@ -108,12 +108,12 @@ else
                             <td class="p-3 text-center text-gray-400">@reg.ApprovedAt?.ToString("yyyy-MM-dd")</td>
                         }
                         <td class="p-3 text-center">
+                            <a asp-action="AdminEditRegistration" asp-route-id="@reg.Id"
+                               class="bg-camp-gold text-black px-3 py-1 rounded hover:bg-yellow-500 transition ml-1 font-semibold text-sm">
+                                تعديل
+                            </a>
                             @if (reg.ApprovalStatus == RegistrationApprovalStatus.Pending)
                             {
-                                <a asp-action="AdminEditRegistration" asp-route-id="@reg.Id"
-                                   class="bg-camp-gold text-black px-3 py-1 rounded hover:bg-yellow-500 transition ml-1 font-semibold text-sm">
-                                    تعديل
-                                </a>
                                 <form method="post" asp-action="ApproveRegistration" class="inline">
                                     <input type="hidden" name="id" value="@reg.Id" />
                                     <button type="submit" class="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 transition ml-1 font-semibold">موافقة</button>
@@ -122,10 +122,6 @@ else
                                     <input type="hidden" name="id" value="@reg.Id" />
                                     <button type="submit" class="bg-red-700 text-white px-3 py-1 rounded hover:bg-red-600 transition font-semibold">رفض</button>
                                 </form>
-                            }
-                            else
-                            {
-                                <span class="text-gray-500">—</span>
                             }
                         </td>
                     </tr>

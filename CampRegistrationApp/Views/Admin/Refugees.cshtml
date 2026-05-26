@@ -131,6 +131,7 @@
                     <td class="p-3 text-center"><span class="@statusColor font-bold">@statusText</span></td>
                     <td class="p-3 text-center text-gray-400 text-xs">@r.RegistrationDate.ToString("yyyy/MM/dd")</td>
                     <td class="p-3 text-center">
+                        <a asp-action="AdminEditRegistration" asp-route-id="@r.Id" class="text-camp-gold hover:text-yellow-500 transition text-sm ml-2">تعديل</a>
                         <a asp-action="RefugeeDetails" asp-route-id="@r.Id" class="text-camp-gold hover:text-yellow-500 transition text-sm">عرض</a>
                         @if (r.ApprovalStatus == "Approved")
                         {

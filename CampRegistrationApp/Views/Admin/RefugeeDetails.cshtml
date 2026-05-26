@@ -160,18 +160,13 @@
             }
         </div>
 
-        @if (Model.ApprovalStatus == RegistrationApprovalStatus.Pending)
-        {
-            <div class="mt-4 pt-4 border-t border-gray-700 flex gap-3">
-                <a asp-action="AdminEditRegistration" asp-route-id="@Model.Id"
-                   class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-bold">
-                    تعديل البيانات
-                </a>
-            </div>
-        }
-        else if (Model.ApprovalStatus == RegistrationApprovalStatus.Approved)
-        {
-            <div class="mt-4 pt-4 border-t border-gray-700 flex gap-3">
+        <div class="mt-4 pt-4 border-t border-gray-700 flex gap-3 flex-wrap">
+            <a asp-action="AdminEditRegistration" asp-route-id="@Model.Id"
+               class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-bold">
+                تعديل البيانات
+            </a>
+            @if (Model.ApprovalStatus == RegistrationApprovalStatus.Approved)
+            {
                 <button type="button" onclick="resetPassword(@Model.Id, '@Model.FamilyHead.FullName')"
                         class="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition text-sm font-bold">
                     إعادة تعيين كلمة المرور
@@ -182,8 +177,8 @@
                         إزالة — انتقل خارج المخيم
                     </button>
                 </form>
-            </div>
-        }
+            }
+        </div>
     </div>
 </div>
 

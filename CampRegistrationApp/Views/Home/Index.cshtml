@@ -24,41 +24,49 @@
 <!-- Slider -->
 <section class="mb-12" dir="rtl">
     <h2 class="text-2xl font-bold text-camp-gold mb-6 text-center">لحظات من مخيم السلام</h2>
-    <div class="relative overflow-hidden rounded-lg" id="slider">
-        <div class="flex transition-transform duration-500 ease-in-out" id="sliderTrack">
-            <div class="min-w-full">
-                <div class="bg-gradient-to-tr from-blue-900 to-blue-700 p-12 md:p-20 text-center">
-                    <div class="text-6xl mb-4">🏕️</div>
-                    <h3 class="text-2xl font-bold text-white mb-2">توزيع الخيام</h3>
-                    <p class="text-blue-200">توزيع أكثر من 500 خيمة على الأسر المتضررة</p>
-                </div>
+    <div class="relative overflow-hidden rounded-lg h-64 md:h-[500px]" id="slider" dir="ltr">
+        <div class="flex h-full transition-transform duration-500 ease-in-out" id="sliderTrack">
+            <div class="w-full flex-shrink-0 h-full relative">
+                <img src="@Url.Content("~/img_landing/1.jpeg")" alt="توزيع الخيام" class="w-full h-full object-cover absolute inset-0">
+                @* <div class="absolute inset-0 z-10 bg-gradient-to-tr from-blue-900/80 to-blue-700/80 flex items-center justify-center p-12 md:p-20 text-center">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white mb-2">توزيع الخيام</h3>
+                        <p class="text-blue-200">توزيع أكثر من 500 خيمة على الأسر المتضررة</p>
+                    </div>
+                </div> *@
             </div>
-            <div class="min-w-full">
-                <div class="bg-gradient-to-tr from-green-900 to-green-700 p-12 md:p-20 text-center">
-                    <div class="text-6xl mb-4">🍞</div>
-                    <h3 class="text-2xl font-bold text-white mb-2">المساعدات الغذائية</h3>
-                    <p class="text-green-200">توزيع السلال الغذائية للأسر المسجلة شهرياً</p>
-                </div>
+            <div class="w-full flex-shrink-0 h-full relative">
+                <img src="@Url.Content("~/img_landing/2.jpeg")" alt="المساعدات الغذائية" class="w-full h-full object-cover absolute inset-0">
+                @* <div class="absolute inset-0 z-10 bg-gradient-to-tr from-green-900/80 to-green-700/80 flex items-center justify-center p-12 md:p-20 text-center">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white mb-2">المساعدات الغذائية</h3>
+                        <p class="text-green-200">توزيع السلال الغذائية للأسر المسجلة شهرياً</p>
+                    </div>
+                </div> *@
             </div>
-            <div class="min-w-full">
-                <div class="bg-gradient-to-tr from-red-900 to-red-700 p-12 md:p-20 text-center">
-                    <div class="text-6xl mb-4">🏥</div>
-                    <h3 class="text-2xl font-bold text-white mb-2">الدعم الطبي</h3>
-                    <p class="text-red-200">توفير الأدوية والعلاج للحالات الحرجة</p>
-                </div>
+            <div class="w-full flex-shrink-0 h-full relative">
+                <img src="@Url.Content("~/img_landing/3.jpeg")" alt="الدعم الطبي" class="w-full h-full object-cover absolute inset-0">
+                @* <div class="absolute inset-0 z-10 bg-gradient-to-tr from-red-900/80 to-red-700/80 flex items-center justify-center p-12 md:p-20 text-center">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white mb-2">الدعم الطبي</h3>
+                        <p class="text-red-200">توفير الأدوية والعلاج للحالات الحرجة</p>
+                    </div>
+                </div> *@
             </div>
-            <div class="min-w-full">
-                <div class="bg-gradient-to-tr from-purple-900 to-purple-700 p-12 md:p-20 text-center">
-                    <div class="text-6xl mb-4">📚</div>
-                    <h3 class="text-2xl font-bold text-white mb-2">التعليم</h3>
-                    <p class="text-purple-200">دعم تعليم الأطفال وتوفير القرطاسية والحقائب المدرسية</p>
-                </div>
+            <div class="w-full flex-shrink-0 h-full relative">
+                <img src="@Url.Content("~/img_landing/4.jpeg")" alt="التعليم" class="w-full h-full object-cover absolute inset-0">
+                @* <div class="absolute inset-0 z-10 bg-gradient-to-tr from-purple-900/80 to-purple-700/80 flex items-center justify-center p-12 md:p-20 text-center">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white mb-2">التعليم</h3>
+                        <p class="text-purple-200">دعم تعليم الأطفال وتوفير القرطاسية والحقائب المدرسية</p>
+                    </div>
+                </div> *@
             </div>
         </div>
 
         <!-- Slider controls -->
-        <button onclick="slidePrev()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white w-10 h-10 rounded-full hover:bg-black/70 transition-colors text-xl">❮</button>
-        <button onclick="slideNext()" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white w-10 h-10 rounded-full hover:bg-black/70 transition-colors text-xl">❯</button>
+        <button onclick="slidePrev()" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white w-10 h-10 rounded-full hover:bg-black/70 transition-colors text-xl">❮</button>
+        <button onclick="slideNext()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white w-10 h-10 rounded-full hover:bg-black/70 transition-colors text-xl">❯</button>
 
         <!-- Dots -->
         <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2" id="sliderDots">

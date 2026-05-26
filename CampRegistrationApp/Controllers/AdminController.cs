@@ -1086,12 +1086,6 @@ namespace CampRegistrationApp.Controllers
 
             if (registration == null) return NotFound();
 
-            if (registration.ApprovalStatus != RegistrationApprovalStatus.Pending)
-            {
-                TempData["Error"] = "لا يمكن تعديل هذا التسجيل بعد الموافقة عليه";
-                return RedirectToAction("RefugeeDetails", new { id });
-            }
-
             var model = MapToViewModel(registration);
 
             ViewBag.FormAction = "AdminUpdateRegistration";
@@ -1135,12 +1129,6 @@ namespace CampRegistrationApp.Controllers
                 .FirstOrDefaultAsync(f => f.Id == model.Id);
 
             if (registration == null) return NotFound();
-
-            if (registration.ApprovalStatus != RegistrationApprovalStatus.Pending)
-            {
-                TempData["Error"] = "لا يمكن تعديل هذا التسجيل بعد الموافقة عليه";
-                return RedirectToAction("RefugeeDetails", new { id = model.Id });
-            }
 
             ViewBag.HeadAttachments = registration.FamilyHead.Attachments.ToList();
 

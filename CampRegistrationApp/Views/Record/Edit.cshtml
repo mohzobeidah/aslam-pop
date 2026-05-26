@@ -33,7 +33,7 @@
                 @Html.ValidationSummary(false, "", new { @class = "text-red-500 text-sm" })
             </div>
 
-            <form asp-action="@(ViewBag.FormAction ?? "Update")" asp-controller="@(ViewBag.FormController ?? "Record")" method="post" class="space-y-8">
+            <form asp-action="@(ViewBag.FormAction ?? "Update")" asp-controller="@(ViewBag.FormController ?? "Record")" method="post" class="space-y-8" novalidate>
                 <input type="hidden" name="Id" value="@Model.Id" />
                 <input type="hidden" name="RecordId" value="@Model.RecordId" />
                 <input type="hidden" name="CurrentStep" value="1" />
