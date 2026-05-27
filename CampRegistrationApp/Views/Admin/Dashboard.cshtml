@@ -92,38 +92,146 @@
     </div>
 }
 
-<h2 class="text-xl text-camp-gold font-bold mb-4">إحصائيات القواطع</h2>
+<h2 class="text-xl text-camp-gold font-bold mb-4">إحصائيات تفصيلية حسب القاطع</h2>
 
 <div class="overflow-x-auto">
-    <table class="w-full bg-camp-accent-grey rounded-xl border border-gray-700">
+    <table class="w-full bg-camp-accent-grey rounded-xl border border-gray-700" style="min-width: 3200px;">
         <thead>
-            <tr class="border-b border-gray-700 text-camp-gold text-sm">
-                <th class="p-3 text-right">القاطع</th>
-                <th class="p-3 text-right">المخيم</th>
-                <th class="p-3 text-right">المنطقة</th>
-                <th class="p-3 text-center">خيم تصنيع</th>
-                <th class="p-3 text-center">خيم يدوي</th>
-                <th class="p-3 text-center">حمامات</th>
-                <th class="p-3 text-center">عدد المسجلين</th>
+            <tr class="border-b border-gray-700 text-camp-gold text-xs">
+                <th colspan="9" class="p-2 text-center border-l border-gray-700">معلومات القاطع</th>
+                <th colspan="8" class="p-2 text-center border-l border-gray-700">إحصائيات الأسرة</th>
+                <th colspan="6" class="p-2 text-center border-l border-gray-700">تصنيف الأفراد</th>
+                <th colspan="3" class="p-2 text-center border-l border-gray-700">أقل من 5 سنوات</th>
+                <th colspan="3" class="p-2 text-center border-l border-gray-700">رضع (0-2)</th>
+                <th colspan="3" class="p-2 text-center border-l border-gray-700">أطفال (2-5)</th>
+                <th colspan="3" class="p-2 text-center border-l border-gray-700">تحت 18 سنة</th>
+                <th colspan="3" class="p-2 text-center border-l border-gray-700">بالغين (18-60)</th>
+                <th colspan="3" class="p-2 text-center border-l border-gray-700">كبار (>60)</th>
+                <th colspan="4" class="p-2 text-center">الصحة</th>
+            </tr>
+            <tr class="border-b border-gray-700 text-camp-gold text-xs">
+                <!-- Sector Info (9) -->
+                <th class="p-2 text-right">القاطع</th>
+                <th class="p-2 text-right">المخيم</th>
+                <th class="p-2 text-right">المنطقة</th>
+                <th class="p-2 text-center">الإحداثيات</th>
+                <th class="p-2 text-center">خيم مصنعة</th>
+                <th class="p-2 text-center">خيم يدوية</th>
+                <th class="p-2 text-center">حمامات</th>
+                <th class="p-2 text-center">مسجلين</th>
+                <th class="p-2 text-center border-l border-gray-700">معتمد</th>
+                <!-- Family Stats (8) -->
+                <th class="p-2 text-center">عدد الأفراد</th>
+                <th class="p-2 text-center">عدد الأسر</th>
+                <th class="p-2 text-center">تقودها امرأة</th>
+                <th class="p-2 text-center">يقودها طفل</th>
+                <th class="p-2 text-center">رب أسرة</th>
+                <th class="p-2 text-center">زوجات</th>
+                <th class="p-2 text-center border-l border-gray-700">ذكور</th>
+                <th class="p-2 text-center border-l border-gray-700">إناث</th>
+                <!-- Classification (6) -->
+                <th class="p-2 text-center">رب أسرة</th>
+                <th class="p-2 text-center">زوجة</th>
+                <th class="p-2 text-center">ابن</th>
+                <th class="p-2 text-center">ابنة</th>
+                <th class="p-2 text-center border-l border-gray-700">ذكور</th>
+                <th class="p-2 text-center border-l border-gray-700">إناث</th>
+                <!-- Under 5 (3) -->
+                <th class="p-2 text-center">المجموع</th>
+                <th class="p-2 text-center">ذكور</th>
+                <th class="p-2 text-center border-l border-gray-700">إناث</th>
+                <!-- Infants 0-2 (3) -->
+                <th class="p-2 text-center">المجموع</th>
+                <th class="p-2 text-center">ذكور</th>
+                <th class="p-2 text-center border-l border-gray-700">إناث</th>
+                <!-- Children 2-5 (3) -->
+                <th class="p-2 text-center">المجموع</th>
+                <th class="p-2 text-center">ذكور</th>
+                <th class="p-2 text-center border-l border-gray-700">إناث</th>
+                <!-- Under 18 (3) -->
+                <th class="p-2 text-center">المجموع</th>
+                <th class="p-2 text-center">ذكور</th>
+                <th class="p-2 text-center border-l border-gray-700">إناث</th>
+                <!-- Adults 18-60 (3) -->
+                <th class="p-2 text-center">المجموع</th>
+                <th class="p-2 text-center">ذكور</th>
+                <th class="p-2 text-center border-l border-gray-700">إناث</th>
+                <!-- Elderly >60 (3) -->
+                <th class="p-2 text-center">المجموع</th>
+                <th class="p-2 text-center">ذكور</th>
+                <th class="p-2 text-center border-l border-gray-700">إناث</th>
+                <!-- Health (4) -->
+                <th class="p-2 text-center">ذوي إعاقة</th>
+                <th class="p-2 text-center">ذكور</th>
+                <th class="p-2 text-center">إناث</th>
+                <th class="p-2 text-center">أمراض مزمنة</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var s in Model.Sectors)
             {
-                <tr class="border-b border-gray-700 hover:bg-gray-800/50 text-sm">
-                    <td class="p-3 font-bold text-white">@s.SectorName</td>
-                    <td class="p-3 text-gray-300">@s.Camp</td>
-                    <td class="p-3 text-gray-300">@s.Area</td>
-                    <td class="p-3 text-center text-gray-300">@s.ManufacturedTents</td>
-                    <td class="p-3 text-center text-gray-300">@s.HandmadeTents</td>
-                    <td class="p-3 text-center text-gray-300">@s.Bathrooms</td>
-                    <td class="p-3 text-center text-camp-gold font-bold">@s.RegistrationCount</td>
+                <tr class="border-b border-gray-700 hover:bg-gray-800/50 text-xs">
+                    <!-- Sector Info -->
+                    <td class="p-2 font-bold text-white">@s.SectorName</td>
+                    <td class="p-2 text-gray-300">@s.Camp</td>
+                    <td class="p-2 text-gray-300">@s.Area</td>
+                    <td class="p-2 text-center text-gray-300">@s.Coordinate</td>
+                    <td class="p-2 text-center text-gray-300">@s.ManufacturedTents</td>
+                    <td class="p-2 text-center text-gray-300">@s.HandmadeTents</td>
+                    <td class="p-2 text-center text-gray-300">@s.Bathrooms</td>
+                    <td class="p-2 text-center text-camp-gold font-bold">@s.RegistrationCount</td>
+                    <td class="p-2 text-center text-green-400 font-bold border-l border-gray-700">@s.ApprovedFamilyCount</td>
+                    <!-- Family Stats -->
+                    <td class="p-2 text-center text-camp-gold font-bold">@s.TotalPersons</td>
+                    <td class="p-2 text-center text-gray-300">@s.TotalFamilies</td>
+                    <td class="p-2 text-center text-gray-300">@s.FemaleLedFamilies</td>
+                    <td class="p-2 text-center text-gray-300">@s.ChildLedFamilies</td>
+                    <td class="p-2 text-center text-gray-300">@s.HeadCount</td>
+                    <td class="p-2 text-center text-gray-300">@s.WifeCount</td>
+                    <td class="p-2 text-center text-gray-300 border-l border-gray-700">@s.TotalMales</td>
+                    <td class="p-2 text-center text-gray-300 border-l border-gray-700">@s.TotalFemales</td>
+                    <!-- Classification -->
+                    <td class="p-2 text-center text-gray-300">@s.HeadCount</td>
+                    <td class="p-2 text-center text-gray-300">@s.WifeCount</td>
+                    <td class="p-2 text-center text-gray-300">@s.SonCount</td>
+                    <td class="p-2 text-center text-gray-300">@s.DaughterCount</td>
+                    <td class="p-2 text-center text-gray-300 border-l border-gray-700">@s.TotalMales</td>
+                    <td class="p-2 text-center text-gray-300 border-l border-gray-700">@s.TotalFemales</td>
+                    <!-- Under 5 -->
+                    <td class="p-2 text-center text-gray-300">@s.ChildrenUnder5</td>
+                    <td class="p-2 text-center text-gray-300">@s.MaleUnder5</td>
+                    <td class="p-2 text-center text-gray-300 border-l border-gray-700">@s.FemaleUnder5</td>
+                    <!-- Infants 0-2 -->
+                    <td class="p-2 text-center text-gray-300">@s.InfantsUnder2</td>
+                    <td class="p-2 text-center text-gray-300">@s.MaleInfants</td>
+                    <td class="p-2 text-center text-gray-300 border-l border-gray-700">@s.FemaleInfants</td>
+                    <!-- Children 2-5 -->
+                    <td class="p-2 text-center text-gray-300">@s.Children2To5</td>
+                    <td class="p-2 text-center text-gray-300">@s.Male2To5</td>
+                    <td class="p-2 text-center text-gray-300 border-l border-gray-700">@s.Female2To5</td>
+                    <!-- Under 18 -->
+                    <td class="p-2 text-center text-gray-300">@s.ChildrenUnder18</td>
+                    <td class="p-2 text-center text-gray-300">@s.MaleUnder18</td>
+                    <td class="p-2 text-center text-gray-300 border-l border-gray-700">@s.FemaleUnder18</td>
+                    <!-- Adults 18-60 -->
+                    <td class="p-2 text-center text-gray-300">@s.Adults18To60</td>
+                    <td class="p-2 text-center text-gray-300">@s.MaleAdults</td>
+                    <td class="p-2 text-center text-gray-300 border-l border-gray-700">@s.FemaleAdults</td>
+                    <!-- Elderly >60 -->
+                    <td class="p-2 text-center text-gray-300">@s.Elderly</td>
+                    <td class="p-2 text-center text-gray-300">@s.MaleElderly</td>
+                    <td class="p-2 text-center text-gray-300 border-l border-gray-700">@s.FemaleElderly</td>
+                    <!-- Health -->
+                    <td class="p-2 text-center text-yellow-400 font-bold">@s.Disabled</td>
+                    <td class="p-2 text-center text-gray-300">@s.MaleDisabled</td>
+                    <td class="p-2 text-center text-gray-300">@s.FemaleDisabled</td>
+                    <td class="p-2 text-center text-red-400 font-bold">@s.ChronicSick</td>
                 </tr>
             }
             @if (!Model.Sectors.Any())
             {
                 <tr>
-                    <td colspan="7" class="p-6 text-center text-gray-500">لا توجد قواطع بعد</td>
+                    <td colspan="47" class="p-6 text-center text-gray-500">لا توجد قواطع بعد</td>
                 </tr>
             }
         </tbody>

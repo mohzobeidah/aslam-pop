@@ -112,54 +112,124 @@ namespace CampRegistrationApp.Controllers
             ViewBag.AdminRole = admin.Role.ToString();
 
             var isAdmin = IsSuperAdmin();
+            var sectorName = admin.Sector?.Name;
 
-            List<SectorDashboard> sectors;
-            int totalRegistrations;
+            var sql = @"
+WITH AllPersons AS (
+    -- 1 = رب الأسرة (Head), 2 = زوجة (Wife), 3 = أبناء (Children)
+    SELECT 
+        s.Name AS SectorName,
+        1 AS PersonGroup,
+        p.IdNumber AS NationalId,
+        DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) AS Age,
+        p.Gender AS Gender,
+        CASE WHEN p.DisabilityTypes IS NOT NULL AND p.DisabilityTypes != '' THEN 1 ELSE 0 END AS IsDisabled,
+        CASE WHEN p.ChronicDiseases IS NOT NULL AND p.ChronicDiseases != '' THEN 1 ELSE 0 END AS IsSick,
+        CASE WHEN fr.IsChildHeaded = 1 THEN 1 ELSE 0 END AS ChildLeadFamily,
+        CASE WHEN fr.IsFemaleHeaded = 1 THEN 1 ELSE 0 END AS IsFemaleHead
+    FROM FamilyRegistrations fr
+    INNER JOIN Persons p ON fr.FamilyHeadId = p.Id
+    INNER JOIN Sectors s ON fr.SectorId = s.Id
+    WHERE fr.IsDeleted = 0
 
-            if (isAdmin)
+    UNION ALL
+
+    SELECT 
+        s.Name AS SectorName,
+        2 AS PersonGroup,
+        p.IdNumber AS NationalId,
+        DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) AS Age,
+        p.Gender AS Gender,
+        CASE WHEN p.DisabilityTypes IS NOT NULL AND p.DisabilityTypes != '' THEN 1 ELSE 0 END AS IsDisabled,
+        CASE WHEN p.ChronicDiseases IS NOT NULL AND p.ChronicDiseases != '' THEN 1 ELSE 0 END AS IsSick,
+        0 AS ChildLeadFamily,
+        0 AS IsFemaleHead
+    FROM FamilyMembers fm
+    INNER JOIN FamilyRegistrations fr ON fm.RegistrationId = fr.Id
+    INNER JOIN Persons p ON fm.PersonId = p.Id
+    INNER JOIN Sectors s ON fr.SectorId = s.Id
+    WHERE fm.RelationshipToHead = N'زوجة' AND fr.IsDeleted = 0
+
+    UNION ALL
+
+    SELECT 
+        s.Name AS SectorName,
+        3 AS PersonGroup,
+        p.IdNumber AS NationalId,
+        DATEDIFF(YEAR, p.DateOfBirth, GETDATE()) AS Age,
+        p.Gender AS Gender,
+        CASE WHEN p.DisabilityTypes IS NOT NULL AND p.DisabilityTypes != '' THEN 1 ELSE 0 END AS IsDisabled,
+        CASE WHEN p.ChronicDiseases IS NOT NULL AND p.ChronicDiseases != '' THEN 1 ELSE 0 END AS IsSick,
+        0 AS ChildLeadFamily,
+        0 AS IsFemaleHead
+    FROM FamilyMembers fm
+    INNER JOIN FamilyRegistrations fr ON fm.RegistrationId = fr.Id
+    INNER JOIN Persons p ON fm.PersonId = p.Id
+    INNER JOIN Sectors s ON fr.SectorId = s.Id
+    WHERE fm.RelationshipToHead NOT IN (N'زوجة', N'رب الأسرة') AND fr.IsDeleted = 0
+)
+SELECT 
+    ap.SectorName,
+    s.Camp,
+    s.Coordinate,
+    s.Area,
+    ISNULL(s.ManufacturedTentsCount, 0) AS ManufacturedTents,
+    ISNULL(s.HandmadeTentsCount, 0) AS HandmadeTents,
+    ISNULL(s.BathroomsCount, 0) AS Bathrooms,
+    ISNULL(MAX(reg.RegistrationCount), 0) AS RegistrationCount,
+    ISNULL(MAX(apr.ApprovedFamilyCount), 0) AS ApprovedFamilyCount,
+    COUNT(*) AS TotalPersons,
+    COUNT(DISTINCT CASE WHEN ap.PersonGroup = 1 THEN ap.NationalId END) AS TotalFamilies,
+    COUNT(DISTINCT CASE WHEN ap.PersonGroup = 1 AND ap.IsFemaleHead = 1 THEN ap.NationalId END) AS FemaleLedFamilies,
+    COUNT(DISTINCT CASE WHEN ap.PersonGroup = 1 AND ap.ChildLeadFamily = 1 THEN ap.NationalId END) AS ChildLedFamilies,
+    SUM(CASE WHEN ap.PersonGroup = 1 THEN 1 ELSE 0 END) AS HeadCount,
+    SUM(CASE WHEN ap.PersonGroup = 2 THEN 1 ELSE 0 END) AS WifeCount,
+    SUM(CASE WHEN ap.PersonGroup = 3 AND ap.Gender = N'ذكر' THEN 1 ELSE 0 END) AS SonCount,
+    SUM(CASE WHEN ap.PersonGroup = 3 AND ap.Gender = N'أنثى' THEN 1 ELSE 0 END) AS DaughterCount,
+    SUM(CASE WHEN ap.Gender = N'ذكر' THEN 1 ELSE 0 END) AS TotalMales,
+    SUM(CASE WHEN ap.Gender = N'أنثى' THEN 1 ELSE 0 END) AS TotalFemales,
+    SUM(CASE WHEN ap.Age < 5 THEN 1 ELSE 0 END) AS ChildrenUnder5,
+    SUM(CASE WHEN ap.Gender = N'ذكر' AND ap.Age < 5 THEN 1 ELSE 0 END) AS MaleUnder5,
+    SUM(CASE WHEN ap.Gender = N'أنثى' AND ap.Age < 5 THEN 1 ELSE 0 END) AS FemaleUnder5,
+    SUM(CASE WHEN ap.Age < 2 THEN 1 ELSE 0 END) AS InfantsUnder2,
+    SUM(CASE WHEN ap.Gender = N'ذكر' AND ap.Age < 2 THEN 1 ELSE 0 END) AS MaleInfants,
+    SUM(CASE WHEN ap.Gender = N'أنثى' AND ap.Age < 2 THEN 1 ELSE 0 END) AS FemaleInfants,
+    SUM(CASE WHEN ap.Age >= 2 AND ap.Age <= 5 THEN 1 ELSE 0 END) AS Children2To5,
+    SUM(CASE WHEN ap.Gender = N'ذكر' AND ap.Age >= 2 AND ap.Age <= 5 THEN 1 ELSE 0 END) AS Male2To5,
+    SUM(CASE WHEN ap.Gender = N'أنثى' AND ap.Age >= 2 AND ap.Age <= 5 THEN 1 ELSE 0 END) AS Female2To5,
+    SUM(CASE WHEN ap.Age < 18 THEN 1 ELSE 0 END) AS ChildrenUnder18,
+    SUM(CASE WHEN ap.Gender = N'ذكر' AND ap.Age < 18 THEN 1 ELSE 0 END) AS MaleUnder18,
+    SUM(CASE WHEN ap.Gender = N'أنثى' AND ap.Age < 18 THEN 1 ELSE 0 END) AS FemaleUnder18,
+    SUM(CASE WHEN ap.Age >= 18 AND ap.Age <= 60 THEN 1 ELSE 0 END) AS Adults18To60,
+    SUM(CASE WHEN ap.Gender = N'ذكر' AND ap.Age >= 18 AND ap.Age <= 60 THEN 1 ELSE 0 END) AS MaleAdults,
+    SUM(CASE WHEN ap.Gender = N'أنثى' AND ap.Age >= 18 AND ap.Age <= 60 THEN 1 ELSE 0 END) AS FemaleAdults,
+    SUM(CASE WHEN ap.Age > 60 THEN 1 ELSE 0 END) AS Elderly,
+    SUM(CASE WHEN ap.Gender = N'ذكر' AND ap.Age > 60 THEN 1 ELSE 0 END) AS MaleElderly,
+    SUM(CASE WHEN ap.Gender = N'أنثى' AND ap.Age > 60 THEN 1 ELSE 0 END) AS FemaleElderly,
+    SUM(ap.IsDisabled) AS Disabled,
+    SUM(CASE WHEN ap.Gender = N'ذكر' AND ap.IsDisabled = 1 THEN 1 ELSE 0 END) AS MaleDisabled,
+    SUM(CASE WHEN ap.Gender = N'أنثى' AND ap.IsDisabled = 1 THEN 1 ELSE 0 END) AS FemaleDisabled,
+    SUM(ap.IsSick) AS ChronicSick
+FROM AllPersons ap
+LEFT JOIN Sectors s ON ap.SectorName = s.Name
+LEFT JOIN (SELECT SectorId, COUNT(*) AS RegistrationCount FROM FamilyRegistrations WHERE IsDeleted = 0 GROUP BY SectorId) reg ON s.Id = reg.SectorId
+LEFT JOIN (SELECT SectorId, COUNT(*) AS ApprovedFamilyCount FROM FamilyRegistrations WHERE IsDeleted = 0 AND ApprovalStatus = 1 GROUP BY SectorId) apr ON s.Id = apr.SectorId
+GROUP BY ap.SectorName, s.Camp, s.Coordinate, s.Area, s.ManufacturedTentsCount, s.HandmadeTentsCount, s.BathroomsCount, s.Id
+ORDER BY COUNT(*) DESC;
+";
+            var sectors = await _context.Database
+                .SqlQueryRaw<SectorDashboard>(sql)
+                .ToListAsync();
+
+            if (!isAdmin)
             {
-                sectors = await _context.Sectors
-                    .Select(s => new SectorDashboard
-                    {
-                        SectorName = s.Name,
-                        Camp = s.Camp,
-                        Area = s.Area,
-                        ManufacturedTents = s.ManufacturedTentsCount,
-                        HandmadeTents = s.HandmadeTentsCount,
-                        Bathrooms = s.BathroomsCount,
-                        RegistrationCount = _context.FamilyRegistrations.Count(f => f.SectorId == s.Id),
-                        ApprovedFamilyCount = _context.FamilyRegistrations
-                            .Count(f => f.SectorId == s.Id && f.ApprovalStatus == RegistrationApprovalStatus.Approved)
-                    })
-                    .ToListAsync();
-                totalRegistrations = await _context.FamilyRegistrations.CountAsync();
-            }
-            else
-            {
-                var sectorName = admin.Sector?.Name;
-                sectors = await _context.Sectors
-                    .Where(s => s.Name == sectorName)
-                    .Select(s => new SectorDashboard
-                    {
-                        SectorName = s.Name,
-                        Camp = s.Camp,
-                        Area = s.Area,
-                        ManufacturedTents = s.ManufacturedTentsCount,
-                        HandmadeTents = s.HandmadeTentsCount,
-                        Bathrooms = s.BathroomsCount,
-                        RegistrationCount = _context.FamilyRegistrations.Count(f => f.SectorId == s.Id),
-                        ApprovedFamilyCount = _context.FamilyRegistrations
-                            .Count(f => f.SectorId == s.Id && f.ApprovalStatus == RegistrationApprovalStatus.Approved)
-                    })
-                    .ToListAsync();
-                totalRegistrations = await _context.FamilyRegistrations
-                    .CountAsync(f => f.Sector.Name == sectorName);
+                sectors = sectors.Where(s => s.SectorName == sectorName).ToList();
             }
 
             var model = new DashboardViewModel
             {
                 Sectors = sectors,
-                TotalRegistrations = totalRegistrations,
+                TotalRegistrations = sectors.Sum(s => s.TotalFamilies),
                 TotalAdmins = isAdmin ? await _context.Admins.CountAsync() : 0,
                 TotalSectors = isAdmin ? await _context.Sectors.CountAsync() : 0,
                 TotalApprovedRefugees = sectors.Sum(s => s.ApprovedFamilyCount)
