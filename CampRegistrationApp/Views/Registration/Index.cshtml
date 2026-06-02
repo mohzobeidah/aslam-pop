@@ -366,7 +366,7 @@
                                     <input type="radio" name="LivesInTent" data-ls="LivesInTent" value="true" class="accent-camp-gold" onchange="toggleSection(this, 'tent-details'); saveToLocalStorage()" /> نعم
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="LivesInTent" data-ls="LivesInTent" value="false" checked class="accent-camp-gold" onchange="toggleSection(this, 'tent-details'); saveToLocalStorage()" /> لا
+                                    <input type="radio" name="LivesInTent" data-ls="LivesInTent" value="false" class="accent-camp-gold" onchange="toggleSection(this, 'tent-details'); saveToLocalStorage()" /> لا
                                 </label>
                             </div>
                         </div>
@@ -375,10 +375,13 @@
                             <label class="block text-sm mb-1">نوع الخيمة</label>
                             <select name="TentType" data-ls="TentType" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
                                 <option value="">اختر النوع...</option>
-                                <option value="تركيب">تركيب</option>
+                                <option value="تركيب خشب وشوادر">تركيب خشب وشوادر</option>
+                                <option value="حديد وشوادر">حديد وشوادر</option>
                                 <option value="قبة">قبة</option>
                                 <option value="إماراتية">إماراتية</option>
                                 <option value="قطرية">قطرية</option>
+                                <option value="خيمة صينية">خيمة صينية</option>
+                                <option value="خيمة قماش وخشب">خيمة قماش وخشب</option>
                                 <option value="أخرى">أخرى</option>
                             </select>
                             <input name="OtherTentType" data-ls="OtherTentType" placeholder="يرجى تحديد النوع الآخر" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
@@ -422,7 +425,7 @@
                                         <input type="radio" name="HasBathroom" data-ls="HasBathroom" value="true" class="accent-camp-gold" onchange="toggleSection(this, 'bathroom-details'); saveToLocalStorage()" /> نعم
                                     </label>
                                     <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="radio" name="HasBathroom" data-ls="HasBathroom" value="false" checked class="accent-camp-gold" onchange="toggleSection(this, 'bathroom-details'); saveToLocalStorage()" /> لا
+                                        <input type="radio" name="HasBathroom" data-ls="HasBathroom" value="false" class="accent-camp-gold" onchange="toggleSection(this, 'bathroom-details'); saveToLocalStorage()" /> لا
                                     </label>
                                 </div>
                             </div>
@@ -998,6 +1001,7 @@
                 'Head.DateOfBirth': 'تاريخ الميلاد',
                 'PhoneNumber': 'رقم الهاتف',
                 'Wallet': 'المحفظة',
+                'WalletType': 'نوع المحفظة',
                 'Head.OriginalGovernorate': 'مكان السكن الأصلي',
                 'Head.MaritalStatus': 'الحالة الاجتماعية',
                 'Head.EmploymentStatus': 'الوظيفة',
@@ -1160,37 +1164,53 @@
                 valid = false;
             }
 
-            // Validate LivesInTent radio
-            const livesInTentYes = document.querySelector('[name="LivesInTent"][value="true"]');
-            if (livesInTentYes && livesInTentYes.checked) {
-                const tentType = document.querySelector('[name="TentType"]');
-                if (!tentType || !tentType.value) {
-                    highlightError(tentType);
-                    alert('يرجى اختيار نوع الخيمة');
-                    valid = false;
-                } else {
-                    clearHighlight(tentType);
+            // Validate LivesInTent radio — user must explicitly choose
+            const livesInTentTrue = document.querySelector('[name="LivesInTent"][value="true"]:checked');
+            const livesInTentFalse = document.querySelector('[name="LivesInTent"][value="false"]:checked');
+            if (!livesInTentTrue && !livesInTentFalse) {
+                document.querySelectorAll('[name="LivesInTent"]').forEach(r => highlightError(r.parentElement));
+                alert('يرجى اختيار هل تسكن العائلة في خيمة (نعم/لا)');
+                valid = false;
+            } else {
+                document.querySelectorAll('[name="LivesInTent"]').forEach(r => clearHighlight(r.parentElement));
+                if (livesInTentTrue) {
+                    const tentType = document.querySelector('[name="TentType"]');
+                    if (!tentType || !tentType.value) {
+                        highlightError(tentType);
+                        alert('يرجى اختيار نوع الخيمة');
+                        valid = false;
+                    } else {
+                        clearHighlight(tentType);
+                    }
                 }
             }
 
-            // Validate HasBathroom radio -> requires BathroomType + BathroomStatus
-            const hasBathroomYes = document.querySelector('[name="HasBathroom"][value="true"]');
-            if (hasBathroomYes && hasBathroomYes.checked) {
-                const bathroomTypeChecked = document.querySelector('[name="BathroomType"]:checked');
-                if (!bathroomTypeChecked) {
-                    document.querySelectorAll('[name="BathroomType"]').forEach(r => highlightError(r.parentElement));
-                    alert('يرجى اختيار نوع الحمام');
-                    valid = false;
-                } else {
-                    document.querySelectorAll('[name="BathroomType"]').forEach(r => clearHighlight(r.parentElement));
-                }
-                const bathStatus = document.querySelector('[data-ls="Head.BathroomStatus"]');
-                if (!bathStatus || !bathStatus.value) {
-                    highlightError(bathStatus);
-                    alert('يرجى اختيار حالة الحمام');
-                    valid = false;
-                } else {
-                    clearHighlight(bathStatus);
+            // Validate HasBathroom radio — user must explicitly choose
+            const hasBathroomTrue = document.querySelector('[name="HasBathroom"][value="true"]:checked');
+            const hasBathroomFalse = document.querySelector('[name="HasBathroom"][value="false"]:checked');
+            if (!hasBathroomTrue && !hasBathroomFalse) {
+                document.querySelectorAll('[name="HasBathroom"]').forEach(r => highlightError(r.parentElement));
+                alert('يرجى اختيار هل يوجد حمام (نعم/لا)');
+                valid = false;
+            } else {
+                document.querySelectorAll('[name="HasBathroom"]').forEach(r => clearHighlight(r.parentElement));
+                if (hasBathroomTrue) {
+                    const bathroomTypeChecked = document.querySelector('[name="BathroomType"]:checked');
+                    if (!bathroomTypeChecked) {
+                        document.querySelectorAll('[name="BathroomType"]').forEach(r => highlightError(r.parentElement));
+                        alert('يرجى اختيار نوع الحمام');
+                        valid = false;
+                    } else {
+                        document.querySelectorAll('[name="BathroomType"]').forEach(r => clearHighlight(r.parentElement));
+                    }
+                    const bathStatus = document.querySelector('[data-ls="Head.BathroomStatus"]');
+                    if (!bathStatus || !bathStatus.value) {
+                        highlightError(bathStatus);
+                        alert('يرجى اختيار حالة الحمام');
+                        valid = false;
+                    } else {
+                        clearHighlight(bathStatus);
+                    }
                 }
             }
 

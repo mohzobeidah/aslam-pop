@@ -56,7 +56,14 @@ namespace CampRegistrationApp.Services
                 return false;
             }
 
-            // 3. Health Status Validation for Members: sick requires disease or disability
+            // 3a. WalletType Validation: required if Wallet is provided
+            if (!string.IsNullOrWhiteSpace(model.Wallet) && string.IsNullOrWhiteSpace(model.WalletType))
+            {
+                modelState.AddModelError("WalletType", "يرجى اختيار نوع المحفظة");
+                return false;
+            }
+
+            // 4. Health Status Validation for Members: sick requires disease or disability
             for (int i = 0; i < model.Members.Count; i++)
             {
                 var m = model.Members[i];

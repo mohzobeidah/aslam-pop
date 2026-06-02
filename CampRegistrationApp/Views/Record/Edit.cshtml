@@ -497,7 +497,7 @@
                         <div id="tent-details" class="@(Model.LivesInTent ? "" : "hidden") p-4 bg-camp-dark-grey rounded border border-gray-700 space-y-4">
                             <select name="TentType" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
                                 <option value="">اختر النوع...</option>
-                                @foreach (var t in new[] { "تركيب", "قبة", "إماراتية", "قطرية", "أخرى" })
+                                @foreach (var t in new[] { "تركيب خشب وشوادر", "حديد وشوادر", "قبة", "إماراتية", "قطرية", "خيمة صينية", "خيمة قماش وخشب", "أخرى" })
                                 {
                                     <option value="@t" selected="@(Model.TentType == t )">@t</option>
                                 }
@@ -1003,6 +1003,7 @@
                 'Head.DateOfBirth': 'تاريخ الميلاد',
                 'PhoneNumber': 'رقم الهاتف',
                 'Wallet': 'المحفظة',
+                'WalletType': 'نوع المحفظة',
                 'Head.OriginalGovernorate': 'مكان السكن الأصلي',
                 'Head.MaritalStatus': 'الحالة الاجتماعية',
                 'Head.EmploymentStatus': 'الوظيفة',
