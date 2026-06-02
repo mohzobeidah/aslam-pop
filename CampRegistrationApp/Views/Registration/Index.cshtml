@@ -1578,7 +1578,7 @@
         // ========== CLEAR ALL ==========
         function clearAllFields() {
             if (!confirm('هل تريد مسح جميع الحقول؟ سيتم فقدان البيانات المدخلة.')) return;
-            const form = document.querySelector('form');
+            const form = document.getElementById('registrationForm');
             form.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]):not([type="file"]), textarea').forEach(el => el.value = '');
             form.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
             form.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);

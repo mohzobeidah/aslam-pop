@@ -33,7 +33,7 @@
                 @Html.ValidationSummary(false, "", new { @class = "text-red-500 text-sm" })
             </div>
 
-            <form asp-action="@(ViewBag.FormAction ?? "Update")" asp-controller="@(ViewBag.FormController ?? "Record")" method="post" class="space-y-8" novalidate>
+            <form id="editForm" asp-action="@(ViewBag.FormAction ?? "Update")" asp-controller="@(ViewBag.FormController ?? "Record")" method="post" class="space-y-8" novalidate>
                 <input type="hidden" name="Id" value="@Model.Id" />
                 <input type="hidden" name="RecordId" value="@Model.RecordId" />
                 <input type="hidden" name="CurrentStep" value="1" />
@@ -1122,7 +1122,7 @@
                 return false;
             }
 
-            const form = document.querySelector('form');
+            const form = document.getElementById('editForm');
 
             // Disable ALL checkboxes + radios so only hidden inputs submit values
             form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
