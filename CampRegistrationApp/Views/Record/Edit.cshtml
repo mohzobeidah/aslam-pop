@@ -816,8 +816,8 @@
         }
 
         function addMember() {
-            const idx = memberIdx++;
             const container = document.getElementById('members-container');
+            const idx = container.querySelectorAll('.member-card').length;
             const card = document.createElement('div');
             card.className = 'member-card bg-camp-dark-grey p-4 rounded border border-gray-700 relative mb-4';
             card.innerHTML = `
@@ -913,10 +913,40 @@
             `;
             container.appendChild(card);
             document.getElementById('no-members-msg')?.classList.add('hidden');
+            reindexMembers();
+        }
+
+        function reindexMembers() {
+            const cards = document.querySelectorAll('.member-card');
+            cards.forEach((card, idx) => {
+                card.setAttribute('data-index', idx);
+                const inputs = card.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    const name = input.name;
+                    if (name && name.includes('Members[')) {
+                        const newName = name.replace(/Members\[\d+\]/, `Members[${idx}]`);
+                        input.name = newName;
+                    }
+                });
+                const healthSection = card.querySelector(`[id^="member-health-"]`);
+                if (healthSection) healthSection.id = `member-health-${idx}`;
+                const injurySection = card.querySelector(`[id^="member-injury-"]`);
+                if (injurySection) injurySection.id = `member-injury-${idx}`;
+                const radios = card.querySelectorAll('input[type="radio"][name*=".HealthStatus"]');
+                radios.forEach(r => r.name = `Members[${idx}].HealthStatus`);
+                const checkboxes = card.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => {
+                    const name = cb.name;
+                    if (name && name.includes('Members[')) {
+                        cb.name = name.replace(/Members\[\d+\]/, `Members[${idx}]`);
+                    }
+                });
+            });
         }
 
         function removeMember(btn) {
             btn.closest('.member-card').remove();
+            reindexMembers();
             if (document.querySelectorAll('.member-card').length === 0) {
                 document.getElementById('no-members-msg')?.classList.remove('hidden');
             }
@@ -1171,6 +1201,9 @@
                 }
                 form.appendChild(hidden);
             });
+
+            // Sync desires from dropdowns to hidden input before submission
+            saveDesireIds();
 
             // Convert single comma-separated DesireIds input to indexed inputs for model binding
             const desireInput = document.getElementById('desireIdsInput');

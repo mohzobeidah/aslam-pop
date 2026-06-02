@@ -13,8 +13,18 @@ Camp family registration system in two versions:
 - Build: `dotnet build`
 - Run: `dotnet run --project CampRegistrationApp/CampRegistrationApp.csproj`
 - Test: `dotnet test`
+- Selenium E2E: `dotnet test CampRegistrationApp.SeleniumTests/CampRegistrationApp.SeleniumTests.csproj`
 - Ports: HTTP `localhost:5392`, HTTPS `localhost:7126`
 - Production: CI/CD via `.github/workflows/publish.yml`, Azure deploy via `.deployment`
+
+### Playwright E2E Tests (`CampRegistrationApp.PlaywrightTests/`)
+- **Setup**: `cd CampRegistrationApp.PlaywrightTests && npm install && npx playwright install chromium`
+- **Run**: `BASE_URL=http://localhost:5392 npx playwright test` (app must be running on that URL)
+- **Run headed (debug)**: `BASE_URL=http://localhost:5392 npx playwright test --headed`
+- **HTML report**: After run, open `playwright-report/index.html`
+- **Tests**: `tests/registration.spec.ts` (4-step wizard) + `tests/record-edit.spec.ts` (login, edit, admin edit)
+- **Helpers**: Valid Palestinian ID generation, selector constants
+- Requires the ASP.NET Core app to be running (the Selenium tests use an in-process server; Playwright tests connect to a running instance)
 
 ## ASP.NET Core Architecture
 ### Data Model
