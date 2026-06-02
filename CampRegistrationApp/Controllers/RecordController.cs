@@ -16,14 +16,16 @@ namespace CampRegistrationApp.Controllers
         private readonly INotificationService _notificationService;
         private readonly IWebHostEnvironment _env;
         private readonly IRegistrationValidationService _validator;
+        private readonly IFileCompressionService _compression;
 
-        public RecordController(ApplicationDbContext context, IAuditService audit, INotificationService notificationService, IWebHostEnvironment env, IRegistrationValidationService validator)
+        public RecordController(ApplicationDbContext context, IAuditService audit, INotificationService notificationService, IWebHostEnvironment env, IRegistrationValidationService validator, IFileCompressionService compression)
         {
             _context = context;
             _audit = audit;
             _notificationService = notificationService;
             _env = env;
             _validator = validator;
+            _compression = compression;
         }
 
         private async Task PopulateLookupViewBags()
@@ -169,15 +171,21 @@ namespace CampRegistrationApp.Controllers
 
             var regId = HttpContext.Session.GetInt32("EditRegistrationId");
             var recordId = regId?.ToString() ?? "TEMP";
-            var fileName = $"{personId}_{fileType}_{DateTime.Now:yyyyMMddHHmmss}_{Path.GetExtension(file.FileName)}";
+            var ext = Path.GetExtension(file.FileName);
+            var fileName = $"{personId}_{fileType}_{DateTime.Now:yyyyMMddHHmmss}_{ext}";
             var folderPath = Path.Combine(_env.WebRootPath, "uploads", "registrations", recordId);
 
             if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
 
             var filePath = Path.Combine(folderPath, fileName);
-            using (var stream = new FileStream(filePath, FileMode.Create))
+
+            using (var memStream = new MemoryStream())
             {
-                await file.CopyToAsync(stream);
+                await file.CopyToAsync(memStream);
+                memStream.Position = 0;
+
+                var compressed = await _compression.CompressAsync(memStream.ToArray(), file.FileName);
+                await System.IO.File.WriteAllBytesAsync(filePath, compressed);
             }
 
             return Ok(new { path = $"/uploads/registrations/{recordId}/{fileName}" });

@@ -779,10 +779,10 @@
             const formData = new FormData();
             formData.append('file', input.files[0]);
 
-            // Show file name
+            // Show file name with compression indicator
             const fileNameSpan = document.getElementById(hiddenId + '-name');
             if (fileNameSpan) {
-                fileNameSpan.textContent = input.files[0].name;
+                fileNameSpan.textContent = '⏳ ' + input.files[0].name + ' (جاري الضغط...)';
                 fileNameSpan.classList.remove('hidden');
             }
 
@@ -793,8 +793,14 @@
                 });
                 const result = await response.json();
                 document.getElementById(hiddenId).value = result.path;
+                if (fileNameSpan) {
+                    fileNameSpan.textContent = input.files[0].name + ' ✅ (تم الضغط)';
+                }
             } catch (error) {
                 console.error('Error uploading file:', error);
+                if (fileNameSpan) {
+                    fileNameSpan.textContent = input.files[0].name + ' ❌ فشل الرفع';
+                }
                 alert('حدث خطأ أثناء رفع الملف');
             }
         }

@@ -30,6 +30,7 @@ builder.Services.AddScoped<IAssistanceService, AssistanceService>();
 builder.Services.AddScoped<IImportService, ImportService>();
 builder.Services.AddScoped<IRegistrationValidationService, RegistrationValidationService>();
 builder.Services.AddScoped<IComplaintIdGenerator, ComplaintIdGenerator>();
+builder.Services.AddScoped<IFileCompressionService, FileCompressionService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

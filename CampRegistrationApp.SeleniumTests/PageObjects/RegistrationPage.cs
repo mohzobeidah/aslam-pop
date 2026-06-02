@@ -23,6 +23,7 @@ public class RegistrationPage : BasePage
     private static By GenderFemale => By.CssSelector("input[name='Head.Gender'][value='أنثى']");
     private static By PhoneNumber => By.CssSelector("[name='Head.PhoneNumber']");
     private static By Wallet => By.CssSelector("[name='Head.Wallet']");
+    private static By WalletType => By.CssSelector("[name='Head.WalletType']");
     private static By OriginalGovernorate => By.CssSelector("[name='Head.OriginalGovernorate']");
     private static By MaritalStatus => By.CssSelector("[name='Head.MaritalStatus']");
     private static By EmploymentStatus => By.CssSelector("[name='Head.EmploymentStatus']");
@@ -116,6 +117,11 @@ public class RegistrationPage : BasePage
         Test.Type(Wallet, wallet);
     }
 
+    public void SelectWalletType(string walletType)
+    {
+        Test.SelectDropdown(WalletType, walletType);
+    }
+
     public void FillOriginalGovernorate(string gov)
     {
         Test.SelectDropdown(OriginalGovernorate, gov);
@@ -153,7 +159,7 @@ public class RegistrationPage : BasePage
     public void FillStep1(string firstName, string secondName, string thirdName, string lastName,
         string idNumber, string sector, string dob, string gender, string phone,
         string wallet, string governorate, string maritalStatus, string employment, string education,
-        string healthStatus = "سليم")
+        string healthStatus = "سليم", string walletType = "بنك")
     {
         FillHeadName(firstName, secondName, thirdName, lastName);
         FillHeadIdNumber(idNumber);
@@ -162,6 +168,7 @@ public class RegistrationPage : BasePage
         SelectGender(gender);
         FillPhoneNumber(phone);
         FillWallet(wallet);
+        SelectWalletType(walletType);
         FillOriginalGovernorate(governorate);
         SelectMaritalStatus(maritalStatus);
         SelectEmploymentStatus(employment);

@@ -66,14 +66,15 @@ private string RegisterAndGetRecordId()
     db.SaveChanges();
 
     var sectorA = db.Sectors.First(s => s.Name == "A");
-    var registration = new FamilyRegistration
-    {
-        RecordId = recordId,
-        FamilyHeadId = head.Id,
-        ApprovalStatus = RegistrationApprovalStatus.Pending,
-        SectorId = sectorA.Id,
-        PhoneNumber = "0591234567",
-        Wallet = "0591234567",
+        var registration = new FamilyRegistration
+        {
+            RecordId = recordId,
+            FamilyHeadId = head.Id,
+            ApprovalStatus = RegistrationApprovalStatus.Pending,
+            SectorId = sectorA.Id,
+            PhoneNumber = "0591234567",
+            Wallet = "0591234567",
+            WalletType = "بنك",
         LivesInTent = true, TentType = "Installation",
         HasBathroom = true, BathroomType = "Private",
         RegistrationTimestamp = DateTime.UtcNow

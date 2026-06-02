@@ -89,7 +89,7 @@ Notification >── (0..1) Link (URL string)
 | `/Admin/RejectRegistration/{id}` | `AdminController.RejectRegistration` | POST — reject registration |
 | `/Admin/Refugees` | `AdminController.Refugees` | Refugee list page with sector/search filters |
 | `/Admin/RefugeeDetails/{id}` | `AdminController.RefugeeDetails` | Full refugee detail page with family member table |
-| `/Admin/AdminEditRegistration/{id}` | `AdminController.AdminEditRegistration` | Admin edit refugee profile (only Pending status) |
+| `/Admin/AdminEditRegistration/{id}` | `AdminController.AdminEditRegistration` | Admin edit refugee profile (any status) |
 | `/Admin/AdminUpdateRegistration` | `AdminController.AdminUpdateRegistration` | POST — save admin edits; audit log + mandoob notification |
 | `/Admin/Notifications` | `AdminController.Notifications` | Notification list (last 50) |
 | `/Admin/MarkNotificationRead/{id}` | `AdminController.MarkNotificationRead` | POST — mark single notification read |

@@ -22,7 +22,7 @@ Camp family registration system in two versions:
 - **Run**: `BASE_URL=http://localhost:5392 npx playwright test` (app must be running on that URL)
 - **Run headed (debug)**: `BASE_URL=http://localhost:5392 npx playwright test --headed`
 - **HTML report**: After run, open `playwright-report/index.html`
-- **Tests**: `tests/registration.spec.ts` (4-step wizard) + `tests/record-edit.spec.ts` (login, edit, admin edit)
+- **Tests**: (No test files exist yet — placeholder directory with node_modules only)
 - **Helpers**: Valid Palestinian ID generation, selector constants
 - Requires the ASP.NET Core app to be running (the Selenium tests use an in-process server; Playwright tests connect to a running instance)
 
@@ -44,10 +44,10 @@ Camp family registration system in two versions:
 3. Step 3: Housing & Special Cases + **Bathroom section** (HasBathroom, BathroomType, BathroomStatus) + **Refugee Desires** (الرغبات — ranked dropdowns)
 4. Step 4: Review & Confirm + **StatusNotes** textarea for additional notes + password creation
 
-### Admin Edit (only before acceptance)
-- **AdminEditRegistration** GET: loads Pending registration, reuses `Record/Edit.cshtml` view
+### Admin Edit
+- **AdminEditRegistration** GET: loads any registration (Pending/Approved/Rejected), reuses `Record/Edit.cshtml` view
 - **AdminUpdateRegistration** POST: saves changes (head, members, desires) with audit log + mandoob notification
-- Only accessible when `ApprovalStatus == Pending` — blocked for Approved/Rejected
+- Accessible for all statuses (Approved/Rejected are no longer blocked)
 - Edit button shown in `RefugeeDetails` page and `Registrations` list for Pending items
 
 ### Refugee Desires
@@ -106,15 +106,29 @@ Camp family registration system in two versions:
 - Added `onblur="validateMotherIdField(this)"` + `oninput="clearMotherIdError(this)"` + error span in both Index.cshtml and Edit.cshtml
 - If provided, must be a valid Palestinian ID (9 digits + check digit); empty is allowed (optional field)
 
-    ### NullReferenceException in Record Update
-    - Fixed crash in `Edit.cshtml` during POST `/Record/Update` when model binding fails.
-    - Added logic to recover `RegistrationViewModel` from session and ensure `ViewBag.HeadAttachments` are populated when returning to the view.
+### WalletType Validation
+- Server-side (`RegistrationValidationService.ValidateRegistration`): If `Wallet` is provided, `WalletType` is required
+- `WalletType` dropdown options: بنك, بال بي, جوال بي
+- Client-side: added to `validateStep1` in Index.cshtml
+- Edit.cshtml also includes the WalletType field with the same validation
 
-    ### Production Error Page
-    - Implemented a professional, themed error view at `/Home/Error` for non-development environments.
-    - Displays a user-friendly Arabic message and the Request ID for support tracking.
+### Dashboard CTE (Demographic Statistics)
+- `AdminController.Dashboard()` now uses a raw SQL CTE query instead of simple LINQ
+- The `SectorDashboard` view model has 37 properties including detailed age/gender/disability breakdowns
+- Categories: children under 2, 2-5, under 18; adults 18-60; elderly 60+; male/female disaggregation
+- Disabled and chronic sickness counts per gender
+- Soft-deleted registrations (`IsDeleted = 1`) are excluded
+- Unit tests for Dashboard are skipped (require SQL Server — `SqlQueryRaw` unsupported by InMemory provider)
 
-    ## Key Conventions (both versions)
+### NullReferenceException in Record Update
+- Fixed crash in `Edit.cshtml` during POST `/Record/Update` when model binding fails.
+- Added logic to recover `RegistrationViewModel` from session and ensure `ViewBag.HeadAttachments` are populated when returning to the view.
+
+### Production Error Page
+- Implemented a professional, themed error view at `/Home/Error` for non-development environments.
+- Displays a user-friendly Arabic message and the Request ID for support tracking.
+
+## Key Conventions (both versions)
 - All UI text in Arabic, RTL layout, Cairo font, dark theme (`#121212` + `#d4af37` gold).
 - 8-char Record ID from charset `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`.
 - No input sanitization; no migrations (`EnsureCreated()` + raw SQL).
