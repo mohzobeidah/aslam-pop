@@ -17,8 +17,9 @@ namespace CampRegistrationApp.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly IRegistrationValidationService _validator;
         private readonly IFileCompressionService _compression;
+        private readonly IRateLimiterService _rateLimiter;
 
-        public RecordController(ApplicationDbContext context, IAuditService audit, INotificationService notificationService, IWebHostEnvironment env, IRegistrationValidationService validator, IFileCompressionService compression)
+        public RecordController(ApplicationDbContext context, IAuditService audit, INotificationService notificationService, IWebHostEnvironment env, IRegistrationValidationService validator, IFileCompressionService compression, IRateLimiterService rateLimiter)
         {
             _context = context;
             _audit = audit;
@@ -26,6 +27,7 @@ namespace CampRegistrationApp.Controllers
             _env = env;
             _validator = validator;
             _compression = compression;
+            _rateLimiter = rateLimiter;
         }
 
         private async Task PopulateLookupViewBags()
@@ -78,6 +80,17 @@ namespace CampRegistrationApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string idNumber, string password)
         {
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            var rateKey = $"login:{ip}";
+            if (_rateLimiter.IsRateLimited(rateKey, 10, TimeSpan.FromMinutes(15)))
+            {
+                await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", null,
+                    new { idNumber, reason = "محاولات كثيرة جداً" },
+                    null);
+                ModelState.AddModelError("", "محاولات كثيرة جداً. الرجاء المحاولة لاحقاً.");
+                return View();
+            }
+
             if (string.IsNullOrEmpty(idNumber) || string.IsNullOrEmpty(password))
             {
                 await _audit.LogAsync(0, "LoginFailed", "FamilyRegistrations", null,

@@ -31,13 +31,15 @@ builder.Services.AddScoped<IImportService, ImportService>();
 builder.Services.AddScoped<IRegistrationValidationService, RegistrationValidationService>();
 builder.Services.AddScoped<IComplaintIdGenerator, ComplaintIdGenerator>();
 builder.Services.AddScoped<IFileCompressionService, FileCompressionService>();
+builder.Services.AddSingleton<IRateLimiterService, RateLimiterService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromHours(4);
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Strict;
 });
 
 var app = builder.Build();

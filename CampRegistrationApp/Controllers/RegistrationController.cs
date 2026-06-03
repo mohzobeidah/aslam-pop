@@ -17,8 +17,9 @@ namespace CampRegistrationApp.Controllers
         private readonly IAuditService _audit;
         private readonly IRegistrationValidationService _validator;
         private readonly IFileCompressionService _compression;
+        private readonly IRateLimiterService _rateLimiter;
 
-        public RegistrationController(ApplicationDbContext context, IRecordIdGenerator idGenerator, IWebHostEnvironment env, INotificationService notificationService, IAuditService audit, IRegistrationValidationService validator, IFileCompressionService compression)
+        public RegistrationController(ApplicationDbContext context, IRecordIdGenerator idGenerator, IWebHostEnvironment env, INotificationService notificationService, IAuditService audit, IRegistrationValidationService validator, IFileCompressionService compression, IRateLimiterService rateLimiter)
         {
             _context = context;
             _idGenerator = idGenerator;
@@ -27,6 +28,7 @@ namespace CampRegistrationApp.Controllers
             _audit = audit;
             _validator = validator;
             _compression = compression;
+            _rateLimiter = rateLimiter;
         }
 
         private async Task PopulateLookupViewBags()
@@ -64,11 +66,18 @@ namespace CampRegistrationApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CheckId(string idNumber)
+        public IActionResult CheckId(string idNumber)
         {
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            var rateKey = $"checkid:{ip}";
+            if (_rateLimiter.IsRateLimited(rateKey, 30, TimeSpan.FromMinutes(1)))
+            {
+                return Ok(new { exists = false });
+            }
+
             if (string.IsNullOrEmpty(idNumber)) return Ok(new { exists = false });
 
-            var exists = await _context.Persons.AnyAsync(p => p.IdNumber == idNumber);
+            var exists = _context.Persons.Any(p => p.IdNumber == idNumber);
             return Ok(new { exists });
         }
 

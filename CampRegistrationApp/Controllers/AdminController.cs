@@ -18,12 +18,15 @@ namespace CampRegistrationApp.Controllers
         private readonly INotificationService _notificationService;
         private readonly IRegistrationValidationService _validator;
 
-        public AdminController(ApplicationDbContext context, IAuditService audit, INotificationService notificationService, IRegistrationValidationService validator)
+        private readonly IRateLimiterService _rateLimiter;
+
+        public AdminController(ApplicationDbContext context, IAuditService audit, INotificationService notificationService, IRegistrationValidationService validator, IRateLimiterService rateLimiter)
         {
             _context = context;
             _audit = audit;
             _notificationService = notificationService;
             _validator = validator;
+            _rateLimiter = rateLimiter;
         }
 
         private static string HashPassword(string password)
@@ -61,6 +64,17 @@ namespace CampRegistrationApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string nationalId, string password)
         {
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            var rateKey = $"admin-login:{ip}";
+            if (_rateLimiter.IsRateLimited(rateKey, 10, TimeSpan.FromMinutes(15)))
+            {
+                await _audit.LogAsync(0, "LoginFailed", "Admins", null,
+                    new { nationalId, reason = "محاولات كثيرة جداً" },
+                    null);
+                ModelState.AddModelError("", "محاولات كثيرة جداً. الرجاء المحاولة لاحقاً.");
+                return View();
+            }
+
             var admin = await _context.Admins
                 .Include(a => a.Sector)
                 .FirstOrDefaultAsync(a => a.NationalId == nationalId);
@@ -237,6 +251,24 @@ ORDER BY COUNT(*) DESC;
 
             ViewBag.IsMandoob = !isAdmin;
             return View(model);
+        }
+
+        private async Task<bool> CanAccessRegistrationAsync(int registrationId)
+        {
+            if (IsSuperAdmin()) return true;
+            if (!IsAuthenticated()) return false;
+
+            var admin = await _context.Admins.Include(a => a.Sector)
+                .FirstOrDefaultAsync(a => a.Id == GetCurrentAdminId());
+
+            if (admin?.Sector == null) return false;
+
+            var regSectorId = await _context.FamilyRegistrations
+                .Where(f => f.Id == registrationId)
+                .Select(f => f.SectorId)
+                .FirstOrDefaultAsync();
+
+            return regSectorId == admin.Sector.Id;
         }
 
         // ──────────────────────────────────────
@@ -979,6 +1011,9 @@ ORDER BY COUNT(*) DESC;
         {
             if (!IsAuthenticated()) return RedirectToAction("Login");
 
+            if (!await CanAccessRegistrationAsync(id))
+                return Forbid();
+
             var reg = await _context.FamilyRegistrations
                 .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)
                 .Include(f => f.ApprovedBy)
@@ -1047,6 +1082,9 @@ ORDER BY COUNT(*) DESC;
         {
             if (!IsAuthenticated()) return Unauthorized();
 
+            if (!await CanAccessRegistrationAsync(id))
+                return Forbid();
+
             var registration = await _context.FamilyRegistrations
                 .Include(f => f.FamilyHead)
                 .FirstOrDefaultAsync(f => f.Id == id);
@@ -1071,6 +1109,9 @@ ORDER BY COUNT(*) DESC;
         public async Task<IActionResult> RejectRegistration(int id)
         {
             if (!IsAuthenticated()) return Unauthorized();
+
+            if (!await CanAccessRegistrationAsync(id))
+                return Forbid();
 
             var registration = await _context.FamilyRegistrations
                 .Include(f => f.FamilyHead)
@@ -1098,6 +1139,9 @@ ORDER BY COUNT(*) DESC;
         {
             if (!IsAuthenticated()) return Unauthorized();
 
+            if (!await CanAccessRegistrationAsync(id))
+                return Forbid();
+
             var registration = await _context.FamilyRegistrations
                 .Include(f => f.FamilyHead)
                 .Include(f => f.Sector)
@@ -1124,6 +1168,9 @@ ORDER BY COUNT(*) DESC;
         {
             if (!IsAuthenticated()) return Unauthorized();
 
+            if (!await CanAccessRegistrationAsync(id))
+                return Forbid();
+
             var registration = await _context.FamilyRegistrations
                 .Include(f => f.FamilyHead)
                 .FirstOrDefaultAsync(f => f.Id == id);
@@ -1146,6 +1193,9 @@ ORDER BY COUNT(*) DESC;
         public async Task<IActionResult> AdminEditRegistration(int id)
         {
             if (!IsAuthenticated()) return RedirectToAction("Login");
+
+            if (!await CanAccessRegistrationAsync(id))
+                return Forbid();
 
             var registration = await _context.FamilyRegistrations
                 .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)
@@ -1171,6 +1221,9 @@ ORDER BY COUNT(*) DESC;
         public async Task<IActionResult> AdminUpdateRegistration(RegistrationViewModel model)
         {
             if (!IsAuthenticated()) return Unauthorized();
+
+            if (!await CanAccessRegistrationAsync(model.Id))
+                return Forbid();
 
             await PopulateLookupViewBags();
 

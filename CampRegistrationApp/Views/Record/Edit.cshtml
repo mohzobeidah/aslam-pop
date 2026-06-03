@@ -829,26 +829,26 @@
             card.innerHTML = `
                 <button type="button" onclick="removeMember(this)" class="absolute top-2 left-2 text-red-500 hover:text-red-700 text-xl">✕</button>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-                    <div><label class="block text-xs mb-1">الاسم الأول</label><input name="Members[\${idx}].FirstName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
-                    <div><label class="block text-xs mb-1">الاسم الثاني</label><input name="Members[\${idx}].SecondName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
-                    <div><label class="block text-xs mb-1">الاسم الثالث</label><input name="Members[\${idx}].ThirdName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
-                    <div><label class="block text-xs mb-1">اسم العائلة</label><input name="Members[\${idx}].LastName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
-                    <div><label class="block text-xs mb-1">رقم الهوية</label><input name="Members[\${idx}].IdNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onblur="validateIdField(this)" oninput="clearIdError(this)" /><span class="id-error text-red-500 text-xs hidden">رقم الهوية يجب أن يتكون من 9 أرقام</span></div>
-                    <div><label class="block text-xs mb-1">تاريخ الميلاد</label><input type="date" name="Members[\${idx}].DateOfBirth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                    <div><label class="block text-xs mb-1">الاسم الأول</label><input name="Members[${idx}].FirstName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                    <div><label class="block text-xs mb-1">الاسم الثاني</label><input name="Members[${idx}].SecondName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                    <div><label class="block text-xs mb-1">الاسم الثالث</label><input name="Members[${idx}].ThirdName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                    <div><label class="block text-xs mb-1">اسم العائلة</label><input name="Members[${idx}].LastName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                    <div><label class="block text-xs mb-1">رقم الهوية</label><input name="Members[${idx}].IdNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onblur="validateIdField(this)" oninput="clearIdError(this)" /><span class="id-error text-red-500 text-xs hidden">رقم الهوية يجب أن يتكون من 9 أرقام</span></div>
+                    <div><label class="block text-xs mb-1">تاريخ الميلاد</label><input type="date" name="Members[${idx}].DateOfBirth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
                     <div><label class="block text-xs mb-1">الجنس</label>
-                        <select name="Members[\${idx}].Gender" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onchange="toggleFemaleFields(this, \${idx})">
+                        <select name="Members[${idx}].Gender" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onchange="toggleFemaleFields(this, ${idx})">
                             <option value="ذكر">ذكر</option><option value="أنثى">أنثى</option>
                         </select>
                     </div>
-                    <div><label class="block text-xs mb-1">رقم هوية الأم</label><input name="Members[\${idx}].MotherIdNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onblur="validateMotherIdField(this)" oninput="clearMotherIdError(this)" /><span class="mother-id-error text-red-500 text-xs hidden">رقم هوية الأم يجب أن يتكون من 9 أرقام صحيحة</span></div>
+                    <div><label class="block text-xs mb-1">رقم هوية الأم</label><input name="Members[${idx}].MotherIdNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onblur="validateMotherIdField(this)" oninput="clearMotherIdError(this)" /><span class="mother-id-error text-red-500 text-xs hidden">رقم هوية الأم يجب أن يتكون من 9 أرقام صحيحة</span></div>
                     <div><label class="block text-xs mb-1">صلة القرابة</label>
-                <select name="Members[\${idx}].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                <select name="Members[${idx}].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
                     <option value="">اختر...</option>
                     ${['زوج','زوجة','ابن','ابنة','أم','أب','أخ','أخت','جدة/جد','حفيد/حفيدة','أخ غير شقيق','أخت غير شقيقة','Other'].map(r => '<option value="'+r+'">'+r+'</option>').join('')}
                 </select>
                     </div>
                     <div><label class="block text-xs mb-1">الحالة الاجتماعية <span class="text-red-500">*</span></label>
-                        <select name="Members[\${idx}].MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" required>
+                        <select name="Members[${idx}].MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" required>
                             <option value="">اختر...</option>
                             <option value="متزوج">متزوج</option>
                             <option value="أعزب">أعزب</option>
@@ -861,57 +861,57 @@
                 </div>
                 <div class="flex items-center gap-4 mt-2">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" name="Members[\${idx}].IsPrisoner" value="true" class="accent-camp-gold" />
+                        <input type="checkbox" name="Members[${idx}].IsPrisoner" value="true" class="accent-camp-gold" />
                         <span class="text-xs">أسير</span>
                     </label>
-                    <label class="flex items-center gap-2 cursor-pointer female-only-\${idx} hidden">
-                        <input type="checkbox" name="Members[\${idx}].IsHusbandPrisoner" value="true" class="accent-camp-gold" />
+                    <label class="flex items-center gap-2 cursor-pointer female-only-${idx} hidden">
+                        <input type="checkbox" name="Members[${idx}].IsHusbandPrisoner" value="true" class="accent-camp-gold" />
                         <span class="text-xs">زوجها مسجون</span>
                     </label>
                 </div>
                 <div class="border-t border-gray-700 pt-4">
                     <h4 class="text-md font-semibold text-camp-gold mb-3">الحالة الصحية</h4>
                     <div class="flex gap-4 mb-4">
-                        ${HEALTH_STATUSES.map((hs, hi) => '<label class="flex items-center gap-2 cursor-pointer text-xs"><input type="radio" name="Members[\${idx}].HealthStatus" value="'+hs+'" class="accent-camp-gold" '+(hi===0?'checked':'')+' onchange="toggleMemberHealth(\${idx})" /> '+hs+'</label>').join('')}
+                        ${HEALTH_STATUSES.map((hs, hi) => '<label class="flex items-center gap-2 cursor-pointer text-xs"><input type="radio" name="Members[${idx}].HealthStatus" value="'+hs+'" class="accent-camp-gold" '+(hi===0?'checked':'')+' onchange="toggleMemberHealth(${idx})" /> '+hs+'</label>').join('')}
                     </div>
-                    <div id="member-health-\${idx}" class="hidden space-y-4">
+                    <div id="member-health-${idx}" class="hidden space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs mb-1">الأمراض المزمنة</label>
                                 <div class="grid grid-cols-2 gap-2">
-                                    ${CHRONIC_DISEASES.map(d => '<label class="flex items-center gap-1 text-xs"><input type="checkbox" name="Members[\${idx}].ChronicDiseases" value="'+d+'" class="accent-camp-gold" /> '+d+'</label>').join('')}
+                                    ${CHRONIC_DISEASES.map(d => '<label class="flex items-center gap-1 text-xs"><input type="checkbox" name="Members[${idx}].ChronicDiseases" value="'+d+'" class="accent-camp-gold" /> '+d+'</label>').join('')}
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-xs mb-1">أنواع الإعاقة</label>
                                 <div class="grid grid-cols-2 gap-2">
-                                    ${DISABILITY_TYPES.map(d => '<label class="flex items-center gap-1 text-xs"><input type="checkbox" name="Members[\${idx}].DisabilityTypes" value="'+d+'" class="accent-camp-gold" /> '+d+'</label>').join('')}
+                                    ${DISABILITY_TYPES.map(d => '<label class="flex items-center gap-1 text-xs"><input type="checkbox" name="Members[${idx}].DisabilityTypes" value="'+d+'" class="accent-camp-gold" /> '+d+'</label>').join('')}
                                 </div>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <input type="checkbox" name="Members[\${idx}].HasInjury" value="true" class="accent-camp-gold" onchange="toggleMemberInjury(\${idx})" />
+                            <input type="checkbox" name="Members[${idx}].HasInjury" value="true" class="accent-camp-gold" onchange="toggleMemberInjury(${idx})" />
                             <label class="text-xs">تعرض لإصابة</label>
                         </div>
-                        <div id="member-injury-\${idx}" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-xs mb-1">تاريخ الإصابة</label><input type="date" name="Members[\${idx}].InjuryDate" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
-                            <div><label class="block text-xs mb-1">تفاصيل الإصابة</label><textarea name="Members[\${idx}].InjuryDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2"></textarea></div>
+                        <div id="member-injury-${idx}" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label class="block text-xs mb-1">تاريخ الإصابة</label><input type="date" name="Members[${idx}].InjuryDate" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                            <div><label class="block text-xs mb-1">تفاصيل الإصابة</label><textarea name="Members[${idx}].InjuryDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2"></textarea></div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="flex items-center gap-2"><input type="checkbox" name="Members[\${idx}].IsPregnant" value="true" class="accent-camp-gold" onchange="toggleMemberSection(\${idx}, 'pregnancy')" /><label class="text-xs">حامل</label></div>
-                            <div id="member-pregnancy-\${idx}" class="hidden md:col-span-2">
-                                <select name="Members[\${idx}].PregnancyMonth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                            <div class="flex items-center gap-2"><input type="checkbox" name="Members[${idx}].IsPregnant" value="true" class="accent-camp-gold" onchange="toggleMemberSection(${idx}, 'pregnancy')" /><label class="text-xs">حامل</label></div>
+                            <div id="member-pregnancy-${idx}" class="hidden md:col-span-2">
+                                <select name="Members[${idx}].PregnancyMonth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
                                     <option value="">اختر الشهر...</option>
                                     ${Array.from({length:9}, (_, i) => i+1).map(m => '<option value="'+m+'">'+m+'</option>').join('')}
                                 </select>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="flex items-center gap-2"><input type="checkbox" name="Members[\${idx}].IsNursing" value="true" class="accent-camp-gold" onchange="toggleMemberSection(\${idx}, 'nursing')" /><label class="text-xs">مرضع</label></div>
-                            <div id="member-nursing-\${idx}" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <div><label class="block text-xs mb-1">اسم الطفل</label><input name="Members[\${idx}].NursingInfantName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
-                                <div><label class="block text-xs mb-1">تاريخ ميلاد الطفل</label><input type="date" name="Members[\${idx}].NursingInfantDOB" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
-                                <div><label class="block text-xs mb-1">رقم هوية الطفل</label><input name="Members[\${idx}].NursingInfantID" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                            <div class="flex items-center gap-2"><input type="checkbox" name="Members[${idx}].IsNursing" value="true" class="accent-camp-gold" onchange="toggleMemberSection(${idx}, 'nursing')" /><label class="text-xs">مرضع</label></div>
+                            <div id="member-nursing-${idx}" class="hidden md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div><label class="block text-xs mb-1">اسم الطفل</label><input name="Members[${idx}].NursingInfantName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                                <div><label class="block text-xs mb-1">تاريخ ميلاد الطفل</label><input type="date" name="Members[${idx}].NursingInfantDOB" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
+                                <div><label class="block text-xs mb-1">رقم هوية الطفل</label><input name="Members[${idx}].NursingInfantID" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" /></div>
                             </div>
                         </div>
                     </div>
