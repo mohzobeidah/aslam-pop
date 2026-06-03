@@ -1019,6 +1019,7 @@ ORDER BY COUNT(*) DESC;
                 .Include(f => f.ApprovedBy)
                 .Include(f => f.Members).ThenInclude(m => m.Person)
                 .Include(f => f.FamilyDesires).ThenInclude(fd => fd.Desire)
+                .Include(f => f.Sector)
                 .FirstOrDefaultAsync(f => f.Id == id);
 
             if (reg == null) return NotFound();
