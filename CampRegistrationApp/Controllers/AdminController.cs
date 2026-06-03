@@ -1003,7 +1003,7 @@ ORDER BY COUNT(*) DESC;
 
             return File(content,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                $"النازحون_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+                $"النازحون_{JerusalemTime.Now:yyyyMMdd_HHmmss}.xlsx");
         }
 
         [HttpGet]
@@ -1094,7 +1094,7 @@ ORDER BY COUNT(*) DESC;
             var oldStatus = registration.ApprovalStatus;
             registration.ApprovalStatus = RegistrationApprovalStatus.Approved;
             registration.ApprovedById = GetCurrentAdminId();
-            registration.ApprovedAt = DateTime.UtcNow;
+            registration.ApprovedAt = JerusalemTime.Now;
             await _context.SaveChangesAsync();
 
             await _audit.LogAsync(GetCurrentAdminId(), "Approve", "FamilyRegistrations",
@@ -1122,7 +1122,7 @@ ORDER BY COUNT(*) DESC;
             var oldStatus = registration.ApprovalStatus;
             registration.ApprovalStatus = RegistrationApprovalStatus.Rejected;
             registration.ApprovedById = GetCurrentAdminId();
-            registration.ApprovedAt = DateTime.UtcNow;
+            registration.ApprovedAt = JerusalemTime.Now;
             await _context.SaveChangesAsync();
 
             await _audit.LogAsync(GetCurrentAdminId(), "Reject", "FamilyRegistrations",
@@ -1151,7 +1151,7 @@ ORDER BY COUNT(*) DESC;
 
             registration.IsDeleted = true;
             registration.DeletedById = GetCurrentAdminId();
-            registration.DeletedAt = DateTime.UtcNow;
+            registration.DeletedAt = JerusalemTime.Now;
             await _context.SaveChangesAsync();
 
             await _audit.LogAsync(GetCurrentAdminId(), "RemoveOutOfCamp", "FamilyRegistrations",

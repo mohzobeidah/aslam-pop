@@ -112,7 +112,7 @@ public class NominationService : INominationService
             ExistingCount = rows.Count,
             Rows = rows,
             IsAdmin = isAdmin,
-            IsPastEndDate = project.EndDate < DateTime.UtcNow,
+            IsPastEndDate = project.EndDate < JerusalemTime.Now,
             DelegateSectorId = adminSectorId,
             SectorQuotas = sectorQuotaInfos,
             Description = project.Description,
@@ -135,7 +135,7 @@ public class NominationService : INominationService
             existing.Description = description ?? existing.Description;
             existing.Notes = notes ?? existing.Notes;
             existing.Status = NominationStatus.Draft;
-            existing.UpdatedAt = DateTime.UtcNow;
+            existing.UpdatedAt = JerusalemTime.Now;
         }
         else
         {

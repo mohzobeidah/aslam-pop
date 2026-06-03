@@ -185,7 +185,7 @@ namespace CampRegistrationApp.Controllers
             var regId = HttpContext.Session.GetInt32("EditRegistrationId");
             var recordId = regId?.ToString() ?? "TEMP";
             var ext = Path.GetExtension(file.FileName);
-            var fileName = $"{personId}_{fileType}_{DateTime.Now:yyyyMMddHHmmss}_{ext}";
+            var fileName = $"{personId}_{fileType}_{JerusalemTime.Now:yyyyMMddHHmmss}_{ext}";
             var folderPath = Path.Combine(_env.WebRootPath, "uploads", "registrations", recordId);
 
             if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);

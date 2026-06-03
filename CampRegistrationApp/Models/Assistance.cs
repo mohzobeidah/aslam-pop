@@ -39,7 +39,7 @@ public class Assistance
     [BindNever]
     public virtual Admin CreatedBy { get; set; } = null!;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = JerusalemTime.Now;
 
     public int? ApprovedById { get; set; }
     public virtual Admin? ApprovedBy { get; set; }

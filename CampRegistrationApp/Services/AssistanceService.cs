@@ -72,7 +72,7 @@ public class AssistanceService : IAssistanceService
     public async Task<Assistance> CreateAsync(Assistance assistance, int userId)
     {
         assistance.CreatedById = userId;
-        assistance.CreatedAt = DateTime.UtcNow;
+        assistance.CreatedAt = JerusalemTime.Now;
         _context.Assistances.Add(assistance);
         await _context.SaveChangesAsync();
 
@@ -124,7 +124,7 @@ public class AssistanceService : IAssistanceService
 
         entity.Status = AssistanceStatus.Approved;
         entity.ApprovedById = userId;
-        entity.ApprovedAt = DateTime.UtcNow;
+        entity.ApprovedAt = JerusalemTime.Now;
         await _context.SaveChangesAsync();
 
         await _audit.LogAsync(userId, "اعتماد مساعدة", "Assistances",
@@ -178,7 +178,7 @@ public class AssistanceService : IAssistanceService
             throw new InvalidOperationException("رقم الهوية موجود مسبقاً في هذه المساعدة");
 
         beneficiary.CreatedById = userId;
-        beneficiary.CreatedAt = DateTime.UtcNow;
+        beneficiary.CreatedAt = JerusalemTime.Now;
         _context.AssistanceBeneficiaries.Add(beneficiary);
         await _context.SaveChangesAsync();
 
@@ -229,7 +229,7 @@ public class AssistanceService : IAssistanceService
             SectorId = sector?.Id ?? 0,
             Status = BeneficiaryStatus.Active,
             CreatedById = userId,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = JerusalemTime.Now
         };
 
         _context.AssistanceBeneficiaries.Add(beneficiary);
@@ -253,7 +253,7 @@ public class AssistanceService : IAssistanceService
         existing.BenefitType = updated.BenefitType;
         existing.Notes = updated.Notes;
         existing.Status = updated.Status;
-        existing.UpdatedAt = DateTime.UtcNow;
+        existing.UpdatedAt = JerusalemTime.Now;
 
         await _context.SaveChangesAsync();
 

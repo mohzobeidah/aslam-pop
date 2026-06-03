@@ -13,5 +13,5 @@ public class AuditLog
     public string? NewValues { get; set; }
     public string? IPAddress { get; set; }
     public string Source { get; set; } = "Web"; // Web / Excel / API
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = JerusalemTime.Now;
 }

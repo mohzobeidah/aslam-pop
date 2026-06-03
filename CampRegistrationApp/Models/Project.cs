@@ -26,7 +26,7 @@ public class Project
 
     public int CreatedById { get; set; }
     public virtual Admin CreatedBy { get; set; } = null!;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = JerusalemTime.Now;
 
     public bool IsDeleted { get; set; }
     public byte[] RowVersion { get; set; } = [];

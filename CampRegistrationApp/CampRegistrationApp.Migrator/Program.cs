@@ -7,6 +7,12 @@ const string OldConnStr = "Server=localhost\\SQLEXPRESS;Database=AslamDbNew;Trus
 //const string NewConnStr = "Server=localhost\\SQLEXPRESS;Database=CampRegistrationDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
 const string NewConnStr = "Server=db53123.public.databaseasp.net; Database=db53123; User Id=db53123; Password=cW@5C8t%b?6X; Encrypt=True; TrustServerCertificate=True; MultipleActiveResultSets=True;   ";
 
+DateTime JerusalemNow()
+{
+    try { return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Israel Standard Time")); }
+    catch { return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Asia/Jerusalem")); }
+}
+
 Console.WriteLine("=== Camp Registration Data Migrator ===");
 Console.WriteLine($"From: AslamDbNew  To: CampRegistrationDb");
 Console.WriteLine();
@@ -243,7 +249,7 @@ foreach (var row in refugeeRows)
                 @pw, @sn, @as, @aa, @isd)", newConn, transaction);
 
         insertFamily.Parameters.AddWithValue("@rid", recordId);
-        insertFamily.Parameters.AddWithValue("@ts", DateTime.UtcNow);
+        insertFamily.Parameters.AddWithValue("@ts", JerusalemNow());
         insertFamily.Parameters.AddWithValue("@fhid", headPersonId);
         insertFamily.Parameters.AddWithValue("@ich", row.ChildLeadFamily);
         insertFamily.Parameters.AddWithValue("@ifh", false);
@@ -261,7 +267,7 @@ foreach (var row in refugeeRows)
         insertFamily.Parameters.AddWithValue("@pw", passwordHash);
         insertFamily.Parameters.AddWithValue("@sn", row.Note);
         insertFamily.Parameters.AddWithValue("@as", 1); // Approved
-        insertFamily.Parameters.AddWithValue("@aa", DateTime.UtcNow);
+        insertFamily.Parameters.AddWithValue("@aa", JerusalemNow());
         insertFamily.Parameters.AddWithValue("@isd", false);
 
         var registrationId = (int)await insertFamily.ExecuteScalarAsync();

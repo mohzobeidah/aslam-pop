@@ -47,7 +47,7 @@ public class AssistanceBeneficiary
     public int CreatedById { get; set; }
     public virtual Admin CreatedBy { get; set; } = null!;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = JerusalemTime.Now;
     public DateTime? UpdatedAt { get; set; }
 
     public int? ImportId { get; set; }

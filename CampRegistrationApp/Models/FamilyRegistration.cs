@@ -14,7 +14,7 @@ namespace CampRegistrationApp.Models
         public int Id { get; set; }
         [Required]
         public string RecordId { get; set; } = string.Empty;
-        public DateTime RegistrationTimestamp { get; set; } = DateTime.UtcNow;
+        public DateTime RegistrationTimestamp { get; set; } = JerusalemTime.Now;
 
         [Required]
         public int FamilyHeadId { get; set; }

@@ -16,7 +16,7 @@ public class AssistanceImport
     public int SectorId { get; set; }
     public virtual Sector Sector { get; set; } = null!;
 
-    public DateTime ImportedAt { get; set; } = DateTime.UtcNow;
+    public DateTime ImportedAt { get; set; } = JerusalemTime.Now;
 
     public int TotalRows { get; set; }
     public int SuccessRows { get; set; }

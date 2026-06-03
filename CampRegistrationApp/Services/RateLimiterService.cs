@@ -8,7 +8,7 @@ public class RateLimiterService : IRateLimiterService
 
     public bool IsRateLimited(string key, int maxAttempts, TimeSpan window)
     {
-        var now = DateTime.UtcNow;
+        var now = JerusalemTime.Now;
         var attempts = _attempts.GetOrAdd(key, _ => new List<DateTime>());
 
         lock (attempts)

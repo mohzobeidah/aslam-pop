@@ -452,8 +452,8 @@ public class AssistanceController : Controller
         var bytes = stream.ToArray();
 
         var fileName = assistance != null
-            ? $"مستفيدو_{assistance.Name}_{DateTime.Now:yyyyMMdd}.xlsx"
-            : $"مستفيدون_{DateTime.Now:yyyyMMdd}.xlsx";
+            ? $"مستفيدو_{assistance.Name}_{JerusalemTime.Now:yyyyMMdd}.xlsx"
+            : $"مستفيدون_{JerusalemTime.Now:yyyyMMdd}.xlsx";
 
         return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
     }

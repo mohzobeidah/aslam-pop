@@ -60,7 +60,7 @@ public class ExceptionLoggingMiddleware
                 }),
                 IPAddress = context.Connection.RemoteIpAddress?.ToString(),
                 Source = "Middleware",
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = JerusalemTime.Now
             });
             await db.SaveChangesAsync();
         }

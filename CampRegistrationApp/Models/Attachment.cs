@@ -12,6 +12,6 @@ namespace CampRegistrationApp.Models
         public string FileType { get; set; } = string.Empty; // MedicalReport, IDImage
         [Required]
         public string FilePath { get; set; } = string.Empty;
-        public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UploadedAt { get; set; } = JerusalemTime.Now;
     }
 }

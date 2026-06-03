@@ -31,7 +31,7 @@ public class Nomination
     public string? Description { get; set; }
     public string? Notes { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = JerusalemTime.Now;
     public DateTime? UpdatedAt { get; set; }
 
     public int? ApprovedById { get; set; }

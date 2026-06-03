@@ -38,7 +38,7 @@ public class Complaint
     public virtual Admin? ResolvedBy { get; set; }
     public DateTime? ResolvedAt { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = JerusalemTime.Now;
 
     public bool IsDeleted { get; set; }
 }

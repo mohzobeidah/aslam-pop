@@ -45,7 +45,7 @@ public class ImportService : IImportService
             FileName = fileName,
             ImportedById = userId,
             SectorId = sectorId,
-            ImportedAt = DateTime.UtcNow
+            ImportedAt = JerusalemTime.Now
         };
 
         var errors = new List<(int Row, string Error)>();
@@ -88,7 +88,7 @@ public class ImportService : IImportService
                     SectorId = sectorId,
                     Status = BeneficiaryStatus.Active,
                     CreatedById = userId,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = JerusalemTime.Now,
                     ImportId = null // set after save
                 };
 
@@ -123,7 +123,7 @@ public class ImportService : IImportService
             var errorBytes = GenerateErrorReport(errors);
             var errorDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "import-errors");
             Directory.CreateDirectory(errorDir);
-            var errorFile = Path.Combine(errorDir, $"error_{import.Id}_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+            var errorFile = Path.Combine(errorDir, $"error_{import.Id}_{JerusalemTime.Now:yyyyMMddHHmmss}.xlsx");
             await File.WriteAllBytesAsync(errorFile, errorBytes);
             import.ErrorFilePath = errorFile;
             await _context.SaveChangesAsync();

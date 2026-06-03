@@ -82,7 +82,7 @@ namespace CampRegistrationApp.Services
                     ThirdName = _firstNames[_random.Next(_firstNames.Length)],
                     LastName = _lastNames[_random.Next(_lastNames.Length)],
                     IdNumber = _random.Next(100000000, 999999999).ToString(),
-                    DateOfBirth = DateTime.UtcNow.AddYears(-_random.Next(20, 70)),
+                    DateOfBirth = JerusalemTime.Now.AddYears(-_random.Next(20, 70)),
                     Gender = _random.Next(0, 2) == 0 ? "ذكر" : "أنثى",
                     OriginalGovernorate = "غزة",
                     MaritalStatus = "متزوج",
@@ -102,7 +102,7 @@ namespace CampRegistrationApp.Services
                     SectorId = sector.Id,
                     PhoneNumber = "059" + _random.Next(1000000, 9999999),
                     Wallet = _random.Next(0, 2) == 0 ? "" : _random.Next(100, 999).ToString(),
-                    RegistrationTimestamp = DateTime.UtcNow.AddDays(-_random.Next(1, 365)),
+                    RegistrationTimestamp = JerusalemTime.Now.AddDays(-_random.Next(1, 365)),
                     ApprovalStatus = (RegistrationApprovalStatus)_random.Next(0, 3),
                     IsChildHeaded = _random.Next(0, 10) == 0,
                     ChildHeadedDetails = _random.Next(0, 10) == 0 ? "طفل يعيل أسرته بسبب فقدان الوالدين" : null,
@@ -150,7 +150,7 @@ namespace CampRegistrationApp.Services
                         ThirdName = _firstNames[_random.Next(_firstNames.Length)],
                         LastName = head.LastName,
                         IdNumber = _random.Next(100000000, 999999999).ToString(),
-                        DateOfBirth = DateTime.UtcNow.AddYears(-_random.Next(1, 60)),
+                        DateOfBirth = JerusalemTime.Now.AddYears(-_random.Next(1, 60)),
                         Gender = _random.Next(0, 2) == 0 ? "ذكر" : "أنثى",
                         OriginalGovernorate = "غزة",
                         MaritalStatus = "أعزب",
@@ -180,12 +180,12 @@ namespace CampRegistrationApp.Services
                 var project = new Project
                 {
                     Name = "مشروع مساعدات " + i,
-                    StartDate = DateTime.UtcNow.AddMonths(-2),
-                    EndDate = DateTime.UtcNow.AddMonths(2),
+                    StartDate = JerusalemTime.Now.AddMonths(-2),
+                    EndDate = JerusalemTime.Now.AddMonths(2),
                     RequiredCount = 100,
                     Status = ProjectStatus.Active,
                     CreatedById = 1, // Super admin
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = JerusalemTime.Now
                 };
                 _context.Projects.Add(project);
                 projects.Add(project);
@@ -216,7 +216,7 @@ namespace CampRegistrationApp.Services
                             SectorId = sector.Id,
                             DelegateId = admin.Id,
                             Status = NominationStatus.Submitted,
-                            CreatedAt = DateTime.UtcNow
+                            CreatedAt = JerusalemTime.Now
                         });
                     }
                 }
@@ -243,19 +243,19 @@ namespace CampRegistrationApp.Services
                         Name = assistanceNames[idx] + (_random.Next(0, 2) == 0 ? $" {i + 1}" : ""),
                         AssistanceType = assistanceTypes[idx],
                         Source = sources[_random.Next(sources.Length)],
-                        AssistanceDate = DateTime.UtcNow.AddDays(-_random.Next(1, 180)),
+                        AssistanceDate = JerusalemTime.Now.AddDays(-_random.Next(1, 180)),
                         SectorId = sector.Id,
                         Status = (AssistanceStatus)_random.Next(0, 3),
                         Description = "وصف " + assistanceNames[idx],
                         CreatedById = 1,
-                        CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(1, 90)),
+                        CreatedAt = JerusalemTime.Now.AddDays(-_random.Next(1, 90)),
                         IsDeleted = false
                     };
 
                     if (assistance.Status == AssistanceStatus.Approved)
                     {
                         assistance.ApprovedById = 1;
-                        assistance.ApprovedAt = DateTime.UtcNow.AddDays(-_random.Next(1, 30));
+                        assistance.ApprovedAt = JerusalemTime.Now.AddDays(-_random.Next(1, 30));
                     }
 
                     _context.Assistances.Add(assistance);
@@ -305,10 +305,10 @@ namespace CampRegistrationApp.Services
 
                 var import = new AssistanceImport
                 {
-                    FileName = $"import_{DateTime.UtcNow.AddDays(-i):yyyyMMdd}.xlsx",
+                    FileName = $"import_{JerusalemTime.Now.AddDays(-i):yyyyMMdd}.xlsx",
                     ImportedById = 1,
                     SectorId = sector.Id,
-                    ImportedAt = DateTime.UtcNow.AddDays(-i * _random.Next(1, 14)),
+                    ImportedAt = JerusalemTime.Now.AddDays(-i * _random.Next(1, 14)),
                     TotalRows = total,
                     SuccessRows = success,
                     FailedRows = failed < 0 ? 0 : failed,

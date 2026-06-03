@@ -158,7 +158,7 @@ namespace CampRegistrationApp.Controllers
                 if (status == ComplaintStatus.Resolved)
                 {
                     complaint.ResolvedById = GetCurrentAdminId();
-                    complaint.ResolvedAt = DateTime.UtcNow;
+                    complaint.ResolvedAt = JerusalemTime.Now;
                 }
             }
 
