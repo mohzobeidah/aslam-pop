@@ -60,7 +60,7 @@
                 </div>
             </div>
 
-            <form id="registrationForm" asp-action="Submit" method="post" class="space-y-6" enctype="multipart/form-data">
+            <form id="registrationForm" asp-action="Submit" method="post" class="space-y-6" enctype="multipart/form-data" novalidate>
                 <!-- ============ STEP 1: FAMILY HEAD ============ -->
                 <div class="step bg-camp-accent-grey p-6 rounded-lg border-r-4 border-camp-gold shadow-xl" id="step-1">
                     <h2 class="text-2xl font-semibold text-camp-gold mb-6">بيانات رب الأسرة</h2>
@@ -764,6 +764,7 @@
                     if (key.includes('HealthStatus')) triggerEvent(radio, 'change');
                     if (key.includes('LivesInTent')) triggerEvent(radio, 'change');
                     if (key.includes('HasBathroom')) triggerEvent(radio, 'change');
+                    if (key === 'BathroomType' && radio) triggerEvent(radio, 'change');
                 } else if (el.type === 'checkbox') {
                     if (Array.isArray(val)) {
                         val.forEach(v => {
@@ -796,6 +797,13 @@
             if (data.DesireIds) {
                 const desireInput = document.getElementById('desireIdsInput');
                 if (desireInput) desireInput.value = data.DesireIds;
+            }
+
+            // Ensure bathroom details section is visible after restore
+            const hasBathroomYes = document.querySelector('[data-ls="HasBathroom"][value="true"]');
+            if (hasBathroomYes?.checked) {
+                const bathroomDetails = document.getElementById('bathroom-details');
+                if (bathroomDetails) bathroomDetails.classList.remove('hidden');
             }
 
             // Step indicator
@@ -1083,6 +1091,13 @@
             return valid;
         }
 
+        function getMemberDisplayName(card) {
+            const parts = ['FirstName', 'SecondName', 'ThirdName', 'LastName']
+                .map(f => card.querySelector(`[name$=".${f}"]`)?.value?.trim() || '')
+                .filter(Boolean);
+            return parts.length ? parts.join(' ') : '';
+        }
+
         function validateStep2() {
             const cards = document.querySelectorAll('.member-card');
             if (cards.length === 0) return true;
@@ -1129,6 +1144,15 @@
                 }
                 if (memberMissing.length > 0) {
                     alert(`الفرد رقم ${idx + 1}: الحقول التالية مطلوبة:\n- ` + memberMissing.join('\n- '));
+                }
+                const maritalEl = card.querySelector('[name$=".MaritalStatus"]');
+                if (maritalEl && !maritalEl.value.trim()) {
+                    const name = getMemberDisplayName(card) || `رقم ${idx + 1}`;
+                    highlightError(maritalEl);
+                    alert(`يرجى اختيار الحالة الاجتماعية للفرد: ${name}`);
+                    valid = false;
+                } else if (maritalEl) {
+                    clearHighlight(maritalEl);
                 }
             });
 
@@ -1385,7 +1409,7 @@
                 </select>
                     </div>
                     <div>
-                        <label class="block text-xs mb-1">الحالة الاجتماعية</label>
+                        <label class="block text-xs mb-1">الحالة الاجتماعية <span class="text-red-500">*</span></label>
                         <select name="Members[${idx}].MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
                             <option value="">اختر...</option>
                             <option value="متزوج" ${data?.MaritalStatus === 'متزوج' ? 'selected' : ''}>متزوج</option>
@@ -1705,6 +1729,11 @@
                 }
             });
 
+            // Capture housing radio values before disabling
+            const livesInTentValue = document.querySelector('[name="LivesInTent"]:checked')?.value || 'false';
+            const hasBathroomValue = document.querySelector('[name="HasBathroom"]:checked')?.value || 'false';
+            const bathroomTypeValue = document.querySelector('[name="BathroomType"]:checked')?.value || '';
+
             // Disable ALL checkboxes + radios so only hidden inputs submit values
             form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
             form.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
@@ -1730,12 +1759,15 @@
             });
 
             // Registration radio values (LivesInTent, HasBathroom, BathroomType)
-            ['LivesInTent', 'HasBathroom', 'BathroomType'].forEach(field => {
-                const checked = document.querySelector(`[name="${field}"]:checked`);
+            [
+                ['LivesInTent', livesInTentValue],
+                ['HasBathroom', hasBathroomValue],
+                ['BathroomType', bathroomTypeValue]
+            ].forEach(([name, value]) => {
                 const hidden = document.createElement('input');
                 hidden.type = 'hidden';
-                hidden.name = field;
-                hidden.value = checked?.value || 'false';
+                hidden.name = name;
+                hidden.value = value;
                 form.appendChild(hidden);
             });
 

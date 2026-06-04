@@ -236,7 +236,7 @@ namespace CampRegistrationApp.Controllers
                     Wallet = model.Wallet,
                     WalletType = model.WalletType,
                     HasBathroom = model.HasBathroom,
-                    BathroomType = model.BathroomType,
+                    BathroomType = RegistrationConstants.NormalizeBathroomType(model.BathroomType, model.HasBathroom),
                     NeedsDiapers = model.NeedsDiapers,
                     DiaperDetails = model.DiaperDetails,
                     HasMultipleFamiliesInTent = model.HasMultipleFamiliesInTent,

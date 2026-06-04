@@ -342,7 +342,7 @@ namespace CampRegistrationApp.Controllers
                 registration.TentType = model.TentType;
                 registration.OtherTentType = model.OtherTentType;
                 registration.HasBathroom = model.HasBathroom;
-                registration.BathroomType = model.BathroomType;
+                registration.BathroomType = RegistrationConstants.NormalizeBathroomType(model.BathroomType, model.HasBathroom);
                 registration.NeedsDiapers = model.NeedsDiapers;
                 registration.DiaperDetails = model.DiaperDetails;
                 registration.HasMultipleFamiliesInTent = model.HasMultipleFamiliesInTent;
@@ -600,7 +600,7 @@ namespace CampRegistrationApp.Controllers
                 TentType = registration.TentType,
                 OtherTentType = registration.OtherTentType,
                 HasBathroom = registration.HasBathroom,
-                BathroomType = registration.BathroomType,
+                BathroomType = RegistrationConstants.NormalizeBathroomType(registration.BathroomType, registration.HasBathroom),
                 NeedsDiapers = registration.NeedsDiapers,
                 DiaperDetails = registration.DiaperDetails,
                 HasMultipleFamiliesInTent = registration.HasMultipleFamiliesInTent,

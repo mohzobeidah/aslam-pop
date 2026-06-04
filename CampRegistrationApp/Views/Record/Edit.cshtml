@@ -331,7 +331,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-xs mb-1">الحالة الاجتماعية <span class="text-red-500">*</span></label>
-                                        <select name="Members[@i].MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" required>
+                                        <select name="Members[@i].MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onchange="clearMemberMaritalError(this)">
                                             <option value="">اختر...</option>
                                             <option value="متزوج" selected="@(m.MaritalStatus == "متزوج")">متزوج</option>
                                             <option value="أعزب" selected="@(m.MaritalStatus == "أعزب")">أعزب</option>
@@ -549,10 +549,10 @@
                         <label class="block text-sm mb-1">نوع الحمام</label>
                         <div class="flex gap-4">
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="BathroomType" value="Private" class="accent-camp-gold" @(Model.BathroomType == "Private" ? "checked" : "") /> خاص
+                                <input type="radio" name="BathroomType" value="Private" class="accent-camp-gold" @(Model.BathroomType is "Private" or "خاص" ? "checked" : "") /> خاص
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="BathroomType" value="Shared" class="accent-camp-gold" @(Model.BathroomType == "Shared" ? "checked" : "") /> مشترك
+                                <input type="radio" name="BathroomType" value="Shared" class="accent-camp-gold" @(Model.BathroomType is "Shared" or "مشترك" ? "checked" : "") /> مشترك
                             </label>
                         </div>
                     </div>
@@ -848,7 +848,7 @@
                 </select>
                     </div>
                     <div><label class="block text-xs mb-1">الحالة الاجتماعية <span class="text-red-500">*</span></label>
-                        <select name="Members[${idx}].MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" required>
+                        <select name="Members[${idx}].MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onchange="clearMemberMaritalError(this)">
                             <option value="">اختر...</option>
                             <option value="متزوج">متزوج</option>
                             <option value="أعزب">أعزب</option>
@@ -983,6 +983,38 @@
             if (section) section.classList.toggle('hidden');
         }
 
+        function getMemberDisplayName(card) {
+            const parts = ['FirstName', 'SecondName', 'ThirdName', 'LastName']
+                .map(f => card.querySelector(`[name$=".${f}"]`)?.value?.trim() || '')
+                .filter(Boolean);
+            return parts.length ? parts.join(' ') : '';
+        }
+
+        function clearMemberMaritalError(select) {
+            const card = select.closest('.member-card');
+            if (!card) return;
+            const errorSpan = card.querySelector('.marital-status-error');
+            if (errorSpan) errorSpan.classList.add('hidden');
+            clearHighlight(select);
+        }
+
+        function validateMemberMaritalStatus(card, idx) {
+            const select = card.querySelector('[name$=".MaritalStatus"]');
+            if (!select) return true;
+            const name = getMemberDisplayName(card) || `رقم ${idx + 1}`;
+            const errorSpan = card.querySelector('.marital-status-error');
+            if (!select.value.trim()) {
+                highlightError(select);
+                if (errorSpan) {
+                    errorSpan.textContent = `يرجى اختيار الحالة الاجتماعية للفرد: ${name}`;
+                    errorSpan.classList.remove('hidden');
+                }
+                return false;
+            }
+            clearMemberMaritalError(select);
+            return true;
+        }
+
         function submitEditForm() {
             let valid = true;
 
@@ -1100,6 +1132,11 @@
                 if (memberMissing.length > 0) {
                     alert(`الفرد رقم ${idx + 1}: الحقول التالية مطلوبة:\n- ` + memberMissing.join('\n- '));
                 }
+                if (!validateMemberMaritalStatus(card, idx)) {
+                    const name = getMemberDisplayName(card) || `رقم ${idx + 1}`;
+                    alert(`يرجى اختيار الحالة الاجتماعية للفرد: ${name}`);
+                    valid = false;
+                }
             });
 
             // Validate: no duplicate ID numbers among members and head
@@ -1148,6 +1185,11 @@
             }
 
             const form = document.getElementById('editForm');
+
+            // Capture housing radio values before disabling
+            const livesInTentValue = document.querySelector('[name="LivesInTent"]:checked')?.value || 'false';
+            const hasBathroomValue = document.querySelector('[name="HasBathroom"]:checked')?.value || 'false';
+            const bathroomTypeValue = document.querySelector('[name="BathroomType"]:checked')?.value || '';
 
             // Disable ALL checkboxes + radios so only hidden inputs submit values
             form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
@@ -1213,17 +1255,24 @@
                 form.appendChild(hidden);
             });
 
-            // Registration-level bools
-            ['NeedsDiapers', 'HasMultipleFamiliesInTent', 'IsChildHeaded', 'IsFemaleHeaded', 'SupportsOutsidePerson', 'LivesInTent', 'HasBathroom'].forEach(field => {
+            // Registration-level bools + housing radios
+            [
+                ['LivesInTent', livesInTentValue],
+                ['HasBathroom', hasBathroomValue],
+                ['BathroomType', bathroomTypeValue]
+            ].forEach(([name, value]) => {
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = name;
+                hidden.value = value;
+                form.appendChild(hidden);
+            });
+            ['NeedsDiapers', 'HasMultipleFamiliesInTent', 'IsChildHeaded', 'IsFemaleHeaded', 'SupportsOutsidePerson'].forEach(field => {
                 const el = form.querySelector(`[name="${field}"]`);
                 const hidden = document.createElement('input');
                 hidden.type = 'hidden';
                 hidden.name = field;
-                if (el?.type === 'radio') {
-                    hidden.value = document.querySelector(`[name="${field}"]:checked`)?.value || 'false';
-                } else {
-                    hidden.value = el?.checked ? 'true' : 'false';
-                }
+                hidden.value = el?.checked ? 'true' : 'false';
                 form.appendChild(hidden);
             });
 

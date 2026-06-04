@@ -11,6 +11,19 @@ namespace CampRegistrationApp.Services
         public const string MaritalStatusMarried = "متزوج";
         public const string RelationshipWife = "زوجة";
         public const string HealthStatusSick = "مريض";
+        public const string BathroomTypePrivate = "Private";
+        public const string BathroomTypeShared = "Shared";
+
+        public static string? NormalizeBathroomType(string? value, bool hasBathroom)
+        {
+            if (!hasBathroom) return null;
+            return value switch
+            {
+                BathroomTypePrivate or "خاص" => BathroomTypePrivate,
+                BathroomTypeShared or "مشترك" => BathroomTypeShared,
+                _ => string.IsNullOrWhiteSpace(value) ? null : value
+            };
+        }
     }
 
     public interface IRegistrationValidationService
@@ -73,7 +86,21 @@ namespace CampRegistrationApp.Services
                 return false;
             }
 
-            // 4. Health Status Validation for Members: sick requires disease or disability
+            // 4. Marital Status Validation for Members
+            for (int i = 0; i < model.Members.Count; i++)
+            {
+                var m = model.Members[i];
+                if (string.IsNullOrWhiteSpace(Normalized(m.MaritalStatus)))
+                {
+                    var name = Normalized(m.FullName);
+                    if (string.IsNullOrEmpty(name))
+                        name = $"رقم {i + 1}";
+                    modelState.AddModelError("", $"يرجى اختيار الحالة الاجتماعية للفرد: {name}");
+                    return false;
+                }
+            }
+
+            // 5. Health Status Validation for Members: sick requires disease or disability
             for (int i = 0; i < model.Members.Count; i++)
             {
                 var m = model.Members[i];

@@ -689,6 +689,34 @@ public class ValidationServiceTests
 
         Assert.True(result);
     }
+
+    [Fact]
+    public void MemberMaritalStatus_Required_IncludesMemberName()
+    {
+        var validator = new RegistrationValidationService();
+        var model = Helpers.GetValidViewModel();
+        model.Members.Add(new MemberViewModel
+        {
+            FirstName = "فاطمة",
+            SecondName = "محمد",
+            ThirdName = "أحمد",
+            LastName = "السيد",
+            IdNumber = "987654321",
+            DateOfBirth = new DateTime(1995, 5, 5),
+            Gender = "أنثى",
+            RelationshipToHead = "زوجة",
+            HealthStatus = "سليم",
+            MaritalStatus = ""
+        });
+        var state = new ModelStateDictionary();
+
+        var result = validator.ValidateRegistration(model, state);
+
+        Assert.False(result);
+        var error = state.Values.SelectMany(v => v.Errors).Single().ErrorMessage;
+        Assert.Contains("فاطمة محمد أحمد السيد", error);
+        Assert.Contains("الحالة الاجتماعية", error);
+    }
 }
 
 // =========================================================================

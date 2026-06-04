@@ -143,10 +143,36 @@
 <!-- Preview Table + Export -->
 @if (hasData)
 {
-    var allKeys = new List<string>();
+    var allColumns = Model.ColumnGroups.SelectMany(g => g.Columns).ToList();
+    var columnsToShow = allColumns.Where(c => Model.SelectedColumns.Contains(c.Key)).ToList();
+
+    var allDynamicKeys = new List<string>();
     foreach (var row in Model.Rows)
+    {
         foreach (var key in row.Values.Keys)
-            if (!allKeys.Contains(key)) allKeys.Add(key);
+        {
+            if (!Model.SelectedColumns.Contains(key) && !key.StartsWith("Wife") && !key.StartsWith("Child") && key != "OtherMembers")
+                continue;
+            if (!allDynamicKeys.Contains(key))
+                allDynamicKeys.Add(key);
+        }
+    }
+
+    var allKeys = new List<string>();
+    foreach (var col in columnsToShow)
+    {
+        if (col.Key == "Wives")
+            allKeys.AddRange(allDynamicKeys.Where(k => k.StartsWith("Wife")));
+        else if (col.Key == "Children")
+            allKeys.AddRange(allDynamicKeys.Where(k => k.StartsWith("Child")));
+        else if (col.Key == "OtherMembers")
+        {
+            if (allDynamicKeys.Contains("OtherMembers"))
+                allKeys.Add("OtherMembers");
+        }
+        else
+            allKeys.Add(col.Key);
+    }
 
     <div class="mt-6 bg-camp-accent-grey p-4 rounded-xl border border-gray-700">
         <div class="flex justify-between items-center mb-4">
