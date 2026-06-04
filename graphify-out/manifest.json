@@ -1,0 +1,817 @@
+{
+  ".claude/settings.local.json": {
+    "mtime": 1780412058.128423,
+    "ast_hash": "177cb17a2cb9be45d92a21c102248e78",
+    "semantic_hash": ""
+  },
+  ".opencode/opencode.json": {
+    "mtime": 1780559375.5134816,
+    "ast_hash": "1efe24ecf938911d4f23e4b1c6ec91f7",
+    "semantic_hash": ""
+  },
+  ".opencode/package.json": {
+    "mtime": 1780559530.6228945,
+    "ast_hash": "d3ab821609ec487b22aa5b0027f5f400",
+    "semantic_hash": ""
+  },
+  ".opencode/plugins/graphify.js": {
+    "mtime": 1780559355.748592,
+    "ast_hash": "32b67963417a30cb80544e0b2a56a98d",
+    "semantic_hash": ""
+  },
+  ".vscode/launch.json": {
+    "mtime": 1779545108.7422154,
+    "ast_hash": "9fd56811d9ebfffe65f7bacd492dedab",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/CampRegistrationApp.SeleniumTests.csproj": {
+    "mtime": 1779296829.1939805,
+    "ast_hash": "584cb62bf1706ace7e1f6e1712d55e6a",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Infrastructure/CustomWebApplicationFactory.cs": {
+    "mtime": 1779352985.1337998,
+    "ast_hash": "d2ad835ea765be26841aa6f2ebf39781",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Infrastructure/TestBase.cs": {
+    "mtime": 1779353191.1283946,
+    "ast_hash": "edab2cf741874d01585efc8753128be5",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Infrastructure/TestDataSeeder.cs": {
+    "mtime": 1779296850.7774,
+    "ast_hash": "2f52c0eac22421754e668b59417457e4",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Infrastructure/WebDriverFactory.cs": {
+    "mtime": 1779346854.3170812,
+    "ast_hash": "cf7cba98e2633af67bf131824e7082ab",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/PageObjects/AdminPages.cs": {
+    "mtime": 1779354343.5255032,
+    "ast_hash": "8bb92403d51fea13b8aa342389dcffde",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/PageObjects/BasePage.cs": {
+    "mtime": 1779296891.251208,
+    "ast_hash": "06729fef82ee48796f46c65aaa803a72",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/PageObjects/HomePage.cs": {
+    "mtime": 1779296900.814799,
+    "ast_hash": "663bf70ee6b4f9fc192a0aa373ac935f",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/PageObjects/RecordPages.cs": {
+    "mtime": 1779296938.359454,
+    "ast_hash": "315176657a452217c49418eeababf410",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/PageObjects/RegistrationPage.cs": {
+    "mtime": 1780399694.4818997,
+    "ast_hash": "232dc4aa7c641f770982af75d5883c73",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Tests/AdminApprovalAndRefugeeTests.cs": {
+    "mtime": 1780399701.759857,
+    "ast_hash": "5ac954c9dc76d5730552708dfbe9a935",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Tests/AdminAuthAndDashboardTests.cs": {
+    "mtime": 1779297044.1414838,
+    "ast_hash": "a09961e5bca69477aefcd8565138c34c",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Tests/AdminCrudAndSectorTests.cs": {
+    "mtime": 1779297073.017332,
+    "ast_hash": "9bc07674429dcec778ab8b5c76163483",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Tests/AssistanceTests.cs": {
+    "mtime": 1779297101.8491168,
+    "ast_hash": "5605baadf3f86d562ddab9dc46b884ab",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Tests/EdgeCaseTests.cs": {
+    "mtime": 1779297303.1698353,
+    "ast_hash": "1e4133091c2707bb83f30af0e98e2f89",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Tests/HomePageTests.cs": {
+    "mtime": 1779296994.1795654,
+    "ast_hash": "0c08443022a61d77ad5558e9ffcf6b9d",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Tests/NotificationAndAuditLogTests.cs": {
+    "mtime": 1779297114.473717,
+    "ast_hash": "55a4a1dc88a2ab6217ba6c1062272e78",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Tests/ProjectAndNominationTests.cs": {
+    "mtime": 1779297088.8031948,
+    "ast_hash": "3c15f1c4048bf03254e38ec24d916c2f",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Tests/RecordTests.cs": {
+    "mtime": 1779297294.4368927,
+    "ast_hash": "1febc1449776f12c44a04216377ae2b4",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.SeleniumTests/Tests/RegistrationTests.cs": {
+    "mtime": 1779297018.3380282,
+    "ast_hash": "798db6a32322a62b39568885dade056f",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.Tests/CampRegistrationApp.Tests.csproj": {
+    "mtime": 1778947957.6338072,
+    "ast_hash": "5c222629ba8392115c672889247fba95",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp.Tests/Tests.cs": {
+    "mtime": 1780399643.3679485,
+    "ast_hash": "a570ad01934df13cb4d780722d215c2b",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/CampRegistrationApp.Migrator/CampRegistrationApp.Migrator.csproj": {
+    "mtime": 1779365828.4665768,
+    "ast_hash": "88c5e66b516dd373548e19051622e762",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/CampRegistrationApp.Migrator/Program.cs": {
+    "mtime": 1780467899.6745195,
+    "ast_hash": "68f68c41cbaacb739ba6e1f4dffba9ba",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/CampRegistrationApp.csproj": {
+    "mtime": 1780399300.880857,
+    "ast_hash": "9ac7c9c8064a2c96226bd1e89af3f70f",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Controllers/AdminController.cs": {
+    "mtime": 1780467831.9740455,
+    "ast_hash": "0ea529efb433e3a5a79112e1785ecf0a",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Controllers/AssistanceController.cs": {
+    "mtime": 1780467834.1742854,
+    "ast_hash": "3989ca3b658a9ae7227ec6d9808bae40",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Controllers/ComplaintController.cs": {
+    "mtime": 1780467834.5764174,
+    "ast_hash": "cd57fc5c57ec69cbd2009176b8b3f0db",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Controllers/FileController.cs": {
+    "mtime": 1780463459.26247,
+    "ast_hash": "24c97a5e4a694626a0dacbbf332940e5",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Controllers/HomeController.cs": {
+    "mtime": 1778739087.3558047,
+    "ast_hash": "e005e13d874b2717c9529497defa4f1d",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Controllers/NominationController.cs": {
+    "mtime": 1779522203.8334239,
+    "ast_hash": "0523bef1b05358d4f6b539877880bf98",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Controllers/ProjectController.cs": {
+    "mtime": 1779368663.1742415,
+    "ast_hash": "110ad4e725aafde4c5c416f95bc8f053",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Controllers/RecordController.cs": {
+    "mtime": 1780467833.2824824,
+    "ast_hash": "8967043894c897ed748d2a7269356840",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Controllers/RegistrationController.cs": {
+    "mtime": 1780467832.621128,
+    "ast_hash": "e6a5ad832bc728560f08d02e2daef47b",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Data/ApplicationDbContext.cs": {
+    "mtime": 1779531961.7298584,
+    "ast_hash": "1555545596f6d05f2de5fda247c4c790",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Middleware/ExceptionLoggingMiddleware.cs": {
+    "mtime": 1780467845.7335856,
+    "ast_hash": "0e9d07f3eb271640a1d6763460e537dd",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/Admin.cs": {
+    "mtime": 1779374218.1204033,
+    "ast_hash": "8fdf3c6c3cafbc2e08e786b13d1f78d6",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/Assistance.cs": {
+    "mtime": 1780467867.9468155,
+    "ast_hash": "fb174ad75a4a98763f0ffec8f5698a65",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/AssistanceBeneficiary.cs": {
+    "mtime": 1780467868.4257996,
+    "ast_hash": "c5848daa7e9937c13c717dfa4a718abe",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/AssistanceImport.cs": {
+    "mtime": 1780467868.9562116,
+    "ast_hash": "c12cc714ac7053e3b552c8b560d95ab5",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/Attachment.cs": {
+    "mtime": 1780467867.4254923,
+    "ast_hash": "06287539e478c462a2f3290d57ad99ef",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/AuditLog.cs": {
+    "mtime": 1780467866.3865361,
+    "ast_hash": "8bbfdf192ab337c59ffce71692606a2b",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/ChronicDisease.cs": {
+    "mtime": 1778924523.4843104,
+    "ast_hash": "426d220856c478bd929715a6739f873d",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/Complaint.cs": {
+    "mtime": 1780467869.432969,
+    "ast_hash": "b349ba5c6635eb935d79383e19d5ef82",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/Desire.cs": {
+    "mtime": 1779279633.2953322,
+    "ast_hash": "8affba092d38ad3a81745f1c067037e6",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/DisabilityType.cs": {
+    "mtime": 1778924524.0772326,
+    "ast_hash": "bf30af05ff3699bd27aeeb4e7a84e8f2",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/ErrorViewModel.cs": {
+    "mtime": 1778739087.3648503,
+    "ast_hash": "34b76bb6f399b12ec4e82f17b133d9ba",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/FamilyDesire.cs": {
+    "mtime": 1779279634.137578,
+    "ast_hash": "8f7b20a43b2145cc744b4b3bcb2f2db7",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/FamilyMember.cs": {
+    "mtime": 1778757576.0188923,
+    "ast_hash": "86cdea53842416965d382e968a664bad",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/FamilyRegistration.cs": {
+    "mtime": 1780467865.9110515,
+    "ast_hash": "7b6f546a8653e67fbc80b81905007c50",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/HealthStatus.cs": {
+    "mtime": 1778924522.8246715,
+    "ast_hash": "6e19044387f61c8b0e2a6108894bfb32",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/Nomination.cs": {
+    "mtime": 1780467870.0496526,
+    "ast_hash": "babb958ff9d078e723ab9e91cc9567d0",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/Notification.cs": {
+    "mtime": 1780467866.8877473,
+    "ast_hash": "81f34e024271f057b6c638e3fe3ac49d",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/Person.cs": {
+    "mtime": 1779625385.272006,
+    "ast_hash": "2fd69445730277a988bb5996b72519ae",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/Project.cs": {
+    "mtime": 1780467870.4407449,
+    "ast_hash": "aae157d533a3f6d8befb4de2584cb9a3",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/ProjectSectorQuota.cs": {
+    "mtime": 1779272462.150733,
+    "ast_hash": "a09e1c0aa31879447cec184bd3bdfb95",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/Sector.cs": {
+    "mtime": 1778834634.5915637,
+    "ast_hash": "2c5006cd39a63fc9a0a1d9a2911b4757",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/ViewModels/AdminDashboardViewModel.cs": {
+    "mtime": 1779920988.9358697,
+    "ast_hash": "9b64c20c06ec1845749fbc1e7e1645fc",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/ViewModels/AuditLogListViewModel.cs": {
+    "mtime": 1779276102.0379817,
+    "ast_hash": "e7eadc42e5698b491c39999e90e1df34",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/ViewModels/ComplaintViewModel.cs": {
+    "mtime": 1779531943.1911662,
+    "ast_hash": "1a3c551d9fe705541ed8a898c5f61509",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/ViewModels/CreateAssistanceViewModel.cs": {
+    "mtime": 1779535888.3734853,
+    "ast_hash": "0ebfba3ab661b5b632850c972e8baa44",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/ViewModels/EditAssistanceViewModel.cs": {
+    "mtime": 1779536423.1419613,
+    "ast_hash": "ce18502e4bf63d73812f0a882f6e436c",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/ViewModels/NominationViewModel.cs": {
+    "mtime": 1779367875.8804452,
+    "ast_hash": "0df4a2ca5c952f298a341be86e74cf90",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/ViewModels/ProjectViewModel.cs": {
+    "mtime": 1779368614.7307584,
+    "ast_hash": "a8cb1a2652b3b7d42bb3a4a73e67205a",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Models/ViewModels/RegistrationViewModel.cs": {
+    "mtime": 1779625392.3449795,
+    "ast_hash": "bfa07dc0372e8746a794fc1e1402ac67",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Program.cs": {
+    "mtime": 1780463616.6337168,
+    "ast_hash": "a24fa4dc4100e7ad37a36ab466a56653",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Properties/launchSettings.json": {
+    "mtime": 1778760625.448341,
+    "ast_hash": "1152ab3ed074c1993c959891d516ee81",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/AssistanceService.cs": {
+    "mtime": 1780467842.5604315,
+    "ast_hash": "670418a66a7936dcf4004885a3c57edd",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/AuditService.cs": {
+    "mtime": 1779612431.192709,
+    "ast_hash": "3cf7adba9a643e279ad6b542fd644d56",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/ComplaintIdGenerator.cs": {
+    "mtime": 1779531944.6699593,
+    "ast_hash": "58530876a6bdac263a653fb414301508",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/DummyDataService.cs": {
+    "mtime": 1780467842.93578,
+    "ast_hash": "025a4c4330927e813c63e630b3bce2a5",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/FileCompressionService.cs": {
+    "mtime": 1780399340.7446704,
+    "ast_hash": "3d343b939a76b1031a19d8732a98f055",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/IAssistanceService.cs": {
+    "mtime": 1779563876.1879566,
+    "ast_hash": "31ebee8dac6efb596de428bb7913228a",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/IDummyDataService.cs": {
+    "mtime": 1778998731.4212046,
+    "ast_hash": "cc48785a51fc70f3a7ce441da99aae25",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/IImportService.cs": {
+    "mtime": 1779021898.877897,
+    "ast_hash": "31be9157193f697c094e8b6e74be67ae",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/IRateLimiterService.cs": {
+    "mtime": 1780463548.1995654,
+    "ast_hash": "9f918115a4e5ad5e66e888f33b005caf",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/ImportService.cs": {
+    "mtime": 1780467845.0986283,
+    "ast_hash": "5cc004fefa5bac29d6ec9108a7e4e9c1",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/JerusalemTime.cs": {
+    "mtime": 1780468054.0017285,
+    "ast_hash": "0e3fd7324520b222ac16380f95f9d1b7",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/NominationService.cs": {
+    "mtime": 1780467858.8733706,
+    "ast_hash": "796ef93e89f6cf1067990253ffbbc21e",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/NotificationService.cs": {
+    "mtime": 1778956752.4647033,
+    "ast_hash": "9fa3d40ec4a3a75e0809ab08e5c009e8",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/RateLimiterService.cs": {
+    "mtime": 1780467843.4296777,
+    "ast_hash": "4017dd4822fe990e6708654db2e558f3",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/RecordIdGenerator.cs": {
+    "mtime": 1778754150.1799119,
+    "ast_hash": "00ef6c1809fb66c8cfdb269f37f4acbc",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Services/RegistrationValidationService.cs": {
+    "mtime": 1780394269.7892272,
+    "ast_hash": "c49b63e3504032dae5bba074e55a5883",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/AuditLogs.cshtml": {
+    "mtime": 1779276651.4368987,
+    "ast_hash": "fe466c34d0e55cf115f509ba0bf02a01",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/Create.cshtml": {
+    "mtime": 1779612831.5804257,
+    "ast_hash": "91b1774c10c25c9f0ace524c9e220270",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/CreateSector.cshtml": {
+    "mtime": 1778834758.4154935,
+    "ast_hash": "2f4f921ad8e47e3c49a77c3858353808",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/Dashboard.cshtml": {
+    "mtime": 1779921357.689654,
+    "ast_hash": "bcef7883424e68ddd5562855b7891a53",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/Edit.cshtml": {
+    "mtime": 1779612830.899664,
+    "ast_hash": "f114d485417f952e3654d87e5a5482b9",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/EditSector.cshtml": {
+    "mtime": 1779273620.1654682,
+    "ast_hash": "d43c26618becbf024c9f5aad21b057ae",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/Index.cshtml": {
+    "mtime": 1778835935.5997963,
+    "ast_hash": "18cdb39086a0b9c8d32dc9714fb1d8b4",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/Login.cshtml": {
+    "mtime": 1779612829.2798076,
+    "ast_hash": "7aa90d08f642ef7d8ffc5ec0feeca0ca",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/Notifications.cshtml": {
+    "mtime": 1778956850.9269438,
+    "ast_hash": "200e6c0c3f5b54361f7a9881ceb2ded5",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/RefugeeDetails.cshtml": {
+    "mtime": 1779707447.1843123,
+    "ast_hash": "c4809009aec5cc9ae6dd969999c56bab",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/Refugees.cshtml": {
+    "mtime": 1779707453.8666403,
+    "ast_hash": "5d0c839798d83d38edc015c6574702c8",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/Registrations.cshtml": {
+    "mtime": 1779707450.7505848,
+    "ast_hash": "87e6e37779a65681e2c85eaa1b958c8d",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Admin/Sectors.cshtml": {
+    "mtime": 1778956571.2948577,
+    "ast_hash": "8fcce2224c5fcf9fd58b24b6df5d06fa",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Assistance/Create.cshtml": {
+    "mtime": 1779535918.4286325,
+    "ast_hash": "3706a2fee674ce2841f55640089a549f",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Assistance/Details.cshtml": {
+    "mtime": 1779563978.8771966,
+    "ast_hash": "1c8a3cbcdc938d9af16475be71dc75ae",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Assistance/Edit.cshtml": {
+    "mtime": 1779536447.5159762,
+    "ast_hash": "c29d4380413a21616e65f7a2c437ffe1",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Assistance/Import.cshtml": {
+    "mtime": 1779562405.0733204,
+    "ast_hash": "12677965d5fb97d3bdb4489d650d60be",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Assistance/ImportHistory.cshtml": {
+    "mtime": 1779022049.7039285,
+    "ast_hash": "12c7c9c79c541fc6fb3bfaf17c16e7d6",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Assistance/Index.cshtml": {
+    "mtime": 1779536672.4036336,
+    "ast_hash": "93c01064a76f7b4653920ed990623a92",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Complaint/Confirmation.cshtml": {
+    "mtime": 1779531997.4111319,
+    "ast_hash": "c03cb59e841d100e525a3f93bd8eb18c",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Complaint/Create.cshtml": {
+    "mtime": 1779531995.3491335,
+    "ast_hash": "8867c586a63b7a57720cff7ac165b5e0",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Complaint/Details.cshtml": {
+    "mtime": 1779532011.3463159,
+    "ast_hash": "44a4fe85f40336e8a4fcf1622542e897",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Complaint/Index.cshtml": {
+    "mtime": 1779532003.9205217,
+    "ast_hash": "210d64c9532bc2972abbebbdb01c69b1",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Home/Error.cshtml": {
+    "mtime": 1779604785.9306858,
+    "ast_hash": "ce99a5ae6803c98fda1d50966e63d36b",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Home/Index.cshtml": {
+    "mtime": 1779789642.6811688,
+    "ast_hash": "216391a25aad9af7b906de0bfb37752e",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Home/Privacy.cshtml": {
+    "mtime": 1778739087.000573,
+    "ast_hash": "6ac68e2b0d9ab26bd02a905a365a2bcc",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Nomination/Index.cshtml": {
+    "mtime": 1779470486.2432592,
+    "ast_hash": "32e20e9c43b50312ed7b68067fadf668",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Project/Create.cshtml": {
+    "mtime": 1779273504.5916317,
+    "ast_hash": "7ad3ff79927df35cd9d80808ac293802",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Project/Edit.cshtml": {
+    "mtime": 1779273516.3871562,
+    "ast_hash": "da508673ba461c3b716e123cca87369f",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Project/Index.cshtml": {
+    "mtime": 1779368680.779564,
+    "ast_hash": "666db7647aa0fc7e724a707b09574ccd",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Record/ChangePassword.cshtml": {
+    "mtime": 1779612667.1851728,
+    "ast_hash": "f7fb33e6003cc2457a69c1a4494c1c6b",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Record/Edit.cshtml": {
+    "mtime": 1780465199.4964588,
+    "ast_hash": "3e16ca340881c587a422be0955f26aba",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Record/Login.cshtml": {
+    "mtime": 1780465277.54806,
+    "ast_hash": "9ed9e7e905707df68394630d1022f482",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Record/Search.cshtml": {
+    "mtime": 1778918383.1209354,
+    "ast_hash": "435b82c7282acbe13a23e7c8296c1dc5",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Registration/Index.cshtml": {
+    "mtime": 1780399317.6209285,
+    "ast_hash": "75560dbf2603fae812c6a72a6992be8b",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Registration/Success.cshtml": {
+    "mtime": 1779279099.2327507,
+    "ast_hash": "a04c0c5cac3c838907ef9284af4006ec",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Shared/Error.cshtml": {
+    "mtime": 1778739087.0158753,
+    "ast_hash": "939096be653d41fb8a147fb4ff36bfb5",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Shared/_Layout.cshtml": {
+    "mtime": 1779533161.1762645,
+    "ast_hash": "b6be3c8befbc635ab62556519ee14f9f",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/Shared/_ValidationScriptsPartial.cshtml": {
+    "mtime": 1778739087.0380404,
+    "ast_hash": "e44d1ba7aa6fc476b40834e79a00fd81",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/_ViewImports.cshtml": {
+    "mtime": 1779023153.5175865,
+    "ast_hash": "11331860e90cde9ec9b8c2292360b6f8",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/Views/_ViewStart.cshtml": {
+    "mtime": 1778739087.40809,
+    "ast_hash": "e4cd881cf745e1e88cf2c5f6eceae943",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/appsettings.Development.json": {
+    "mtime": 1778739087.1897645,
+    "ast_hash": "804b473502a4c415cf75db61c56c32aa",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/appsettings.Production.json": {
+    "mtime": 1779371089.0907445,
+    "ast_hash": "d76803a6a39baeed41a8c1e50d48a888",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/appsettings.json": {
+    "mtime": 1779367974.854605,
+    "ast_hash": "9da4514df1d95cf95a1a93a9a977dca8",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/wwwroot/js/site.js": {
+    "mtime": 1778739087.0470815,
+    "ast_hash": "53e309eeca51b3b6de20c4d24e1b2b63",
+    "semantic_hash": ""
+  },
+  "aslam pop.sln": {
+    "mtime": 1778947107.8670323,
+    "ast_hash": "1c2d2cf2529574f3b8cae408839126ab",
+    "semantic_hash": ""
+  },
+  "opencode.json": {
+    "mtime": 1780225314.952921,
+    "ast_hash": "2b014e94943638849f4c7e2fd8ed247a",
+    "semantic_hash": ""
+  },
+  "tmp_original.cs": {
+    "mtime": 1779604969.1593375,
+    "ast_hash": "6e517cf9a980156777333fbf748e98e6",
+    "semantic_hash": ""
+  },
+  ".github/workflows/publish.yml": {
+    "mtime": 1779084881.8597991,
+    "ast_hash": "4f330111c19842165bcaedebba356fae",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1780399754.3966436,
+    "ast_hash": "c990c64206155fc2421b52b2154dc82f",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1780399767.3338158,
+    "ast_hash": "9d9ac67898817fc0678dd89dfe226997",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/aid_PRD.md": {
+    "mtime": 1779013484.7385118,
+    "ast_hash": "fee229421e111b7af973ccf13d92f3dc",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/mandoob_financial_recorder_PRD.md": {
+    "mtime": 1780414408.6693246,
+    "ast_hash": "4761bd4f999765e6d806608d4aa4e268",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/project_nomination_prd.md": {
+    "mtime": 1778954112.8439753,
+    "ast_hash": "df6c034bd1caee9d9126fd3c4e1f78ff",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/wwwroot/lib/jquery-validation-unobtrusive/LICENSE.txt": {
+    "mtime": 1778739087.2879477,
+    "ast_hash": "ba2bed45d99b13d4c31485d0631ae675",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/wwwroot/lib/jquery-validation/LICENSE.md": {
+    "mtime": 1778739087.184807,
+    "ast_hash": "41ef1b919db5e3aeaf47308518e7bcee",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/wwwroot/lib/jquery/LICENSE.txt": {
+    "mtime": 1778739087.165542,
+    "ast_hash": "f661402a551136dbe74282edc5bea28d",
+    "semantic_hash": ""
+  },
+  "E2E_TEST.md": {
+    "mtime": 1780399782.3680224,
+    "ast_hash": "561a7664be8e4764853b098883d7bb4f",
+    "semantic_hash": ""
+  },
+  "PRD.md": {
+    "mtime": 1778738072.8488233,
+    "ast_hash": "98dc773ada09f06e19d04c8005dd4960",
+    "semantic_hash": ""
+  },
+  "admin_cookies.txt": {
+    "mtime": 1779694459.3316636,
+    "ast_hash": "2463e55d7ac851d6c775c5e1036f34e2",
+    "semantic_hash": ""
+  },
+  "admins.md": {
+    "mtime": 1778834193.7929747,
+    "ast_hash": "8fad3f2ce279e7369909698e88c2ccde",
+    "semantic_hash": ""
+  },
+  "cookies.txt": {
+    "mtime": 1779694432.1427596,
+    "ast_hash": "a3e03ad0a61b2f96a2e5c848502dcf7e",
+    "semantic_hash": ""
+  },
+  "delete_log.txt": {
+    "mtime": 1779367523.6584086,
+    "ast_hash": "7ab522acb4dcd0ad95977c627d8dddc8",
+    "semantic_hash": ""
+  },
+  "user_cookies.txt": {
+    "mtime": 1779694506.9145637,
+    "ast_hash": "cb5d9f164a354942a5b1c51ba7cd5dae",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/wwwroot/uploads/registrations/TEMP/-1_MedicalReport_20260514182609_.pdf": {
+    "mtime": 1778772369.8062072,
+    "ast_hash": "5490f88199f48106d655affb3375ab32",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/wwwroot/img_landing/1.jpeg": {
+    "mtime": 1779788247.5406487,
+    "ast_hash": "38ec97701aca6634807dab1d296b2124",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/wwwroot/img_landing/2.jpeg": {
+    "mtime": 1779788228.325731,
+    "ast_hash": "8b9d82b765c172a0f4624fb60d62e134",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/wwwroot/img_landing/3.jpeg": {
+    "mtime": 1779787933.8697336,
+    "ast_hash": "ee6f4b7dab4c4c29706b1cf2f904b6ea",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/wwwroot/img_landing/4.jpeg": {
+    "mtime": 1779787876.1686504,
+    "ast_hash": "64031a044634bbbc4e1092ae533de13c",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/wwwroot/uploads/registrations/TEMP/-1_IDImage_20260514165608_.jpg": {
+    "mtime": 1778766968.9846482,
+    "ast_hash": "a51b9ee52fa62464aedbc6b4571260d1",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/wwwroot/uploads/registrations/TEMP/-1_IDImage_20260514180519_.jpg": {
+    "mtime": 1778771119.069853,
+    "ast_hash": "720f39f0de3c04cbe6dc476d1575654e",
+    "semantic_hash": ""
+  },
+  "CampRegistrationApp/wwwroot/uploads/registrations/TEMP/-1_IDImage_20260514182557_.jpg": {
+    "mtime": 1778772357.8541498,
+    "ast_hash": "720f39f0de3c04cbe6dc476d1575654e",
+    "semantic_hash": ""
+  },
+  "Screenshots/RegistrationPage_20260521_114205.png": {
+    "mtime": 1779352925.1662633,
+    "ast_hash": "740fc4aeca2b5a26a6484da558f910c1",
+    "semantic_hash": ""
+  },
+  "Screenshots/RegistrationPage_20260521_114349.png": {
+    "mtime": 1779353029.4082384,
+    "ast_hash": "c13e6292144dd3cb88557cfbf2cf1b42",
+    "semantic_hash": ""
+  },
+  "Screenshots/debug_registration_page_20260521_113011.png": {
+    "mtime": 1779352211.201299,
+    "ast_hash": "584fc856a4f942b514ca0c48a53bfc03",
+    "semantic_hash": ""
+  }
+}
