@@ -9,6 +9,14 @@ namespace CampRegistrationApp.Models.ViewModels
         public int TotalCount { get; set; }
         public List<Sector> Sectors { get; set; } = new();
         public Dictionary<string, string> HeaderLabels { get; set; } = new();
+        /// <summary>Resolved column keys + labels for grid (same order as Excel export).</summary>
+        public List<ReportDisplayColumn> DisplayColumns { get; set; } = new();
+    }
+
+    public class ReportDisplayColumn
+    {
+        public string Key { get; set; } = "";
+        public string Label { get; set; } = "";
     }
 
     public class ColumnGroup

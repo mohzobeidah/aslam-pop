@@ -130,7 +130,10 @@ namespace CampRegistrationApp.Services
 
         public async Task<List<ReportRow>> GetReportDataAsync(ReportFilter filter, List<string> selectedColumns, int? adminSectorId = null)
         {
-            var canIncludeMembers = selectedColumns.Contains("Wives") || selectedColumns.Contains("Children") || selectedColumns.Contains("OtherMembers");
+            var canIncludeMembers = filter.IncludeMembers
+                || selectedColumns.Contains("Wives")
+                || selectedColumns.Contains("Children")
+                || selectedColumns.Contains("OtherMembers");
 
             if (filter.ReportType == "Disabled" || filter.ReportType == "ChronicSick" || filter.ReportType == "Pregnant" || filter.ReportType == "Nursing")
             {
@@ -398,116 +401,68 @@ namespace CampRegistrationApp.Services
             return rows;
         }
 
-        public async Task<byte[]> GenerateExcelAsync(List<ReportRow> rows, List<string> selectedColumns)
+        public List<ReportDisplayColumn> ResolveDisplayColumns(List<ReportRow> rows, List<string> selectedColumns)
         {
+            var selected = new HashSet<string>(selectedColumns, StringComparer.Ordinal);
             var allColumns = GetColumnGroups().SelectMany(g => g.Columns).ToList();
-            var columnsToExport = allColumns.Where(c => selectedColumns.Contains(c.Key)).ToList();
+            var columnsToShow = allColumns.Where(c => selected.Contains(c.Key)).ToList();
+            var headerLabels = BuildHeaderLabelsMap(allColumns);
 
-            var allDynamicKeys = new List<string>();
+            var dynamicKeys = new HashSet<string>(StringComparer.Ordinal);
             foreach (var row in rows)
             {
                 foreach (var key in row.Values.Keys)
                 {
-                    if (!selectedColumns.Contains(key) && !key.StartsWith("Wife") && !key.StartsWith("Child") && key != "OtherMembers")
-                        continue;
-                    if (!allDynamicKeys.Contains(key))
-                        allDynamicKeys.Add(key);
+                    if (ShouldIncludeDataKey(key, selected))
+                        dynamicKeys.Add(key);
                 }
             }
 
             var orderedKeys = new List<string>();
-            foreach (var col in columnsToExport)
+            foreach (var col in columnsToShow)
             {
                 if (col.Key == "Wives")
-                {
-                    var wifeKeys = allDynamicKeys.Where(k => k.StartsWith("Wife")).ToList();
-                    orderedKeys.AddRange(wifeKeys);
-                }
+                    orderedKeys.AddRange(dynamicKeys.Where(k => k.StartsWith("Wife", StringComparison.Ordinal)).OrderBy(k => k, DynamicKeyComparer.Instance));
                 else if (col.Key == "Children")
-                {
-                    var childKeys = allDynamicKeys.Where(k => k.StartsWith("Child")).ToList();
-                    orderedKeys.AddRange(childKeys);
-                }
+                    orderedKeys.AddRange(dynamicKeys.Where(k => k.StartsWith("Child", StringComparison.Ordinal)).OrderBy(k => k, DynamicKeyComparer.Instance));
                 else if (col.Key == "OtherMembers")
                 {
-                    if (allDynamicKeys.Contains("OtherMembers"))
+                    if (dynamicKeys.Contains("OtherMembers"))
                         orderedKeys.Add("OtherMembers");
                 }
                 else
-                {
                     orderedKeys.Add(col.Key);
-                }
             }
 
-            var headerLabels = new Dictionary<string, string>();
-            foreach (var col in allColumns)
-                headerLabels[col.Key] = col.Label;
-
-            foreach (var key in orderedKeys)
-            {
-                if (!headerLabels.ContainsKey(key))
+            return orderedKeys
+                .Select(k => new ReportDisplayColumn
                 {
-                    if (key.StartsWith("Wife") && key.Contains("_"))
-                    {
-                        var parts = key.Split('_');
-                        var num = parts[0].Replace("Wife", "");
-                        var field = parts[1] switch
-                        {
-                            "Name" => "الاسم",
-                            "IdNumber" => "رقم الهوية",
-                            "DOB" => "تاريخ الميلاد",
-                            "Age" => "العمر",
-                            "HealthStatus" => "الحالة الصحية",
-                            "ChronicDiseases" => "أمراض مزمنة",
-                            "DisabilityTypes" => "إعاقات",
-                            "BathroomStatus" => "حالة الحمام",
-                            "IsPregnant" => "حامل",
-                            "IsNursing" => "مرضع",
-                            _ => parts[1]
-                        };
-                        headerLabels[key] = $"الزوجة {num} - {field}";
-                    }
-                    else if (key.StartsWith("Child") && key.Contains("_"))
-                    {
-                        var parts = key.Split('_');
-                        var num = parts[0].Replace("Child", "");
-                        var field = parts[1] switch
-                        {
-                            "Name" => "الاسم",
-                            "IdNumber" => "رقم الهوية",
-                            "DOB" => "تاريخ الميلاد",
-                            "Age" => "العمر",
-                            "Gender" => "الجنس",
-                            "HealthStatus" => "الحالة الصحية",
-                            "ChronicDiseases" => "أمراض مزمنة",
-                            "DisabilityTypes" => "إعاقات",
-                            "BathroomStatus" => "حالة الحمام",
-                            _ => parts[1]
-                        };
-                        headerLabels[key] = $"الابن {num} - {field}";
-                    }
-                    else if (key == "OtherMembers")
-                    {
-                        headerLabels[key] = "أفراد آخرون";
-                    }
-                }
-            }
+                    Key = k,
+                    Label = headerLabels.TryGetValue(k, out var label) ? label : GenerateDynamicLabel(k)
+                })
+                .ToList();
+        }
+
+        public async Task<byte[]> GenerateExcelAsync(List<ReportRow> rows, List<string> selectedColumns)
+        {
+            var displayColumns = ResolveDisplayColumns(rows, selectedColumns);
 
             using var workbook = new XLWorkbook();
             var ws = workbook.Worksheets.Add("التقرير");
 
-            for (int c = 0; c < orderedKeys.Count; c++)
+            for (int c = 0; c < displayColumns.Count; c++)
             {
-                ws.Cell(1, c + 1).Value = headerLabels.GetValueOrDefault(orderedKeys[c], orderedKeys[c]);
+                ws.Cell(1, c + 1).Value = displayColumns[c].Label;
                 ws.Cell(1, c + 1).Style.Font.Bold = true;
                 ws.Cell(1, c + 1).Style.Fill.BackgroundColor = XLColor.Gold;
             }
 
             for (int r = 0; r < rows.Count; r++)
             {
-                for (int c = 0; c < orderedKeys.Count; c++)
+                for (int c = 0; c < displayColumns.Count; c++)
                 {
-                    var val = rows[r].Values.GetValueOrDefault(orderedKeys[c]);
+                    var key = displayColumns[c].Key;
+                    var val = rows[r].Values.GetValueOrDefault(key);
                     ws.Cell(r + 2, c + 1).Value = val?.ToString() ?? "";
                     ws.Cell(r + 2, c + 1).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
                 }
@@ -518,6 +473,93 @@ namespace CampRegistrationApp.Services
             using var stream = new MemoryStream();
             workbook.SaveAs(stream);
             return stream.ToArray();
+        }
+
+        private static bool ShouldIncludeDataKey(string key, HashSet<string> selectedColumns)
+        {
+            if (selectedColumns.Contains(key))
+                return true;
+            if (key.StartsWith("Wife", StringComparison.Ordinal) && selectedColumns.Contains("Wives"))
+                return true;
+            if (key.StartsWith("Child", StringComparison.Ordinal) && selectedColumns.Contains("Children"))
+                return true;
+            return key == "OtherMembers" && selectedColumns.Contains("OtherMembers");
+        }
+
+        private static Dictionary<string, string> BuildHeaderLabelsMap(List<ColumnDef> allColumns)
+        {
+            var headerLabels = allColumns.ToDictionary(c => c.Key, c => c.Label, StringComparer.Ordinal);
+            return headerLabels;
+        }
+
+        private static string GetDynamicFieldLabel(string field) => field switch
+        {
+            "Name" => "الاسم",
+            "IdNumber" => "رقم الهوية",
+            "DOB" => "تاريخ الميلاد",
+            "Age" => "العمر",
+            "Gender" => "الجنس",
+            "HealthStatus" => "الحالة الصحية",
+            "ChronicDiseases" => "أمراض مزمنة",
+            "DisabilityTypes" => "إعاقات",
+            "BathroomStatus" => "حالة الحمام",
+            "IsPregnant" => "حامل",
+            "IsNursing" => "مرضع",
+            _ => field
+        };
+
+        public static string GenerateDynamicLabel(string key)
+        {
+            if (key.StartsWith("Wife", StringComparison.Ordinal) && key.Contains('_'))
+            {
+                var parts = key.Split('_', 2);
+                var num = parts[0]["Wife".Length..];
+                return $"الزوجة {num} - {GetDynamicFieldLabel(parts[1])}";
+            }
+            if (key.StartsWith("Child", StringComparison.Ordinal) && key.Contains('_'))
+            {
+                var parts = key.Split('_', 2);
+                var num = parts[0]["Child".Length..];
+                return $"الابن {num} - {GetDynamicFieldLabel(parts[1])}";
+            }
+            if (key == "OtherMembers")
+                return "أفراد آخرون";
+            return key;
+        }
+
+        private sealed class DynamicKeyComparer : IComparer<string>
+        {
+            public static readonly DynamicKeyComparer Instance = new();
+
+            private static readonly string[] FieldOrder =
+            {
+                "Name", "IdNumber", "DOB", "Age", "Gender", "HealthStatus",
+                "ChronicDiseases", "DisabilityTypes", "BathroomStatus", "IsPregnant", "IsNursing"
+            };
+
+            public int Compare(string? a, string? b)
+            {
+                if (a == b) return 0;
+                if (a == null) return -1;
+                if (b == null) return 1;
+
+                var aParts = a.Split('_', 2);
+                var bParts = b.Split('_', 2);
+                if (aParts.Length < 2 || bParts.Length < 2)
+                    return string.Compare(a, b, StringComparison.Ordinal);
+
+                var aPrefix = aParts[0];
+                var bPrefix = bParts[0];
+                var prefixCmp = string.Compare(aPrefix, bPrefix, StringComparison.Ordinal);
+                if (prefixCmp != 0)
+                    return prefixCmp;
+
+                var aField = Array.IndexOf(FieldOrder, aParts[1]);
+                var bField = Array.IndexOf(FieldOrder, bParts[1]);
+                if (aField < 0) aField = FieldOrder.Length;
+                if (bField < 0) bField = FieldOrder.Length;
+                return aField.CompareTo(bField);
+            }
         }
 
         private static int CalculateAge(DateTime dateOfBirth)

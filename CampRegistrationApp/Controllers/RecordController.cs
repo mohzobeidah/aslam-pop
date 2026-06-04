@@ -30,6 +30,48 @@ namespace CampRegistrationApp.Controllers
             _rateLimiter = rateLimiter;
         }
 
+        private const string MustChangePasswordSessionKey = "MustChangePassword";
+
+        private static string HashPassword(string password) =>
+            Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
+
+        private static bool IsPasswordSameAsIdNumber(string idNumber, string? passwordHash) =>
+            !string.IsNullOrEmpty(passwordHash) && passwordHash == HashPassword(idNumber);
+
+        private bool RequiresPasswordChange(FamilyRegistration registration) =>
+            HttpContext.Session.GetString(MustChangePasswordSessionKey) == "1"
+            || IsPasswordSameAsIdNumber(registration.FamilyHead.IdNumber, registration.PasswordHash);
+
+        private void SetMustChangePassword(bool required)
+        {
+            if (required)
+                HttpContext.Session.SetString(MustChangePasswordSessionKey, "1");
+            else
+                HttpContext.Session.Remove(MustChangePasswordSessionKey);
+        }
+
+        private IActionResult ReturnEditWithPasswordChangeRequired(FamilyRegistration registration, string? errorMessage = null)
+        {
+            var model = MapToViewModel(registration);
+            ViewBag.HeadAttachments = registration.FamilyHead.Attachments.ToList();
+            ViewBag.MustChangePassword = true;
+            if (!string.IsNullOrEmpty(errorMessage))
+                TempData["PasswordChangeError"] = errorMessage;
+            return View("Edit", model);
+        }
+
+        private async Task<IActionResult> ReturnEditWithPasswordChangeRequiredAsync(int registrationId, string? errorMessage = null)
+        {
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)
+                .Include(f => f.Members).ThenInclude(m => m.Person)
+                .Include(f => f.FamilyDesires)
+                .FirstOrDefaultAsync(f => f.Id == registrationId);
+            if (registration == null)
+                return RedirectToAction("Login");
+            return ReturnEditWithPasswordChangeRequired(registration, errorMessage);
+        }
+
         private async Task PopulateLookupViewBags()
         {
             ViewBag.Sectors = await _context.Sectors.OrderBy(s => s.Name).ToListAsync();
@@ -100,7 +142,7 @@ namespace CampRegistrationApp.Controllers
                 return View();
             }
 
-            var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
+            var hash = HashPassword(password);
 
             var registration = await _context.FamilyRegistrations
                 .Include(f => f.FamilyHead)
@@ -137,6 +179,7 @@ namespace CampRegistrationApp.Controllers
             }
 
             HttpContext.Session.SetInt32("EditRegistrationId", registration.Id);
+            SetMustChangePassword(string.Equals(password, idNumber, StringComparison.Ordinal));
 
             await _audit.LogAsync(0, "Login", "FamilyRegistrations", registration.RecordId,
                 null,
@@ -174,6 +217,8 @@ namespace CampRegistrationApp.Controllers
 
             var model = MapToViewModel(registration);
             ViewBag.HeadAttachments = registration.FamilyHead.Attachments.ToList();
+            if (RequiresPasswordChange(registration))
+                ViewBag.MustChangePassword = true;
             return View(model);
         }
 
@@ -183,7 +228,16 @@ namespace CampRegistrationApp.Controllers
             if (file == null || file.Length == 0) return BadRequest("No file uploaded");
 
             var regId = HttpContext.Session.GetInt32("EditRegistrationId");
-            var recordId = regId?.ToString() ?? "TEMP";
+            if (regId == null) return Unauthorized();
+
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
+                .FirstOrDefaultAsync(f => f.Id == regId);
+            if (registration == null) return Unauthorized();
+            if (RequiresPasswordChange(registration))
+                return StatusCode(403, new { error = "يجب تغيير كلمة المرور أولاً" });
+
+            var recordId = regId.ToString();
             var ext = Path.GetExtension(file.FileName);
             var fileName = $"{personId}_{fileType}_{JerusalemTime.Now:yyyyMMddHHmmss}_{ext}";
             var folderPath = Path.Combine(_env.WebRootPath, "uploads", "registrations", recordId);
@@ -221,8 +275,16 @@ namespace CampRegistrationApp.Controllers
                 HttpContext.Session.Remove("EditRegistrationId");
                 return RedirectToAction("Login");
             }
+
             if (model == null) model = MapToViewModel(registration);
             ViewBag.HeadAttachments = registration.FamilyHead.Attachments.ToList();
+            if (RequiresPasswordChange(registration))
+            {
+                ViewBag.MustChangePassword = true;
+                ModelState.AddModelError("", "يجب تغيير كلمة المرور قبل حفظ التعديلات");
+                return View("Edit", model);
+            }
+
             if (!ModelState.IsValid)
             {
                 ModelState.AddModelError("", "يرجى تصحيح الأخطاء في البيانات");
@@ -459,14 +521,19 @@ namespace CampRegistrationApp.Controllers
             if (regId == null) return RedirectToAction("Login");
 
             var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
                 .FirstOrDefaultAsync(f => f.Id == regId);
             if (registration == null) return RedirectToAction("Login");
+
+            if (RequiresPasswordChange(registration))
+                ViewBag.ForcePasswordChange = true;
 
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword, string confirmPassword)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(string? oldPassword, string newPassword, string confirmPassword, bool force = false)
         {
             var regId = HttpContext.Session.GetInt32("EditRegistrationId");
             if (regId == null) return RedirectToAction("Login");
@@ -476,37 +543,71 @@ namespace CampRegistrationApp.Controllers
                 .FirstOrDefaultAsync(f => f.Id == regId);
             if (registration == null) return RedirectToAction("Login");
 
-            if (string.IsNullOrEmpty(oldPassword) || string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(confirmPassword))
+            var idNumber = registration.FamilyHead.IdNumber;
+            var isForced = force || RequiresPasswordChange(registration);
+
+            if (isForced)
+                ViewBag.ForcePasswordChange = true;
+
+            if (string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(confirmPassword))
             {
+                if (isForced)
+                    return await ReturnEditWithPasswordChangeRequiredAsync(registration.Id, "جميع الحقول مطلوبة");
                 ModelState.AddModelError("", "جميع الحقول مطلوبة");
+                return View();
+            }
+
+            if (!isForced && string.IsNullOrEmpty(oldPassword))
+            {
+                ModelState.AddModelError("", "كلمة المرور القديمة مطلوبة");
                 return View();
             }
 
             if (newPassword != confirmPassword)
             {
+                if (isForced)
+                    return await ReturnEditWithPasswordChangeRequiredAsync(registration.Id, "كلمة المرور الجديدة وتأكيدها غير متطابقين");
                 ModelState.AddModelError("", "كلمة المرور الجديدة وتأكيدها غير متطابقين");
                 return View();
             }
 
             if (newPassword.Length < 4)
             {
+                if (isForced)
+                    return await ReturnEditWithPasswordChangeRequiredAsync(registration.Id, "كلمة المرور يجب أن تكون 4 أحرف على الأقل");
                 ModelState.AddModelError("", "كلمة المرور يجب أن تكون 4 أحرف على الأقل");
                 return View();
             }
 
-            var oldHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(oldPassword)));
-            if (registration.PasswordHash != oldHash)
+            if (string.Equals(newPassword, idNumber, StringComparison.Ordinal))
             {
-                ModelState.AddModelError("", "كلمة المرور القديمة غير صحيحة");
+                if (isForced)
+                    return await ReturnEditWithPasswordChangeRequiredAsync(registration.Id, "كلمة المرور الجديدة يجب أن تكون مختلفة عن رقم الهوية");
+                ModelState.AddModelError("", "كلمة المرور الجديدة يجب أن تكون مختلفة عن رقم الهوية");
                 return View();
             }
 
-            var newHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(newPassword)));
-            registration.PasswordHash = newHash;
+            if (!isForced)
+            {
+                if (registration.PasswordHash != HashPassword(oldPassword!))
+                {
+                    ModelState.AddModelError("", "كلمة المرور القديمة غير صحيحة");
+                    return View();
+                }
+            }
+            else if (!IsPasswordSameAsIdNumber(idNumber, registration.PasswordHash))
+            {
+                SetMustChangePassword(false);
+                TempData["Success"] = "كلمة المرور محدّثة مسبقاً";
+                return RedirectToAction(nameof(Edit));
+            }
+
+            registration.PasswordHash = HashPassword(newPassword);
             await _context.SaveChangesAsync();
+            SetMustChangePassword(false);
 
             await _audit.LogAsync(0, "ChangePassword", "FamilyRegistrations", registration.RecordId,
-                new { action = "تم تغيير كلمة المرور بواسطة رب الأسرة" },
+                new { action = isForced ? "تغيير إجباري بعد تسجيل الدخول" : "تم تغيير كلمة المرور بواسطة رب الأسرة" },
                 new { headName = registration.FamilyHead.FullName },
                 source: "Web");
 
@@ -515,9 +616,11 @@ namespace CampRegistrationApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Logout()
         {
             HttpContext.Session.Remove("EditRegistrationId");
+            HttpContext.Session.Remove(MustChangePasswordSessionKey);
             return RedirectToAction("Login");
         }
 

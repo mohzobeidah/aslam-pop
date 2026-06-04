@@ -76,6 +76,13 @@
                 </tr>
                 <tr id="details-@log.Id" class="hidden">
                     <td colspan="8" class="p-3 sm:p-4 bg-gray-800/70 border-b border-gray-700">
+                        @if (log.TableName == "Reports" && !string.IsNullOrEmpty(log.NewValues))
+                        {
+                            <div class="mb-4 min-w-0">
+                                <h4 class="text-camp-gold font-bold mb-2 text-sm">استعلام التقرير</h4>
+                                <pre class="report-query-viewer bg-gray-950 text-gray-100 p-3 rounded-lg text-xs leading-relaxed overflow-x-auto max-h-96 whitespace-pre-wrap border border-camp-gold/30" data-json="@log.NewValues"></pre>
+                            </div>
+                        }
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                             @if (!string.IsNullOrEmpty(log.OldValues))
                             {
@@ -84,11 +91,18 @@
                                     <pre class="json-viewer bg-gray-950 text-green-300 p-3 rounded-lg text-xs leading-relaxed overflow-x-auto max-h-60" data-json="@log.OldValues"></pre>
                                 </div>
                             }
-                            @if (!string.IsNullOrEmpty(log.NewValues))
+                            @if (!string.IsNullOrEmpty(log.NewValues) && log.TableName != "Reports")
                             {
                                 <div class="min-w-0">
                                     <h4 class="text-camp-gold font-bold mb-1 text-xs sm:text-sm">القيم الجديدة</h4>
                                     <pre class="json-viewer bg-gray-950 text-green-300 p-3 rounded-lg text-xs leading-relaxed overflow-x-auto max-h-60" data-json="@log.NewValues"></pre>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(log.NewValues) && log.TableName == "Reports")
+                            {
+                                <div class="min-w-0 sm:col-span-2">
+                                    <h4 class="text-camp-gold font-bold mb-1 text-xs sm:text-sm">تفاصيل JSON</h4>
+                                    <pre class="json-viewer bg-gray-950 text-green-300 p-3 rounded-lg text-xs leading-relaxed overflow-x-auto max-h-48" data-json="@log.NewValues"></pre>
                                 </div>
                             }
                         </div>
@@ -126,6 +140,18 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.report-query-viewer').forEach(function (pre) {
+            var raw = pre.getAttribute('data-json');
+            if (!raw) return;
+            try {
+                var parsed = JSON.parse(raw);
+                var text = parsed.QueryDescription || parsed.SqlQuery || JSON.stringify(parsed, null, 2);
+                pre.textContent = text;
+            } catch (e) {
+                pre.textContent = raw;
+            }
+        });
+
         document.querySelectorAll('.json-viewer').forEach(function (pre) {
             var raw = pre.getAttribute('data-json');
             if (!raw) return;

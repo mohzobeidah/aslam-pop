@@ -143,55 +143,11 @@
 <!-- Preview Table + Export -->
 @if (hasData)
 {
-    var allColumns = Model.ColumnGroups.SelectMany(g => g.Columns).ToList();
-    var columnsToShow = allColumns.Where(c => Model.SelectedColumns.Contains(c.Key)).ToList();
-
-    var allDynamicKeys = new List<string>();
-    foreach (var row in Model.Rows)
-    {
-        foreach (var key in row.Values.Keys)
-        {
-            if (!Model.SelectedColumns.Contains(key) && !key.StartsWith("Wife") && !key.StartsWith("Child") && key != "OtherMembers")
-                continue;
-            if (!allDynamicKeys.Contains(key))
-                allDynamicKeys.Add(key);
-        }
-    }
-
-    var allKeys = new List<string>();
-    foreach (var col in columnsToShow)
-    {
-        if (col.Key == "Wives")
-            allKeys.AddRange(allDynamicKeys.Where(k => k.StartsWith("Wife")));
-        else if (col.Key == "Children")
-            allKeys.AddRange(allDynamicKeys.Where(k => k.StartsWith("Child")));
-        else if (col.Key == "OtherMembers")
-        {
-            if (allDynamicKeys.Contains("OtherMembers"))
-                allKeys.Add("OtherMembers");
-        }
-        else
-            allKeys.Add(col.Key);
-    }
-
     <div class="mt-6 bg-camp-accent-grey p-4 rounded-xl border border-gray-700">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-camp-gold font-bold text-lg">المعاينة (@Model.TotalCount صف)</h2>
+            <h2 class="text-camp-gold font-bold text-lg">المعاينة (@Model.TotalCount صف — @Model.DisplayColumns.Count عمود)</h2>
             <form method="post" asp-action="ExportExcel" id="exportForm">
                 @Html.AntiForgeryToken()
-                @foreach (var col in Model.SelectedColumns)
-                {
-                    <input type="hidden" name="SelectedColumns" value="@col" />
-                }
-                <input type="hidden" name="Filter.ReportType" value="@Model.Filter.ReportType" />
-                <input type="hidden" name="Filter.SectorId" value="@Model.Filter.SectorId" />
-                <input type="hidden" name="Filter.Status" value="@Model.Filter.Status" />
-                <input type="hidden" name="Filter.Gender" value="@Model.Filter.Gender" />
-                <input type="hidden" name="Filter.HealthStatus" value="@Model.Filter.HealthStatus" />
-                <input type="hidden" name="Filter.AgeFrom" value="@Model.Filter.AgeFrom" />
-                <input type="hidden" name="Filter.AgeTo" value="@Model.Filter.AgeTo" />
-                <input type="hidden" name="Filter.Search" value="@Model.Filter.Search" />
-                <input type="hidden" name="Filter.IncludeMembers" value="@(Model.Filter.IncludeMembers ? "true" : "false")" />
                 <button type="submit" class="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition text-sm font-bold">
                     ⬇ تصدير Excel
                 </button>
@@ -203,9 +159,9 @@
                 <thead class="sticky top-0 bg-gray-800 z-10">
                     <tr class="border-b border-gray-700 text-camp-gold">
                         <th class="p-2 text-right">#</th>
-                        @foreach (var key in allKeys)
+                        @foreach (var col in Model.DisplayColumns)
                         {
-                            <th class="p-2 text-right whitespace-nowrap">@(Model.HeaderLabels.GetValueOrDefault(key, key))</th>
+                            <th class="p-2 text-right whitespace-nowrap">@col.Label</th>
                         }
                     </tr>
                 </thead>
@@ -215,9 +171,9 @@
                         var row = Model.Rows[i];
                         <tr class="border-b border-gray-700 hover:bg-gray-700/50">
                             <td class="p-2 text-gray-400">@(i + 1)</td>
-                            @foreach (var key in allKeys)
+                            @foreach (var col in Model.DisplayColumns)
                             {
-                                var val = row.Values.GetValueOrDefault(key);
+                                var val = row.Values.GetValueOrDefault(col.Key);
                                 <td class="p-2 text-gray-300 whitespace-nowrap">@val?.ToString()</td>
                             }
                         </tr>
@@ -249,6 +205,34 @@
         var groupCheckbox = document.getElementById('group_' + groupIndex);
         if (groupCheckbox) {
             groupCheckbox.checked = total === checked;
+            groupCheckbox.indeterminate = checked > 0 && checked < total;
         }
+    }
+
+    document.querySelectorAll('.group-checkbox').forEach((cb, i) => updateGroupState(i));
+
+    var exportForm = document.getElementById('exportForm');
+    var reportForm = document.getElementById('reportForm');
+    if (exportForm && reportForm) {
+        exportForm.addEventListener('submit', function () {
+            exportForm.querySelectorAll('input[name="SelectedColumns"], input[name^="Filter."]').forEach(el => el.remove());
+
+            reportForm.querySelectorAll('input[name="SelectedColumns"]:checked').forEach(cb => {
+                var hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'SelectedColumns';
+                hidden.value = cb.value;
+                exportForm.appendChild(hidden);
+            });
+
+            reportForm.querySelectorAll('select[name^="Filter."], input[name^="Filter."]').forEach(el => {
+                if (el.type === 'checkbox' && !el.checked) return;
+                var hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = el.name;
+                hidden.value = el.type === 'checkbox' ? 'true' : el.value;
+                exportForm.appendChild(hidden);
+            });
+        });
     }
 </script>

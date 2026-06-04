@@ -63,6 +63,7 @@ namespace CampRegistrationApp.Controllers
         {
             if (!IsAuthenticated()) return RedirectToAction("Login", "Admin");
 
+            model.SelectedColumns ??= new List<string>();
             model.ColumnGroups = _reportService.GetColumnGroups();
             model.Sectors = await _context.Sectors.OrderBy(s => s.Name).ToListAsync();
             model.HeaderLabels = BuildHeaderLabels(model.ColumnGroups);
@@ -70,20 +71,11 @@ namespace CampRegistrationApp.Controllers
             var rows = await _reportService.GetReportDataAsync(model.Filter, model.SelectedColumns, GetAdminSectorId());
             model.Rows = rows;
             model.TotalCount = rows.Count;
+            model.DisplayColumns = _reportService.ResolveDisplayColumns(rows, model.SelectedColumns);
+            model.HeaderLabels = model.DisplayColumns.ToDictionary(c => c.Key, c => c.Label, StringComparer.Ordinal);
 
-            foreach (var row in rows)
-                foreach (var key in row.Values.Keys)
-                    if (!model.HeaderLabels.ContainsKey(key))
-                        model.HeaderLabels[key] = GenerateDynamicLabel(key);
-
-            var sqlQuery = BuildSqlQuery(model.Filter, model.SelectedColumns, GetAdminSectorId());
-            await _audit.LogAsync(GetCurrentAdminId(), "PreviewReport", "Reports", null, null, new
-            {
-                Filter = model.Filter,
-                SelectedColumns = model.SelectedColumns,
-                SqlQuery = sqlQuery,
-                RowCount = rows.Count
-            });
+            var auditPayload = await BuildReportAuditPayloadAsync(model.Filter, model.SelectedColumns, model.DisplayColumns, model.ColumnGroups, rows.Count, "PreviewReport");
+            await _audit.LogAsync(GetCurrentAdminId(), "PreviewReport", "Reports", auditPayload.Summary, null, auditPayload.Payload);
 
             return View("Index", model);
         }
@@ -93,17 +85,14 @@ namespace CampRegistrationApp.Controllers
         {
             if (!IsAuthenticated()) return RedirectToAction("Login", "Admin");
 
+            model.SelectedColumns ??= new List<string>();
             var rows = await _reportService.GetReportDataAsync(model.Filter, model.SelectedColumns, GetAdminSectorId());
             var excelBytes = await _reportService.GenerateExcelAsync(rows, model.SelectedColumns);
 
-            var sqlQuery = BuildSqlQuery(model.Filter, model.SelectedColumns, GetAdminSectorId());
-            await _audit.LogAsync(GetCurrentAdminId(), "ExportExcel", "Reports", null, null, new
-            {
-                Filter = model.Filter,
-                SelectedColumns = model.SelectedColumns,
-                SqlQuery = sqlQuery,
-                RowCount = rows.Count
-            });
+            model.ColumnGroups = _reportService.GetColumnGroups();
+            var displayColumns = _reportService.ResolveDisplayColumns(rows, model.SelectedColumns);
+            var auditPayload = await BuildReportAuditPayloadAsync(model.Filter, model.SelectedColumns, displayColumns, model.ColumnGroups, rows.Count, "ExportExcel");
+            await _audit.LogAsync(GetCurrentAdminId(), "ExportExcel", "Reports", auditPayload.Summary, null, auditPayload.Payload);
 
             var reportTypeLabel = model.Filter.ReportType switch
             {
@@ -128,89 +117,34 @@ namespace CampRegistrationApp.Controllers
             return labels;
         }
 
-        private static string GenerateDynamicLabel(string key)
+        private async Task<(string Summary, object Payload)> BuildReportAuditPayloadAsync(
+            ReportFilter filter,
+            List<string> selectedColumns,
+            List<ReportDisplayColumn> displayColumns,
+            List<ColumnGroup> columnGroups,
+            int rowCount,
+            string action)
         {
-            if (key.StartsWith("Wife") && key.Contains("_"))
-            {
-                var parts = key.Split('_');
-                var num = parts[0]["Wife".Length..];
-                var field = parts[1] switch
-                {
-                    "Name" => "الاسم",
-                    "IdNumber" => "رقم الهوية",
-                    "DOB" => "تاريخ الميلاد",
-                    "Age" => "العمر",
-                    "HealthStatus" => "الحالة الصحية",
-                    "ChronicDiseases" => "أمراض مزمنة",
-                    "DisabilityTypes" => "إعاقات",
-                    "IsPregnant" => "حامل",
-                    "IsNursing" => "مرضع",
-                    _ => parts[1]
-                };
-                return $"الزوجة {num} - {field}";
-            }
-            if (key.StartsWith("Child") && key.Contains("_"))
-            {
-                var parts = key.Split('_');
-                var num = parts[0]["Child".Length..];
-                var field = parts[1] switch
-                {
-                    "Name" => "الاسم",
-                    "IdNumber" => "رقم الهوية",
-                    "DOB" => "تاريخ الميلاد",
-                    "Age" => "العمر",
-                    "Gender" => "الجنس",
-                    "HealthStatus" => "الحالة الصحية",
-                    "ChronicDiseases" => "أمراض مزمنة",
-                    "DisabilityTypes" => "إعاقات",
-                    _ => parts[1]
-                };
-                return $"الابن {num} - {field}";
-            }
-            if (key == "OtherMembers") return "أفراد آخرون";
-            return key;
-        }
+            var adminSectorId = GetAdminSectorId();
+            string? adminSectorName = null;
+            string? filterSectorName = null;
 
-        private static string BuildSqlQuery(ReportFilter filter, List<string> selectedColumns, int? adminSectorId)
-        {
-            var reportTypeLabel = filter.ReportType switch
-            {
-                "Normal" => "عادي",
-                "Disabled" => "ذوي إعاقة",
-                "ChronicSick" => "أمراض مزمنة",
-                "Pregnant" => "حوامل",
-                "Nursing" => "مرضعات",
-                _ => filter.ReportType
-            };
-
-            var query = $"تقرير {reportTypeLabel}\n";
-            query += $"SELECT الأعمدة: {string.Join(", ", selectedColumns)}\n";
-            query += $"FROM FamilyRegistrations f\n";
-            query += $"JOIN Persons head ON f.FamilyHeadId = head.Id\n";
-
-            var wheres = new List<string>();
             if (adminSectorId.HasValue)
-                wheres.Add($"f.SectorId = {adminSectorId.Value}");
+                adminSectorName = await _context.Sectors.Where(s => s.Id == adminSectorId.Value).Select(s => s.Name).FirstOrDefaultAsync();
             if (filter.SectorId.HasValue)
-                wheres.Add($"f.SectorId = {filter.SectorId.Value}");
-            if (!string.IsNullOrEmpty(filter.Status))
-                wheres.Add($"f.ApprovalStatus = '{filter.Status}'");
-            if (!string.IsNullOrEmpty(filter.Gender))
-                wheres.Add($"head.Gender = '{filter.Gender}'");
-            if (!string.IsNullOrEmpty(filter.HealthStatus))
-                wheres.Add($"head.HealthStatus = '{filter.HealthStatus}'");
-            if (!string.IsNullOrEmpty(filter.Search))
-                wheres.Add($"(head.IdNumber LIKE '%{filter.Search}%' OR head.FullName LIKE '%{filter.Search}%')");
-            if (filter.AgeFrom.HasValue)
-                wheres.Add($"العمر >= {filter.AgeFrom.Value}");
-            if (filter.AgeTo.HasValue)
-                wheres.Add($"العمر <= {filter.AgeTo.Value}");
+                filterSectorName = await _context.Sectors.Where(s => s.Id == filter.SectorId.Value).Select(s => s.Name).FirstOrDefaultAsync();
 
-            if (wheres.Count > 0)
-                query += "WHERE " + string.Join("\n  AND ", wheres);
+            var payload = ReportQueryDescriptor.BuildAuditPayload(
+                filter, selectedColumns, displayColumns, columnGroups,
+                adminSectorId, adminSectorName, filterSectorName, rowCount, action);
 
-            query += $"\nORDER BY f.RegistrationTimestamp DESC";
-            return query;
+            var summary = $"{ReportQueryDescriptor.GetReportTypeLabel(filter.ReportType)} | {rowCount} صف";
+            if (!string.IsNullOrEmpty(filterSectorName))
+                summary += $" | قاطع: {filterSectorName}";
+            else if (!string.IsNullOrEmpty(adminSectorName))
+                summary += $" | قاطع: {adminSectorName}";
+
+            return (summary, payload);
         }
     }
 }

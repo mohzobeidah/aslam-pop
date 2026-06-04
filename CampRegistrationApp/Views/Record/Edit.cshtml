@@ -1,6 +1,7 @@
 @model CampRegistrationApp.Models.ViewModels.RegistrationViewModel
 @{
     Layout = "_Layout";
+    var mustChangePassword = ViewBag.MustChangePassword == true;
 }
 
 <div class="min-h-screen bg-camp-dark-grey text-white font-cairo" dir="rtl">
@@ -8,11 +9,14 @@
             <header class="text-center mb-12">
                 <h1 class="text-4xl font-bold text-camp-gold mb-2">تعديل بيانات العائلة</h1>
                 <p class="text-gray-400">معرف التسجيل: <span class="font-mono text-camp-gold">@Model.RecordId</span></p>
-                <div class="mt-4">
-                    <a href="@Url.Action("ChangePassword")" class="inline-block px-6 py-2 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors text-sm">
-                        تغيير كلمة المرور
-                    </a>
-                </div>
+                @if (!mustChangePassword)
+                {
+                    <div class="mt-4">
+                        <a href="@Url.Action("ChangePassword")" class="inline-block px-6 py-2 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors text-sm">
+                            تغيير كلمة المرور
+                        </a>
+                    </div>
+                }
             </header>
 
         <div class="max-w-4xl mx-auto">
@@ -33,7 +37,7 @@
                 @Html.ValidationSummary(false, "", new { @class = "text-red-500 text-sm" })
             </div>
 
-            <form id="editForm" asp-action="@(ViewBag.FormAction ?? "Update")" asp-controller="@(ViewBag.FormController ?? "Record")" method="post" class="space-y-8" novalidate>
+            <form id="editForm" asp-action="@(ViewBag.FormAction ?? "Update")" asp-controller="@(ViewBag.FormController ?? "Record")" method="post" class="space-y-8 novalidate @(mustChangePassword ? "pointer-events-none opacity-40 select-none" : "")">
                 <input type="hidden" name="Id" value="@Model.Id" />
                 <input type="hidden" name="RecordId" value="@Model.RecordId" />
                 <input type="hidden" name="CurrentStep" value="1" />
@@ -621,6 +625,48 @@
     </div>
 </div>
 
+@if (mustChangePassword)
+{
+    <div id="force-password-modal" class="fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4">
+        <div class="bg-camp-accent-grey rounded-lg border-r-4 border-red-500 shadow-2xl p-8 max-w-md w-full pointer-events-auto" role="dialog" aria-modal="true" aria-labelledby="force-password-title">
+            <div class="text-center mb-6">
+                <div class="text-4xl mb-3">🔒</div>
+                <h3 id="force-password-title" class="text-2xl font-bold text-camp-gold">تغيير كلمة المرور مطلوب</h3>
+                <p class="text-gray-300 mt-3 text-sm leading-relaxed">
+                    كلمة المرور الحالية هي نفس رقم الهوية. لأسباب أمنية، يجب تعيين كلمة مرور جديدة مختلفة عن رقم الهوية قبل تعديل بيانات العائلة.
+                </p>
+            </div>
+
+            @if (TempData["PasswordChangeError"] is string pwdErr)
+            {
+                <div class="bg-red-900/50 border border-red-500 text-red-300 p-3 rounded mb-4 text-sm text-center">@pwdErr</div>
+            }
+
+            <form method="post" asp-action="ChangePassword" asp-controller="Record" class="space-y-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="force" value="true" />
+                <div>
+                    <label class="block text-sm mb-1">كلمة المرور الجديدة</label>
+                    <input type="password" name="newPassword" id="forceNewPassword" required minlength="4" autocomplete="new-password"
+                           class="w-full p-3 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                </div>
+                <div>
+                    <label class="block text-sm mb-1">تأكيد كلمة المرور الجديدة</label>
+                    <input type="password" name="confirmPassword" id="forceConfirmPassword" required autocomplete="new-password"
+                           class="w-full p-3 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                </div>
+                <button type="submit" class="w-full py-3 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors">
+                    حفظ كلمة المرور والمتابعة
+                </button>
+            </form>
+            <form method="post" asp-action="Logout" asp-controller="Record" class="mt-4 text-center">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="text-gray-400 text-sm hover:text-white underline">تسجيل الخروج</button>
+            </form>
+        </div>
+    </div>
+}
+
 <!-- Reminder Modal -->
 <div id="reminder-modal" class="fixed inset-0 z-50 bg-black/70 hidden items-center justify-center" onclick="if(event.target===this)closeReminderModal()">
     <div class="bg-camp-accent-grey rounded-lg border-r-4 border-camp-gold shadow-xl p-8 max-w-lg mx-4 w-full">
@@ -1016,6 +1062,10 @@
         }
 
         function submitEditForm() {
+            if (document.getElementById('force-password-modal')) {
+                alert('يجب تغيير كلمة المرور أولاً');
+                return false;
+            }
             let valid = true;
 
             // Validate IDs
