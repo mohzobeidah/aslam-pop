@@ -69,6 +69,48 @@ namespace CampRegistrationApp.Data
             modelBuilder.Entity<FamilyRegistration>()
                 .HasQueryFilter(f => !f.IsDeleted);
 
+            // Performance indexes for FamilyRegistration
+            modelBuilder.Entity<FamilyRegistration>()
+                .HasIndex(f => f.FamilyHeadId);
+
+            modelBuilder.Entity<FamilyRegistration>()
+                .HasIndex(f => f.SectorId);
+
+            modelBuilder.Entity<FamilyRegistration>()
+                .HasIndex(f => f.ApprovalStatus);
+
+            modelBuilder.Entity<FamilyRegistration>()
+                .HasIndex(f => f.RegistrationTimestamp);
+
+            // ── FamilyMember ──
+            modelBuilder.Entity<FamilyMember>()
+                .HasOne(fm => fm.Registration)
+                .WithMany(f => f.Members)
+                .HasForeignKey(fm => fm.RegistrationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<FamilyMember>()
+                .HasOne(fm => fm.Person)
+                .WithMany()
+                .HasForeignKey(fm => fm.PersonId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FamilyMember>()
+                .HasIndex(fm => fm.RegistrationId);
+
+            modelBuilder.Entity<FamilyMember>()
+                .HasIndex(fm => fm.PersonId);
+
+            // ── Attachment ──
+            modelBuilder.Entity<Attachment>()
+                .HasOne(a => a.Person)
+                .WithMany(p => p.Attachments)
+                .HasForeignKey(a => a.PersonId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Attachment>()
+                .HasIndex(a => a.PersonId);
+
             // ── FamilyDesire ──
             modelBuilder.Entity<FamilyDesire>()
                 .HasOne(fd => fd.FamilyRegistration)
@@ -85,6 +127,9 @@ namespace CampRegistrationApp.Data
             modelBuilder.Entity<FamilyDesire>()
                 .HasIndex(fd => new { fd.FamilyRegistrationId, fd.DesireId })
                 .IsUnique();
+
+            modelBuilder.Entity<FamilyDesire>()
+                .HasIndex(fd => fd.FamilyRegistrationId);
 
             // ── Desire ──
             modelBuilder.Entity<Desire>()
@@ -152,6 +197,9 @@ namespace CampRegistrationApp.Data
                 .HasIndex(q => new { q.ProjectId, q.SectorId })
                 .IsUnique();
 
+            modelBuilder.Entity<ProjectSectorQuota>()
+                .HasIndex(q => q.ProjectId);
+
             // ── Nomination ──
             modelBuilder.Entity<Nomination>()
                 .HasOne(n => n.Project)
@@ -185,6 +233,15 @@ namespace CampRegistrationApp.Data
 
             modelBuilder.Entity<Nomination>()
                 .HasQueryFilter(n => !n.IsDeleted);
+
+            modelBuilder.Entity<Nomination>()
+                .HasIndex(n => n.ProjectId);
+
+            modelBuilder.Entity<Nomination>()
+                .HasIndex(n => n.PersonId);
+
+            modelBuilder.Entity<Nomination>()
+                .HasIndex(n => n.SectorId);
 
             // ── AuditLog ──
             modelBuilder.Entity<AuditLog>()
@@ -258,6 +315,9 @@ namespace CampRegistrationApp.Data
             modelBuilder.Entity<AssistanceBeneficiary>()
                 .HasQueryFilter(b => !b.IsDeleted);
 
+            modelBuilder.Entity<AssistanceBeneficiary>()
+                .HasIndex(b => b.AssistanceId);
+
             // ── AssistanceImport ──
             modelBuilder.Entity<AssistanceImport>()
                 .HasOne(i => i.ImportedBy)
@@ -284,6 +344,9 @@ namespace CampRegistrationApp.Data
 
             modelBuilder.Entity<Complaint>()
                 .HasQueryFilter(c => !c.IsDeleted);
+
+            modelBuilder.Entity<Complaint>()
+                .HasIndex(c => c.CreatedAt);
 
             base.OnModelCreating(modelBuilder);
         }

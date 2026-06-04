@@ -128,6 +128,32 @@ Camp family registration system in two versions:
 - Implemented a professional, themed error view at `/Home/Error` for non-development environments.
 - Displays a user-friendly Arabic message and the Request ID for support tracking.
 
+### Report System (Dynamic Excel Reporting)
+- **Controllers/ReportController.cs**: GET Index (column selection + filters), POST Preview (renders data grid), POST ExportExcel (generates .xlsx).
+- **Services/IReportService.cs + ReportService.cs**: Column definitions (7 groups, 50+ columns), two query modes:
+  - `GetFamilyReportAsync` — one row per family, dynamic wife/child expansion
+  - `GetPersonReportAsync` — one row per person for Disabled/ChronicSick/Pregnant/Nursing reports
+  - `GenerateExcelAsync` — Excel via ClosedXML with Arabic headers
+- **Models/ViewModels/ReportViewModel.cs**: `ColumnGroup`, `ColumnDef`, `ReportFilter`, `ReportRow` (Dictionary-based), `HeaderLabels` for Arabic column display.
+- **Views/Report/Index.cshtml**: Left panel column checkboxes (group toggles), right panel filters (Sector, Status, Gender, HealthStatus, Age range, Search, IncludeMembers), preview table (max 50 rows), export button.
+- **Nav**: "التقارير" link added to `_Layout.cshtml` desktop + mobile nav between "لوحة التحكم" and "سجل التدقيق".
+- **Column ordering**: Grid collects column keys from ALL rows (not just first). Excel uses same insertion order (no `OrderBy` on Wife/Child keys) to match grid exactly.
+- **Excel Arabic headers**: Table preview and Excel export both use Arabic column labels via `HeaderLabels` dictionary + `GenerateDynamicLabel` for Wife/Child/OtherMembers keys.
+
+### Health/Disease Contradiction Validation
+- **Client-side** (`toggleHealthSection` + `toggleMemberHealth` in Index.cshtml, Edit.cshtml): When user switches HealthStatus to "سليم", all disease/disability checkboxes are automatically cleared (unchecked).
+- **Server-side** (`RegistrationValidationService.ValidateRegistration`): Rejects submission if HealthStatus = "سليم" with ChronicDiseases or DisabilityTypes present.
+- Rationale: A person cannot be "سليم" (healthy) and have diseases at the same time.
+
+### Report Audit Logging
+- Both `Preview` and `ExportExcel` actions in `ReportController` log to `AuditLog` with:
+  - Action type: `PreviewReport` or `ExportExcel`
+  - Filter parameters (SectorId, Status, Gender, HealthStatus, Search, Age range)
+  - Selected columns
+  - SQL-like query string via `BuildSqlQuery()` showing WHERE clauses
+  - Row count
+- **AdminSectorId** stored in session on login (`AdminController`) for ماندوب sector-scoped reports.
+
 ## Key Conventions (both versions)
 - All UI text in Arabic, RTL layout, Cairo font, dark theme (`#121212` + `#d4af37` gold).
 - 8-char Record ID from charset `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`.
