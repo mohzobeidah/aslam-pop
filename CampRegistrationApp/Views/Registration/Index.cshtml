@@ -1068,6 +1068,15 @@
                     valid = false;
                 }
             }
+            // Validate: سليم cannot have diseases
+            if (!isSick) {
+                const diseases = document.querySelectorAll('[name="Head.ChronicDiseases"]:checked');
+                const disabilities = document.querySelectorAll('[name="Head.DisabilityTypes"]:checked');
+                if (diseases.length > 0 || disabilities.length > 0) {
+                    alert('لا يمكن أن تكون الحالة الصحية سليماً مع وجود أمراض مزمنة أو إعاقات');
+                    valid = false;
+                }
+            }
             if (!valid && missingFields.length > 0) {
                 alert('الحقول التالية مطلوبة:\n- ' + missingFields.join('\n- '));
             }
@@ -1106,6 +1115,15 @@
                     const disabilities = card.querySelectorAll('[name$=".DisabilityTypes"]:checked');
                     if (diseases.length === 0 && disabilities.length === 0) {
                         alert(`الفرد رقم ${idx + 1}: الحالة الصحية مريض، يرجى اختيار مرض مزمن أو نوع إعاقة على الأقل`);
+                        valid = false;
+                    }
+                }
+                // Validate: سليم cannot have diseases
+                if (!isSick) {
+                    const diseases = card.querySelectorAll('[name$=".ChronicDiseases"]:checked');
+                    const disabilities = card.querySelectorAll('[name$=".DisabilityTypes"]:checked');
+                    if (diseases.length > 0 || disabilities.length > 0) {
+                        alert(`الفرد رقم ${idx + 1}: لا يمكن أن تكون الحالة الصحية سليماً مع وجود أمراض مزمنة أو إعاقات`);
                         valid = false;
                     }
                 }
@@ -1525,7 +1543,12 @@
             let show = false;
             radios.forEach((r, i) => { if (r.checked && i > 0) show = true; });
             const section = document.getElementById(`member-health-${idx}`);
-            if (section) section.classList.toggle('hidden', !show);
+            if (section) {
+                section.classList.toggle('hidden', !show);
+                if (!show) {
+                    section.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+                }
+            }
         }
 
         function toggleMemberInjury(idx) {
@@ -1583,7 +1606,12 @@
             const radios = document.querySelectorAll(`[name="${el.name}"]`);
             let isFirst = true;
             radios.forEach((r, i) => { if (r === el && i === 0) isFirst = true; if (r === el && i > 0) isFirst = false; });
-            if (section) section.classList.toggle('hidden', isFirst);
+            if (section) {
+                section.classList.toggle('hidden', isFirst);
+                if (isFirst) {
+                    section.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+                }
+            }
         }
 
         function toggleInjurySection(el, sectionId) {

@@ -31,6 +31,7 @@ builder.Services.AddScoped<IImportService, ImportService>();
 builder.Services.AddScoped<IRegistrationValidationService, RegistrationValidationService>();
 builder.Services.AddScoped<IComplaintIdGenerator, ComplaintIdGenerator>();
 builder.Services.AddScoped<IFileCompressionService, FileCompressionService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddSingleton<IRateLimiterService, RateLimiterService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();

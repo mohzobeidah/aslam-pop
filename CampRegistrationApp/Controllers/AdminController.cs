@@ -91,6 +91,8 @@ namespace CampRegistrationApp.Controllers
             HttpContext.Session.SetInt32("AdminId", admin.Id);
             HttpContext.Session.SetString("AdminName", admin.Name);
             HttpContext.Session.SetString("AdminRole", admin.Role.ToString());
+            if (admin.SectorId.HasValue)
+                HttpContext.Session.SetInt32("AdminSectorId", admin.SectorId.Value);
 
             await _audit.LogAsync(admin.Id, "Login", "Admins", null,
                 null,

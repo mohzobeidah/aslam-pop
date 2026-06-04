@@ -56,7 +56,17 @@ namespace CampRegistrationApp.Services
                 return false;
             }
 
-            // 3a. WalletType Validation: required if Wallet is provided
+            // 3. Health/Healthy contradiction: سليم with diseases
+            if (!healthStatus.Contains(RegistrationConstants.HealthStatusSick, StringComparison.Ordinal) &&
+                (!string.IsNullOrWhiteSpace(model.Head.ChronicDiseases) ||
+                 !string.IsNullOrWhiteSpace(model.Head.DisabilityTypes)))
+            {
+                Debug.WriteLine($"[Validation] Healthy head with diseases. HealthStatus='{healthStatus}'");
+                modelState.AddModelError("", "لا يمكن أن تكون الحالة الصحية سليماً مع وجود أمراض مزمنة أو إعاقات");
+                return false;
+            }
+
+            // 4. WalletType Validation: required if Wallet is provided
             if (!string.IsNullOrWhiteSpace(model.Wallet) && string.IsNullOrWhiteSpace(model.WalletType))
             {
                 modelState.AddModelError("WalletType", "يرجى اختيار نوع المحفظة");
@@ -74,6 +84,15 @@ namespace CampRegistrationApp.Services
                 {
                     Debug.WriteLine($"[Validation] Sick member #{i + 1} without details. Received HealthStatus='{memberHealth}'");
                     modelState.AddModelError("", $"الفرد رقم {i + 1}: بما أن الحالة الصحية مريض، يجب اختيار مرض مزمن أو نوع إعاقة على الأقل");
+                    return false;
+                }
+                // 5. Health/Healthy contradiction for members: سليم with diseases
+                if (!memberHealth.Contains(RegistrationConstants.HealthStatusSick, StringComparison.Ordinal) &&
+                    (!string.IsNullOrWhiteSpace(m.ChronicDiseases) ||
+                     !string.IsNullOrWhiteSpace(m.DisabilityTypes)))
+                {
+                    Debug.WriteLine($"[Validation] Healthy member #{i + 1} with diseases. HealthStatus='{memberHealth}'");
+                    modelState.AddModelError("", $"الفرد رقم {i + 1}: لا يمكن أن تكون الحالة الصحية سليماً مع وجود أمراض مزمنة أو إعاقات");
                     return false;
                 }
             }

@@ -1,0 +1,228 @@
+@model ReportViewModel
+@{
+    ViewData["Title"] = "التقارير الديناميكية";
+    var hasData = Model.Rows.Count > 0;
+}
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl text-camp-gold font-bold">التقارير الديناميكية</h1>
+    <span class="text-gray-400 text-sm" id="totalCountDisplay">@(hasData ? $"إجمالي: {Model.TotalCount}" : "")</span>
+</div>
+
+<form method="post" asp-action="Preview" id="reportForm">
+    @Html.AntiForgeryToken()
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Column Selection -->
+        <div class="lg:col-span-3 bg-camp-accent-grey p-4 rounded-xl border border-gray-700">
+            <h2 class="text-camp-gold font-bold text-lg mb-4">اختر الأعمدة</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                @for (int g = 0; g < Model.ColumnGroups.Count; g++)
+                {
+                    var group = Model.ColumnGroups[g];
+                    <div class="bg-gray-800/50 p-3 rounded-lg border border-gray-700">
+                        <div class="flex items-center gap-2 mb-2">
+                            <input type="checkbox"
+                                   id="group_@g"
+                                   class="group-checkbox rounded border-gray-500 text-camp-gold focus:ring-camp-gold"
+                                   onchange="toggleGroup(@g, this.checked)"
+                                   checked="@(group.Columns.All(c => Model.SelectedColumns.Contains(c.Key)))" />
+                            <label for="group_@g" class="text-camp-gold font-bold text-sm cursor-pointer">@group.GroupName</label>
+                        </div>
+                        <div class="space-y-1 mr-5">
+                            @for (int c = 0; c < group.Columns.Count; c++)
+                            {
+                                var col = group.Columns[c];
+                                var isChecked = Model.SelectedColumns.Contains(col.Key);
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox"
+                                           name="SelectedColumns"
+                                           value="@col.Key"
+                                           id="col_@col.Key"
+                                           class="col-checkbox col-group-@g rounded border-gray-500 text-camp-gold focus:ring-camp-gold"
+                                           onchange="updateGroupState(@g)"
+                                           checked="@isChecked" />
+                                    <label for="col_@col.Key" class="text-gray-300 text-xs cursor-pointer hover:text-white">@col.Label</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-camp-accent-grey p-4 rounded-xl border border-gray-700">
+            <h2 class="text-camp-gold font-bold text-lg mb-4">الفلاتر</h2>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-camp-gold text-xs mb-1">نوع التقرير</label>
+                    <select name="Filter.ReportType" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none">
+                        <option value="Normal" selected="@(Model.Filter.ReportType == "Normal")">تقرير عادي (عائلة)</option>
+                        <option value="Disabled" selected="@(Model.Filter.ReportType == "Disabled")">ذوي إعاقة (صف لكل شخص)</option>
+                        <option value="ChronicSick" selected="@(Model.Filter.ReportType == "ChronicSick")">أمراض مزمنة (صف لكل شخص)</option>
+                        <option value="Pregnant" selected="@(Model.Filter.ReportType == "Pregnant")">حوامل (صف لكل شخص)</option>
+                        <option value="Nursing" selected="@(Model.Filter.ReportType == "Nursing")">مرضعات (صف لكل شخص)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-camp-gold text-xs mb-1">القاطع</label>
+                    <select name="Filter.SectorId" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none">
+                        <option value="">الكل</option>
+                        @foreach (var s in Model.Sectors)
+                        {
+                            <option value="@s.Id" selected="@(Model.Filter.SectorId == s.Id)">@s.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-camp-gold text-xs mb-1">الحالة</label>
+                    <select name="Filter.Status" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none">
+                        <option value="">الكل</option>
+                        <option value="Approved" selected="@(Model.Filter.Status == "Approved")">مقبول</option>
+                        <option value="Pending" selected="@(Model.Filter.Status == "Pending")">قيد المراجعة</option>
+                        <option value="Rejected" selected="@(Model.Filter.Status == "Rejected")">مرفوض</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-camp-gold text-xs mb-1">الجنس</label>
+                    <select name="Filter.Gender" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none">
+                        <option value="">الكل</option>
+                        <option value="male" selected="@(Model.Filter.Gender == "male")">ذكر</option>
+                        <option value="female" selected="@(Model.Filter.Gender == "female")">أنثى</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-camp-gold text-xs mb-1">الحالة الصحية</label>
+                    <select name="Filter.HealthStatus" class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none">
+                        <option value="">الكل</option>
+                        <option value="سليم" selected="@(Model.Filter.HealthStatus == "سليم")">سليم</option>
+                        <option value="مريض" selected="@(Model.Filter.HealthStatus == "مريض")">مريض</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-2">
+                    <div class="flex-1">
+                        <label class="block text-camp-gold text-xs mb-1">العمر من</label>
+                        <input type="number" name="Filter.AgeFrom" value="@Model.Filter.AgeFrom" min="0" max="150"
+                               class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none" />
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-camp-gold text-xs mb-1">العمر إلى</label>
+                        <input type="number" name="Filter.AgeTo" value="@Model.Filter.AgeTo" min="0" max="150"
+                               class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-camp-gold text-xs mb-1">بحث</label>
+                    <input type="text" name="Filter.Search" value="@Model.Filter.Search" placeholder="رقم الهوية أو الاسم..."
+                           class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none" />
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="Filter.IncludeMembers" value="true" id="IncludeMembers"
+                           class="rounded border-gray-500 text-camp-gold focus:ring-camp-gold"
+                           checked="@Model.Filter.IncludeMembers" />
+                    <label for="IncludeMembers" class="text-camp-gold text-xs cursor-pointer">عرض أفراد العائلة</label>
+                </div>
+
+                <button type="submit" class="w-full bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-bold">
+                    عرض المعاينة
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Preview Table + Export -->
+@if (hasData)
+{
+    var allKeys = new List<string>();
+    foreach (var row in Model.Rows)
+        foreach (var key in row.Values.Keys)
+            if (!allKeys.Contains(key)) allKeys.Add(key);
+
+    <div class="mt-6 bg-camp-accent-grey p-4 rounded-xl border border-gray-700">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-camp-gold font-bold text-lg">المعاينة (@Model.TotalCount صف)</h2>
+            <form method="post" asp-action="ExportExcel" id="exportForm">
+                @Html.AntiForgeryToken()
+                @foreach (var col in Model.SelectedColumns)
+                {
+                    <input type="hidden" name="SelectedColumns" value="@col" />
+                }
+                <input type="hidden" name="Filter.ReportType" value="@Model.Filter.ReportType" />
+                <input type="hidden" name="Filter.SectorId" value="@Model.Filter.SectorId" />
+                <input type="hidden" name="Filter.Status" value="@Model.Filter.Status" />
+                <input type="hidden" name="Filter.Gender" value="@Model.Filter.Gender" />
+                <input type="hidden" name="Filter.HealthStatus" value="@Model.Filter.HealthStatus" />
+                <input type="hidden" name="Filter.AgeFrom" value="@Model.Filter.AgeFrom" />
+                <input type="hidden" name="Filter.AgeTo" value="@Model.Filter.AgeTo" />
+                <input type="hidden" name="Filter.Search" value="@Model.Filter.Search" />
+                <input type="hidden" name="Filter.IncludeMembers" value="@(Model.Filter.IncludeMembers ? "true" : "false")" />
+                <button type="submit" class="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition text-sm font-bold">
+                    ⬇ تصدير Excel
+                </button>
+            </form>
+        </div>
+
+        <div class="overflow-x-auto max-h-96 overflow-y-auto">
+            <table class="w-full bg-gray-800 rounded-lg border border-gray-700 text-xs">
+                <thead class="sticky top-0 bg-gray-800 z-10">
+                    <tr class="border-b border-gray-700 text-camp-gold">
+                        <th class="p-2 text-right">#</th>
+                        @foreach (var key in allKeys)
+                        {
+                            <th class="p-2 text-right whitespace-nowrap">@(Model.HeaderLabels.GetValueOrDefault(key, key))</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Math.Min(Model.Rows.Count, 50); i++)
+                    {
+                        var row = Model.Rows[i];
+                        <tr class="border-b border-gray-700 hover:bg-gray-700/50">
+                            <td class="p-2 text-gray-400">@(i + 1)</td>
+                            @foreach (var key in allKeys)
+                            {
+                                var val = row.Values.GetValueOrDefault(key);
+                                <td class="p-2 text-gray-300 whitespace-nowrap">@val?.ToString()</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @if (Model.Rows.Count > 50)
+            {
+                <div class="text-center text-gray-500 text-sm py-3">
+                    ... وعرض فقط أول 50 صف من @Model.TotalCount — قم بالتصدير للحصول على جميع البيانات
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<a asp-action="Dashboard" asp-controller="Admin" class="inline-block mt-6 text-gray-400 hover:text-camp-gold text-sm transition">← العودة إلى لوحة التحكم</a>
+
+<script>
+    function toggleGroup(groupIndex, checked) {
+        document.querySelectorAll('.col-group-' + groupIndex).forEach(cb => {
+            cb.checked = checked;
+        });
+    }
+
+    function updateGroupState(groupIndex) {
+        var total = document.querySelectorAll('.col-group-' + groupIndex).length;
+        var checked = document.querySelectorAll('.col-group-' + groupIndex + ':checked').length;
+        var groupCheckbox = document.getElementById('group_' + groupIndex);
+        if (groupCheckbox) {
+            groupCheckbox.checked = total === checked;
+        }
+    }
+</script>

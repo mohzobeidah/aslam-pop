@@ -1073,6 +1073,15 @@
                     return false;
                 }
             }
+            // Validate: سليم cannot have diseases
+            if (headHealth && headHealth.value === 'سليم') {
+                const diseases = document.querySelectorAll('[name="Head.ChronicDiseases"]:checked');
+                const disabilities = document.querySelectorAll('[name="Head.DisabilityTypes"]:checked');
+                if (diseases.length > 0 || disabilities.length > 0) {
+                    alert('لا يمكن أن تكون الحالة الصحية سليماً مع وجود أمراض مزمنة أو إعاقات');
+                    return false;
+                }
+            }
 
             // Validate member required fields
             const memberFields = ['FirstName', 'IdNumber', 'RelationshipToHead', 'Gender', 'DateOfBirth'];
@@ -1113,6 +1122,15 @@
                     const disabilities = card.querySelectorAll('[name$=".DisabilityTypes"]:checked');
                     if (diseases.length === 0 && disabilities.length === 0) {
                         alert(`الفرد رقم ${idx + 1}: الحالة الصحية مريض، يرجى اختيار مرض مزمن أو نوع إعاقة على الأقل`);
+                        valid = false;
+                    }
+                }
+                // Validate: سليم cannot have diseases
+                if (!isSick) {
+                    const diseases = card.querySelectorAll('[name$=".ChronicDiseases"]:checked');
+                    const disabilities = card.querySelectorAll('[name$=".DisabilityTypes"]:checked');
+                    if (diseases.length > 0 || disabilities.length > 0) {
+                        alert(`الفرد رقم ${idx + 1}: لا يمكن أن تكون الحالة الصحية سليماً مع وجود أمراض مزمنة أو إعاقات`);
                         valid = false;
                     }
                 }
