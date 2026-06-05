@@ -155,7 +155,8 @@ public class RegistrationControllerTests
         var auditService = new Mock<IAuditService>();
         var validator = new Mock<IRegistrationValidationService>();
         var compression = new Mock<IFileCompressionService>();
-        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object, validator.Object, compression.Object);
+        var rateLimiter = new Mock<IRateLimiterService>();
+        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object, validator.Object, compression.Object, rateLimiter.Object);
 
         var result = await ctrl.Index();
         var view = Assert.IsType<ViewResult>(result);
@@ -173,9 +174,10 @@ public class RegistrationControllerTests
         var auditService = new Mock<IAuditService>();
         var validator = new Mock<IRegistrationValidationService>();
         var compression = new Mock<IFileCompressionService>();
-        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object, validator.Object, compression.Object);
+        var rateLimiter = new Mock<IRateLimiterService>();
+        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object, validator.Object, compression.Object, rateLimiter.Object);
 
-        var result = await ctrl.CheckId("999999999");
+        var result = ctrl.CheckId("999999999");
         var json = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result);
         var exists = json.Value?.GetType().GetProperty("exists")?.GetValue(json.Value);
         Assert.Equal(false, exists);
@@ -200,9 +202,10 @@ public class RegistrationControllerTests
         var auditService = new Mock<IAuditService>();
         var validator = new Mock<IRegistrationValidationService>();
         var compression = new Mock<IFileCompressionService>();
-        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object, validator.Object, compression.Object);
+        var rateLimiter = new Mock<IRateLimiterService>();
+        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object, validator.Object, compression.Object, rateLimiter.Object);
 
-        var result = await ctrl.CheckId("123456789");
+        var result = ctrl.CheckId("123456789");
         var json = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result);
         var exists = json.Value?.GetType().GetProperty("exists")?.GetValue(json.Value);
         Assert.Equal(true, exists);
@@ -228,7 +231,8 @@ public class RegistrationControllerTests
         var validator = new Mock<IRegistrationValidationService>();
         validator.Setup(v => v.ValidateRegistration(It.IsAny<RegistrationViewModel>(), It.IsAny<ModelStateDictionary>())).Returns(true);
         var compression = new Mock<IFileCompressionService>();
-        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object, validator.Object, compression.Object);
+        var rateLimiter = new Mock<IRateLimiterService>();
+        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object, validator.Object, compression.Object, rateLimiter.Object);
 
         var model = Helpers.GetValidViewModel();
         var result = await ctrl.Submit(model);
@@ -256,8 +260,9 @@ public class RegistrationControllerTests
         var validator = new Mock<IRegistrationValidationService>();
         validator.Setup(v => v.ValidateRegistration(It.IsAny<RegistrationViewModel>(), It.IsAny<ModelStateDictionary>())).Returns(true);
         var compression = new Mock<IFileCompressionService>();
+        var rateLimiter = new Mock<IRateLimiterService>();
 
-        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object, validator.Object, compression.Object);
+        var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object, validator.Object, compression.Object, rateLimiter.Object);
         Helpers.SetupControllerContext(ctrl);
 
         var model = Helpers.GetValidViewModel();
@@ -318,16 +323,22 @@ public class RecordControllerTests
         return db;
     }
 
-    [Fact]
-    public async Task Login_Approved_RedirectsToEdit()
+    private static RecordController CreateController(ApplicationDbContext db)
     {
-        var db = SetupDbWithRegistration(RegistrationApprovalStatus.Approved);
         var audit = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
         var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
         var validator = new Mock<IRegistrationValidationService>();
         var compression = new Mock<IFileCompressionService>();
-        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object, validator.Object, compression.Object);
+        var rateLimiter = new Mock<IRateLimiterService>();
+        return new RecordController(db, audit.Object, notifService.Object, env.Object, validator.Object, compression.Object, rateLimiter.Object);
+    }
+
+    [Fact]
+    public async Task Login_Approved_RedirectsToEdit()
+    {
+        var db = SetupDbWithRegistration(RegistrationApprovalStatus.Approved);
+        var ctrl = CreateController(db);
         Helpers.SetupControllerContext(ctrl);
 
         var result = await ctrl.Login("999999999", "mypassword");
@@ -339,12 +350,7 @@ public class RecordControllerTests
     public async Task Login_Pending_ShowsError()
     {
         var db = SetupDbWithRegistration(RegistrationApprovalStatus.Pending);
-        var audit = new Mock<IAuditService>();
-        var notifService = new Mock<INotificationService>();
-        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
-        var validator = new Mock<IRegistrationValidationService>();
-        var compression = new Mock<IFileCompressionService>();
-        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object, validator.Object, compression.Object);
+        var ctrl = CreateController(db);
         Helpers.SetupControllerContext(ctrl);
 
         var result = await ctrl.Login("999999999", "mypassword");
@@ -356,12 +362,7 @@ public class RecordControllerTests
     public async Task Login_Rejected_ShowsError()
     {
         var db = SetupDbWithRegistration(RegistrationApprovalStatus.Rejected);
-        var audit = new Mock<IAuditService>();
-        var notifService = new Mock<INotificationService>();
-        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
-        var validator = new Mock<IRegistrationValidationService>();
-        var compression = new Mock<IFileCompressionService>();
-        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object, validator.Object, compression.Object);
+        var ctrl = CreateController(db);
         Helpers.SetupControllerContext(ctrl);
 
         var result = await ctrl.Login("999999999", "mypassword");
@@ -373,12 +374,7 @@ public class RecordControllerTests
     public async Task Login_WrongPassword_ShowsError()
     {
         var db = SetupDbWithRegistration(RegistrationApprovalStatus.Approved);
-        var audit = new Mock<IAuditService>();
-        var notifService = new Mock<INotificationService>();
-        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
-        var validator = new Mock<IRegistrationValidationService>();
-        var compression = new Mock<IFileCompressionService>();
-        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object, validator.Object, compression.Object);
+        var ctrl = CreateController(db);
         Helpers.SetupControllerContext(ctrl);
 
         var result = await ctrl.Login("999999999", "wrongpassword");
@@ -391,12 +387,7 @@ public class RecordControllerTests
     {
         var db = SetupDbWithRegistration(RegistrationApprovalStatus.Approved);
         Helpers.SeedLookups(db);
-        var audit = new Mock<IAuditService>();
-        var notifService = new Mock<INotificationService>();
-        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
-        var validator = new Mock<IRegistrationValidationService>();
-        var compression = new Mock<IFileCompressionService>();
-        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object, validator.Object, compression.Object);
+        var ctrl = CreateController(db);
         var reg = db.FamilyRegistrations.First();
         Helpers.SetupControllerContext(ctrl, reg.Id, "EditRegistrationId");
 
@@ -410,12 +401,7 @@ public class RecordControllerTests
     {
         var db = SetupDbWithRegistration(RegistrationApprovalStatus.Pending);
         Helpers.SeedLookups(db);
-        var audit = new Mock<IAuditService>();
-        var notifService = new Mock<INotificationService>();
-        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
-        var validator = new Mock<IRegistrationValidationService>();
-        var compression = new Mock<IFileCompressionService>();
-        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object, validator.Object, compression.Object);
+        var ctrl = CreateController(db);
         var reg = db.FamilyRegistrations.First();
         Helpers.SetupControllerContext(ctrl, reg.Id, "EditRegistrationId");
 
@@ -430,12 +416,7 @@ public class RecordControllerTests
     {
         var db = Helpers.CreateDbContext("rec_no_sesh");
         Helpers.SeedLookups(db);
-        var audit = new Mock<IAuditService>();
-        var notifService = new Mock<INotificationService>();
-        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
-        var validator = new Mock<IRegistrationValidationService>();
-        var compression = new Mock<IFileCompressionService>();
-        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object, validator.Object, compression.Object);
+        var ctrl = CreateController(db);
         Helpers.SetupControllerContext(ctrl);
 
         var result = await ctrl.Edit();
@@ -447,12 +428,7 @@ public class RecordControllerTests
     public async Task Login_EmptyFields_ShowsError()
     {
         var db = Helpers.CreateDbContext("rec_empty");
-        var audit = new Mock<IAuditService>();
-        var notifService = new Mock<INotificationService>();
-        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
-        var validator = new Mock<IRegistrationValidationService>();
-        var compression = new Mock<IFileCompressionService>();
-        var ctrl = new RecordController(db, audit.Object, notifService.Object, env.Object, validator.Object, compression.Object);
+        var ctrl = CreateController(db);
         Helpers.SetupControllerContext(ctrl);
 
         var result = await ctrl.Login("", "");
@@ -487,7 +463,8 @@ public class AdminControllerTests
         var auditService = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
         var validator = new Mock<IRegistrationValidationService>();
-        var ctrl = new AdminController(db, auditService.Object, notifService.Object, validator.Object);
+        var rateLimiter = new Mock<IRateLimiterService>();
+        var ctrl = new AdminController(db, auditService.Object, notifService.Object, validator.Object, rateLimiter.Object);
         var http = new DefaultHttpContext();
         http.Session = new TestSession();
         var admin = db.Admins.First();
@@ -769,7 +746,8 @@ public class AdminEditTests
         var auditService = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
         var validator = new Mock<IRegistrationValidationService>();
-        var ctrl = new AdminController(db, auditService.Object, notifService.Object, validator.Object);
+        var rateLimiter = new Mock<IRateLimiterService>();
+        var ctrl = new AdminController(db, auditService.Object, notifService.Object, validator.Object, rateLimiter.Object);
         var http = new DefaultHttpContext();
         http.Session = new TestSession();
         var admin = db.Admins.First();
@@ -813,7 +791,8 @@ public class AdminEditTests
         var auditService = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
         var validator = new Mock<IRegistrationValidationService>();
-        var ctrl = new AdminController(db, auditService.Object, notifService.Object, validator.Object);
+        var rateLimiter = new Mock<IRateLimiterService>();
+        var ctrl = new AdminController(db, auditService.Object, notifService.Object, validator.Object, rateLimiter.Object);
         var http = new DefaultHttpContext();
         http.Session = new TestSession();
         var admin = db.Admins.First();
