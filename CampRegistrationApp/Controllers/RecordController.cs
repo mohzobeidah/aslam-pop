@@ -62,6 +62,7 @@ namespace CampRegistrationApp.Controllers
 
         private async Task<IActionResult> ReturnEditWithPasswordChangeRequiredAsync(int registrationId, string? errorMessage = null)
         {
+            await PopulateLookupViewBags();
             var registration = await _context.FamilyRegistrations
                 .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)
                 .Include(f => f.Members).ThenInclude(m => m.Person)
