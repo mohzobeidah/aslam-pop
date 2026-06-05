@@ -175,4 +175,67 @@ private string RegisterAndGetRecordId()
         _registrationsPage.FilterByStatus("Approved");
         _registrationsPage.HasRegistrations().Should().BeTrue();
     }
+
+    [Fact]
+    public void Admin_RejectRegistration_WithReason()
+    {
+        // Register a family
+        RegisterAndGetRecordId();
+
+        _loginPage.GoTo();
+        _loginPage.Login("admin", "admin123");
+        _dashboardPage.ClickRegistrations();
+
+        // Reject first pending registration with reason
+        _registrationsPage.RejectRegistration(0, "مستندات غير مكتملة");
+
+        using (var scope = Factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var rejected = db.FamilyRegistrations
+                .FirstOrDefault(r => r.ApprovalStatus == RegistrationApprovalStatus.Rejected);
+            rejected.Should().NotBeNull();
+            rejected!.RejectionReason.Should().Be("مستندات غير مكتملة");
+        }
+    }
+
+    [Fact]
+    public void Admin_Approve_ClearsRejectionFields()
+    {
+        // Register a family
+        RegisterAndGetRecordId();
+
+        _loginPage.GoTo();
+        _loginPage.Login("admin", "admin123");
+        _dashboardPage.ClickRegistrations();
+
+        // Reject with reason
+        _registrationsPage.RejectRegistration(0, "سبب مؤقت");
+
+        // Wait for list to reload, then approve
+        WaitForPageLoad();
+
+        // Find and approve the same registration
+        _registrationsPage.FilterByStatus("Pending");
+        WaitForPageLoad();
+
+        _registrationsPage.FilterByStatus("Rejected");
+        WaitForPageLoad();
+
+        // Click approve on rejected registration
+        var approveBtn = Wait.Until(d => d.FindElement(By.XPath("//button[normalize-space()='موافقة']")));
+        approveBtn.Click();
+        WaitForPageLoad();
+
+        using (var scope = Factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var approved = db.FamilyRegistrations
+                .FirstOrDefault(r => r.ApprovalStatus == RegistrationApprovalStatus.Approved);
+            approved.Should().NotBeNull();
+            approved!.RejectedById.Should().BeNull();
+            approved.RejectedAt.Should().BeNull();
+            approved.RejectionReason.Should().BeNull();
+        }
+    }
 }

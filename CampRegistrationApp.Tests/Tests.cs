@@ -594,17 +594,69 @@ public class AdminControllerTests
 
     // ---- Reject ----
     [Fact]
-    public async Task RejectRegistration_SetsStatus()
+    public async Task RejectRegistration_WithoutReason_RedirectsBack()
     {
         var (ctrl, http, db) = SetupAdmin();
         var reg = CreateReg(db, "A", RegistrationApprovalStatus.Pending);
 
-        var result = await ctrl.RejectRegistration(reg.Id);
+        var result = await ctrl.RejectRegistration(reg.Id, null);
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("Registrations", redirect.ActionName);
+
+        db.Entry(reg).Reload();
+        Assert.Equal(RegistrationApprovalStatus.Pending, reg.ApprovalStatus);
+    }
+
+    [Fact]
+    public async Task RejectRegistration_WithReason_SetsStatus()
+    {
+        var (ctrl, http, db) = SetupAdmin();
+        var reg = CreateReg(db, "A", RegistrationApprovalStatus.Pending);
+        var adminId = http.Session.GetInt32("AdminId")!.Value;
+
+        var result = await ctrl.RejectRegistration(reg.Id, "سبب الرفض");
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("Registrations", redirect.ActionName);
 
         db.Entry(reg).Reload();
         Assert.Equal(RegistrationApprovalStatus.Rejected, reg.ApprovalStatus);
+        Assert.Equal("سبب الرفض", reg.RejectionReason);
+        Assert.Equal(adminId, reg.RejectedById);
+        Assert.NotNull(reg.RejectedAt);
+    }
+
+    [Fact]
+    public async Task RejectRegistration_ShortReason_RedirectsBack()
+    {
+        var (ctrl, http, db) = SetupAdmin();
+        var reg = CreateReg(db, "A", RegistrationApprovalStatus.Pending);
+
+        var result = await ctrl.RejectRegistration(reg.Id, "ab");
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("Registrations", redirect.ActionName);
+
+        db.Entry(reg).Reload();
+        Assert.Equal(RegistrationApprovalStatus.Pending, reg.ApprovalStatus);
+    }
+
+    // ---- Approve clears rejection ----
+    [Fact]
+    public async Task ApproveRegistration_ClearsRejectionFields()
+    {
+        var (ctrl, http, db) = SetupAdmin();
+        var reg = CreateReg(db, "A", RegistrationApprovalStatus.Rejected);
+        reg.RejectedById = http.Session.GetInt32("AdminId");
+        reg.RejectedAt = DateTime.UtcNow.AddDays(-1);
+        reg.RejectionReason = "سبب سابق";
+        await db.SaveChangesAsync();
+
+        await ctrl.ApproveRegistration(reg.Id);
+
+        db.Entry(reg).Reload();
+        Assert.Equal(RegistrationApprovalStatus.Approved, reg.ApprovalStatus);
+        Assert.Null(reg.RejectedById);
+        Assert.Null(reg.RejectedAt);
+        Assert.Null(reg.RejectionReason);
     }
 
     // ---- Mandoob sector filtering ----
@@ -829,4 +881,604 @@ public class TestSession : ISession
 
     public bool TryGetValue(string key, out byte[] value)
         => _data.TryGetValue(key, out value!);
+}
+
+// =========================================================================
+// REGISTRATION CHANGE TRACKER
+// =========================================================================
+public class RegistrationChangeTrackerTests
+{
+    [Fact]
+    public async Task CaptureAsync_SnapshotHasHeadFields()
+    {
+        var db = Helpers.CreateDbContext($"rct_cap_{Guid.NewGuid()}");
+        var head = new Person
+        {
+            FirstName = "محمد", LastName = "السيد", IdNumber = "123456789",
+            DateOfBirth = new DateTime(1990, 1, 1), Gender = "ذكر", HealthStatus = "سليم"
+        };
+        db.Persons.Add(head);
+        var reg = new FamilyRegistration
+        {
+            RecordId = "RCT00001", FamilyHeadId = head.Id, SectorId = 1,
+            PhoneNumber = "0591234567", PasswordHash = "x",
+            IsChildHeaded = false, LivesInTent = false, HasBathroom = false,
+            NeedsDiapers = false, HasMultipleFamiliesInTent = false
+        };
+        db.FamilyRegistrations.Add(reg);
+        db.SaveChanges();
+
+        var snap = await RegistrationChangeTracker.CaptureAsync(reg);
+
+        Assert.Equal("محمد", snap.Head["FirstName"]);
+        Assert.Equal("123456789", snap.Head["IdNumber"]);
+        Assert.Equal("ذكر", snap.Head["Gender"]);
+    }
+
+    [Fact]
+    public async Task CaptureAsync_SnapshotHasRegistrationFields()
+    {
+        var db = Helpers.CreateDbContext($"rct_cap2_{Guid.NewGuid()}");
+        var head = new Person
+        {
+            FirstName = "A", IdNumber = "111111111",
+            DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم"
+        };
+        db.Persons.Add(head);
+        var reg = new FamilyRegistration
+        {
+            RecordId = "RCT00002", FamilyHeadId = head.Id, SectorId = 1,
+            PhoneNumber = "0591234567", PasswordHash = "x", Wallet = "12345",
+            WalletType = "بنك", IsChildHeaded = false, LivesInTent = true,
+            TentType = "Installation", HasBathroom = false,
+            NeedsDiapers = false, HasMultipleFamiliesInTent = false
+        };
+        db.FamilyRegistrations.Add(reg);
+        db.SaveChanges();
+
+        var snap = await RegistrationChangeTracker.CaptureAsync(reg);
+
+        Assert.Equal("0591234567", snap.Registration["PhoneNumber"]);
+        Assert.Equal("12345", snap.Registration["Wallet"]);
+        Assert.Equal("بنك", snap.Registration["WalletType"]);
+        Assert.Equal("Installation", snap.Registration["TentType"]);
+    }
+
+    [Fact]
+    public async Task CaptureAsync_SnapshotHasMembers()
+    {
+        var db = Helpers.CreateDbContext($"rct_cap3_{Guid.NewGuid()}");
+        var head = new Person
+        {
+            FirstName = "A", IdNumber = "111111111",
+            DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم"
+        };
+        db.Persons.Add(head);
+        var member = new Person
+        {
+            FirstName = "B", IdNumber = "222222222",
+            DateOfBirth = DateTime.Today, Gender = "أنثى", HealthStatus = "سليم"
+        };
+        db.Persons.Add(member);
+        var reg = new FamilyRegistration
+        {
+            RecordId = "RCT00003", FamilyHeadId = head.Id, SectorId = 1,
+            PhoneNumber = "0591234567", PasswordHash = "x",
+            IsChildHeaded = false, LivesInTent = false, HasBathroom = false,
+            NeedsDiapers = false, HasMultipleFamiliesInTent = false
+        };
+        db.FamilyRegistrations.Add(reg);
+        db.FamilyMembers.Add(new FamilyMember { RegistrationId = reg.Id, PersonId = member.Id, RelationshipToHead = "زوجة" });
+        db.SaveChanges();
+
+        var snap = await RegistrationChangeTracker.CaptureAsync(reg);
+
+        Assert.Single(snap.Members);
+        Assert.True(snap.Members.ContainsKey("222222222"));
+        Assert.Equal("B", snap.Members["222222222"].Fields["FirstName"]);
+        Assert.Equal("زوجة", snap.Members["222222222"].Fields["RelationshipToHead"]);
+    }
+
+    [Fact]
+    public async Task BuildDiffAsync_DetectsHeadFieldChange()
+    {
+        var db = Helpers.CreateDbContext($"rct_diff1_{Guid.NewGuid()}");
+        var head = new Person
+        {
+            FirstName = "قديم", LastName = "اسم", IdNumber = "333333333",
+            DateOfBirth = new DateTime(1990, 1, 1), Gender = "ذكر", HealthStatus = "سليم"
+        };
+        db.Persons.Add(head);
+        var reg = new FamilyRegistration
+        {
+            RecordId = "RCT00010", FamilyHeadId = head.Id, SectorId = 1,
+            PhoneNumber = "0591234567", PasswordHash = "x",
+            IsChildHeaded = false, LivesInTent = false, HasBathroom = false,
+            NeedsDiapers = false, HasMultipleFamiliesInTent = false
+        };
+        db.FamilyRegistrations.Add(reg);
+        db.SaveChanges();
+
+        var snap = await RegistrationChangeTracker.CaptureAsync(reg);
+
+        var model = new RegistrationViewModel
+        {
+            Head = new PersonViewModel
+            {
+                FirstName = "جديد", LastName = "اسم", IdNumber = "333333333",
+                DateOfBirth = new DateTime(1990, 1, 1), Gender = "ذكر", HealthStatus = "سليم"
+            },
+            SectorId = 1, PhoneNumber = "0591234567"
+        };
+
+        var diff = await RegistrationChangeTracker.BuildDiffAsync(db, snap, model);
+
+        Assert.False(diff.IsEmpty);
+        Assert.True(diff.Head.ContainsKey("Changes"));
+        Assert.Equal("قديم", diff.Head["Changes"]["FirstName"].Old);
+        Assert.Equal("جديد", diff.Head["Changes"]["FirstName"].New);
+    }
+
+    [Fact]
+    public async Task BuildDiffAsync_DetectsRegistrationFieldChange()
+    {
+        var db = Helpers.CreateDbContext($"rct_diff2_{Guid.NewGuid()}");
+        Helpers.SeedLookups(db);
+        var head = new Person
+        {
+            FirstName = "A", IdNumber = "444444444",
+            DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم"
+        };
+        db.Persons.Add(head);
+        var reg = new FamilyRegistration
+        {
+            RecordId = "RCT00011", FamilyHeadId = head.Id, SectorId = 1,
+            PhoneNumber = "0591234567", PasswordHash = "x",
+            IsChildHeaded = false, LivesInTent = false, HasBathroom = false,
+            NeedsDiapers = false, HasMultipleFamiliesInTent = false
+        };
+        db.FamilyRegistrations.Add(reg);
+        db.SaveChanges();
+
+        var snap = await RegistrationChangeTracker.CaptureAsync(reg);
+
+        var model = new RegistrationViewModel
+        {
+            Head = new PersonViewModel
+            {
+                FirstName = "A", IdNumber = "444444444",
+                DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم"
+            },
+            SectorId = 2, PhoneNumber = "0599999999"
+        };
+
+        var diff = await RegistrationChangeTracker.BuildDiffAsync(db, snap, model);
+
+        Assert.False(diff.IsEmpty);
+        Assert.Contains("Changes", diff.Registration.Keys);
+    }
+
+    [Fact]
+    public async Task BuildDiffAsync_DetectsMemberAdded()
+    {
+        var db = Helpers.CreateDbContext($"rct_diff3_{Guid.NewGuid()}");
+        var head = new Person
+        {
+            FirstName = "A", IdNumber = "555555555",
+            DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم"
+        };
+        db.Persons.Add(head);
+        var reg = new FamilyRegistration
+        {
+            RecordId = "RCT00012", FamilyHeadId = head.Id, SectorId = 1,
+            PhoneNumber = "0591234567", PasswordHash = "x",
+            IsChildHeaded = false, LivesInTent = false, HasBathroom = false,
+            NeedsDiapers = false, HasMultipleFamiliesInTent = false
+        };
+        db.FamilyRegistrations.Add(reg);
+        db.SaveChanges();
+
+        var snap = await RegistrationChangeTracker.CaptureAsync(reg);
+
+        var model = new RegistrationViewModel
+        {
+            Head = new PersonViewModel
+            {
+                FirstName = "A", IdNumber = "555555555",
+                DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم"
+            },
+            SectorId = 1, PhoneNumber = "0591234567",
+            Members = new List<MemberViewModel>
+            {
+                new() { FirstName = "جديد", IdNumber = "666666666", DateOfBirth = DateTime.Today, Gender = "أنثى", HealthStatus = "سليم", RelationshipToHead = "زوجة" }
+            }
+        };
+
+        var diff = await RegistrationChangeTracker.BuildDiffAsync(db, snap, model);
+
+        Assert.Single(diff.MembersAdded);
+        Assert.Equal("666666666", diff.MembersAdded[0]["IdNumber"]);
+    }
+
+    [Fact]
+    public async Task BuildDiffAsync_DetectsMemberRemoved()
+    {
+        var db = Helpers.CreateDbContext($"rct_diff4_{Guid.NewGuid()}");
+        var head = new Person
+        {
+            FirstName = "A", IdNumber = "777777777",
+            DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم"
+        };
+        db.Persons.Add(head);
+        var member = new Person
+        {
+            FirstName = "B", IdNumber = "888888888",
+            DateOfBirth = DateTime.Today, Gender = "أنثى", HealthStatus = "سليم"
+        };
+        db.Persons.Add(member);
+        var reg = new FamilyRegistration
+        {
+            RecordId = "RCT00013", FamilyHeadId = head.Id, SectorId = 1,
+            PhoneNumber = "0591234567", PasswordHash = "x",
+            IsChildHeaded = false, LivesInTent = false, HasBathroom = false,
+            NeedsDiapers = false, HasMultipleFamiliesInTent = false
+        };
+        db.FamilyRegistrations.Add(reg);
+        db.FamilyMembers.Add(new FamilyMember { RegistrationId = reg.Id, PersonId = member.Id, RelationshipToHead = "زوجة" });
+        db.SaveChanges();
+
+        var snap = await RegistrationChangeTracker.CaptureAsync(reg);
+
+        var model = new RegistrationViewModel
+        {
+            Head = new PersonViewModel
+            {
+                FirstName = "A", IdNumber = "777777777",
+                DateOfBirth = DateTime.Today, Gender = "ذكر", HealthStatus = "سليم"
+            },
+            SectorId = 1, PhoneNumber = "0591234567"
+        };
+
+        var diff = await RegistrationChangeTracker.BuildDiffAsync(db, snap, model);
+
+        Assert.Single(diff.MembersRemoved);
+        Assert.Equal("888888888", diff.MembersRemoved[0]["IdNumber"]);
+    }
+
+    [Fact]
+    public async Task BuildDiffAsync_EmptyDiff_WhenNoChanges()
+    {
+        var db = Helpers.CreateDbContext($"rct_diff5_{Guid.NewGuid()}");
+        var head = new Person
+        {
+            FirstName = "A", LastName = "B", IdNumber = "999999999",
+            DateOfBirth = new DateTime(1990, 1, 1), Gender = "ذكر", HealthStatus = "سليم"
+        };
+        db.Persons.Add(head);
+        var reg = new FamilyRegistration
+        {
+            RecordId = "RCT00014", FamilyHeadId = head.Id, SectorId = 1,
+            PhoneNumber = "0591234567", PasswordHash = "x",
+            IsChildHeaded = false, LivesInTent = false, HasBathroom = false,
+            NeedsDiapers = false, HasMultipleFamiliesInTent = false
+        };
+        db.FamilyRegistrations.Add(reg);
+        db.SaveChanges();
+
+        var snap = await RegistrationChangeTracker.CaptureAsync(reg);
+
+        var model = new RegistrationViewModel
+        {
+            Head = new PersonViewModel
+            {
+                FirstName = "A", LastName = "B", IdNumber = "999999999",
+                DateOfBirth = new DateTime(1990, 1, 1), Gender = "ذكر", HealthStatus = "سليم"
+            },
+            SectorId = 1, PhoneNumber = "0591234567"
+        };
+
+        var diff = await RegistrationChangeTracker.BuildDiffAsync(db, snap, model);
+
+        Assert.True(diff.IsEmpty);
+    }
+
+    [Fact]
+    public async Task ToAuditPayload_ProducesStructuredOutput()
+    {
+        var db = Helpers.CreateDbContext($"rct_payload_{Guid.NewGuid()}");
+        var head = new Person
+        {
+            FirstName = "قديم", IdNumber = "121212121",
+            DateOfBirth = new DateTime(1990, 1, 1), Gender = "ذكر", HealthStatus = "سليم"
+        };
+        db.Persons.Add(head);
+        var reg = new FamilyRegistration
+        {
+            RecordId = "RCTPAYLD", FamilyHeadId = head.Id, SectorId = 1,
+            PhoneNumber = "0591234567", PasswordHash = "x",
+            IsChildHeaded = false, LivesInTent = false, HasBathroom = false,
+            NeedsDiapers = false, HasMultipleFamiliesInTent = false
+        };
+        db.FamilyRegistrations.Add(reg);
+        db.SaveChanges();
+
+        var snap = await RegistrationChangeTracker.CaptureAsync(reg);
+        var model = new RegistrationViewModel
+        {
+            Head = new PersonViewModel
+            {
+                FirstName = "جديد", IdNumber = "121212121",
+                DateOfBirth = new DateTime(1990, 1, 1), Gender = "ذكر", HealthStatus = "سليم"
+            },
+            SectorId = 1, PhoneNumber = "0591234567"
+        };
+
+        var diff = await RegistrationChangeTracker.BuildDiffAsync(db, snap, model);
+        var payload = RegistrationChangeTracker.ToAuditPayload(diff, "test", "رب الأسرة", "A", "RCTPAYLD");
+
+        var dict = Assert.IsType<Dictionary<string, object?>>(payload);
+        Assert.Contains("Meta", dict.Keys);
+        Assert.Contains("رب الأسرة", dict.Keys);
+    }
+
+    [Fact]
+    public async Task ToAuditPayload_EmptyDiff_ShowsNoChanges()
+    {
+        var db = Helpers.CreateDbContext($"rct_empty_{Guid.NewGuid()}");
+        var head = new Person
+        {
+            FirstName = "ثابت", IdNumber = "131313131",
+            DateOfBirth = new DateTime(1990, 1, 1), Gender = "ذكر", HealthStatus = "سليم"
+        };
+        db.Persons.Add(head);
+        var reg = new FamilyRegistration
+        {
+            RecordId = "RCTEMPTY", FamilyHeadId = head.Id, SectorId = 1,
+            PhoneNumber = "0591234567", PasswordHash = "x",
+            IsChildHeaded = false, LivesInTent = false, HasBathroom = false,
+            NeedsDiapers = false, HasMultipleFamiliesInTent = false
+        };
+        db.FamilyRegistrations.Add(reg);
+        db.SaveChanges();
+
+        var snap = await RegistrationChangeTracker.CaptureAsync(reg);
+        var model = new RegistrationViewModel
+        {
+            Head = new PersonViewModel
+            {
+                FirstName = "ثابت", IdNumber = "131313131",
+                DateOfBirth = new DateTime(1990, 1, 1), Gender = "ذكر", HealthStatus = "سليم"
+            },
+            SectorId = 1, PhoneNumber = "0591234567"
+        };
+
+        var diff = await RegistrationChangeTracker.BuildDiffAsync(db, snap, model);
+        Assert.True(diff.IsEmpty);
+        Assert.Empty(diff.Head);
+        Assert.Empty(diff.Registration);
+        Assert.Empty(diff.MembersAdded);
+        Assert.Empty(diff.MembersRemoved);
+    }
+}
+
+// =========================================================================
+// ADMIN CHANGE PASSWORD
+// =========================================================================
+public class AdminChangePasswordTests
+{
+    [Fact]
+    public async Task Login_PasswordMatchesNationalId_RedirectsToChangePassword()
+    {
+        var db = Helpers.CreateDbContext($"acp1_{Guid.NewGuid()}");
+        var sector = new Sector { Name = "X" };
+        db.Sectors.Add(sector);
+        db.Admins.Add(new Admin
+        {
+            Name = "Test", NationalId = "123456789",
+            PasswordHash = Helpers.HashPassword("123456789"),
+            Role = AdminRole.Admin, SectorId = sector.Id
+        });
+        db.SaveChanges();
+
+        var audit = new Mock<IAuditService>();
+        audit.Setup(a => a.LogAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<object?>(), It.IsAny<object?>(), It.IsAny<string?>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+        var notif = new Mock<INotificationService>();
+        var val = new Mock<IRegistrationValidationService>();
+        var rate = new Mock<IRateLimiterService>();
+        var ctrl = new AdminController(db, audit.Object, notif.Object, val.Object, rate.Object);
+        var http = new DefaultHttpContext();
+        http.Session = new TestSession();
+        ctrl.ControllerContext = new ControllerContext { HttpContext = http };
+        ctrl.TempData = new TempDataDictionary(http, Mock.Of<ITempDataProvider>());
+
+        var result = await ctrl.Login("123456789", "123456789");
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("ChangePassword", redirect.ActionName);
+    }
+
+    [Fact]
+    public async Task Dashboard_ForcePasswordChange_RedirectsToChangePassword()
+    {
+        var db = Helpers.CreateDbContext($"acp2_{Guid.NewGuid()}");
+        var sector = new Sector { Name = "X" };
+        db.Sectors.Add(sector);
+        var admin = new Admin
+        {
+            Name = "Test", NationalId = "admin", Mobile = "000",
+            PasswordHash = Helpers.HashPassword("admin"),
+            Role = AdminRole.Admin, SectorId = sector.Id
+        };
+        db.Admins.Add(admin);
+        db.SaveChanges();
+
+        var audit = new Mock<IAuditService>();
+        var notif = new Mock<INotificationService>();
+        var val = new Mock<IRegistrationValidationService>();
+        var rate = new Mock<IRateLimiterService>();
+        var ctrl = new AdminController(db, audit.Object, notif.Object, val.Object, rate.Object);
+        var http = new DefaultHttpContext();
+        http.Session = new TestSession();
+        http.Session.SetInt32("AdminId", admin.Id);
+        http.Session.SetString("AdminName", admin.Name);
+        http.Session.SetString("AdminRole", "Admin");
+        ctrl.ControllerContext = new ControllerContext { HttpContext = http };
+        ctrl.TempData = new TempDataDictionary(http, Mock.Of<ITempDataProvider>());
+
+        var result = await ctrl.Dashboard();
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("ChangePassword", redirect.ActionName);
+    }
+
+    [Fact]
+    public async Task ChangePassword_PreventsSameAsNationalId()
+    {
+        var db = Helpers.CreateDbContext($"acp3_{Guid.NewGuid()}");
+        var sector = new Sector { Name = "X" };
+        db.Sectors.Add(sector);
+        var admin = new Admin
+        {
+            Name = "Test", NationalId = "123456789", Mobile = "000",
+            PasswordHash = Helpers.HashPassword("oldpass"),
+            Role = AdminRole.Admin, SectorId = sector.Id
+        };
+        db.Admins.Add(admin);
+        db.SaveChanges();
+
+        var audit = new Mock<IAuditService>();
+        var notif = new Mock<INotificationService>();
+        var val = new Mock<IRegistrationValidationService>();
+        var rate = new Mock<IRateLimiterService>();
+        var ctrl = new AdminController(db, audit.Object, notif.Object, val.Object, rate.Object);
+        var http = new DefaultHttpContext();
+        http.Session = new TestSession();
+        http.Session.SetInt32("AdminId", admin.Id);
+        http.Session.SetString("AdminName", admin.Name);
+        http.Session.SetString("AdminRole", "Admin");
+        ctrl.ControllerContext = new ControllerContext { HttpContext = http };
+        ctrl.TempData = new TempDataDictionary(http, Mock.Of<ITempDataProvider>());
+
+        var result = await ctrl.ChangePassword("oldpass", "123456789", "123456789");
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.False(ctrl.ModelState.IsValid);
+        Assert.Contains("يجب أن تكون مختلفة عن رقم الهوية", ctrl.ModelState[""]?.Errors[0].ErrorMessage ?? "");
+    }
+
+    [Fact]
+    public async Task ChangePassword_Success_ReturnsToDashboard()
+    {
+        var db = Helpers.CreateDbContext($"acp4_{Guid.NewGuid()}");
+        var sector = new Sector { Name = "X" };
+        db.Sectors.Add(sector);
+        var admin = new Admin
+        {
+            Name = "Test", NationalId = "123456789", Mobile = "000",
+            PasswordHash = Helpers.HashPassword("oldpass"),
+            Role = AdminRole.Admin, SectorId = sector.Id
+        };
+        db.Admins.Add(admin);
+        db.SaveChanges();
+
+        var audit = new Mock<IAuditService>();
+        audit.Setup(a => a.LogAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<object?>(), It.IsAny<object?>(), It.IsAny<string?>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+        var notif = new Mock<INotificationService>();
+        var val = new Mock<IRegistrationValidationService>();
+        var rate = new Mock<IRateLimiterService>();
+        var ctrl = new AdminController(db, audit.Object, notif.Object, val.Object, rate.Object);
+        var http = new DefaultHttpContext();
+        http.Session = new TestSession();
+        http.Session.SetInt32("AdminId", admin.Id);
+        http.Session.SetString("AdminName", admin.Name);
+        http.Session.SetString("AdminRole", "Admin");
+        ctrl.ControllerContext = new ControllerContext { HttpContext = http };
+        ctrl.TempData = new TempDataDictionary(http, Mock.Of<ITempDataProvider>());
+
+        var result = await ctrl.ChangePassword("oldpass", "newpass", "newpass");
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("Dashboard", redirect.ActionName);
+        Assert.Equal("تم تغيير كلمة المرور بنجاح", ctrl.TempData["Success"]);
+    }
+}
+
+// =========================================================================
+// RECORD FORCE PASSWORD CHANGE
+// =========================================================================
+public class RecordForcePasswordChangeTests
+{
+    private static FamilyRegistration CreateRegistrationWithPassword(ApplicationDbContext db, string password)
+    {
+        var head = new Person
+        {
+            FirstName = "رب", LastName = "أسرة", IdNumber = "123456789",
+            DateOfBirth = new DateTime(1980, 1, 1), Gender = "ذكر", HealthStatus = "سليم"
+        };
+        db.Persons.Add(head);
+        db.SaveChanges();
+
+        var reg = new FamilyRegistration
+        {
+            RecordId = "FRC00001", FamilyHeadId = head.Id, SectorId = 1,
+            PhoneNumber = "0591234567", PasswordHash = Helpers.HashPassword(password),
+            ApprovalStatus = RegistrationApprovalStatus.Approved,
+            IsChildHeaded = false, LivesInTent = false, HasBathroom = false,
+            NeedsDiapers = false, HasMultipleFamiliesInTent = false
+        };
+        db.FamilyRegistrations.Add(reg);
+        db.SaveChanges();
+        return reg;
+    }
+
+    [Fact]
+    public async Task Login_PasswordMatchesIdNumber_SetsMustChangeSession()
+    {
+        var db = Helpers.CreateDbContext($"rfpc1_{Guid.NewGuid()}");
+        Helpers.SeedLookups(db);
+        CreateRegistrationWithPassword(db, "123456789");
+
+        var audit = new Mock<IAuditService>();
+        audit.Setup(a => a.LogAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<object?>(), It.IsAny<object?>(), It.IsAny<string?>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+        var notif = new Mock<INotificationService>();
+        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        var val = new Mock<IRegistrationValidationService>();
+        var comp = new Mock<IFileCompressionService>();
+        var rate = new Mock<IRateLimiterService>();
+        var ctrl = new RecordController(db, audit.Object, notif.Object, env.Object, val.Object, comp.Object, rate.Object);
+        var http = new DefaultHttpContext();
+        http.Session = new TestSession();
+        ctrl.ControllerContext = new ControllerContext { HttpContext = http };
+        ctrl.TempData = new TempDataDictionary(http, Mock.Of<ITempDataProvider>());
+
+        await ctrl.Login("123456789", "123456789");
+
+        var mustChange = http.Session.GetString("MustChangePassword");
+        Assert.Equal("1", mustChange);
+    }
+
+    [Fact]
+    public async Task Edit_WithPasswordMatch_ShowsMustChangeBanner()
+    {
+        var db = Helpers.CreateDbContext($"rfpc2_{Guid.NewGuid()}");
+        Helpers.SeedLookups(db);
+        var reg = CreateRegistrationWithPassword(db, "123456789");
+
+        var audit = new Mock<IAuditService>();
+        var notif = new Mock<INotificationService>();
+        var env = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+        var val = new Mock<IRegistrationValidationService>();
+        var comp = new Mock<IFileCompressionService>();
+        var rate = new Mock<IRateLimiterService>();
+        var ctrl = new RecordController(db, audit.Object, notif.Object, env.Object, val.Object, comp.Object, rate.Object);
+        var http = new DefaultHttpContext();
+        http.Session = new TestSession();
+        http.Session.SetInt32("EditRegistrationId", reg.Id);
+        ctrl.ControllerContext = new ControllerContext { HttpContext = http };
+        ctrl.TempData = new TempDataDictionary(http, Mock.Of<ITempDataProvider>());
+
+        var result = await ctrl.Edit();
+        var view = Assert.IsType<ViewResult>(result);
+
+        Assert.True((bool)(view.ViewData["MustChangePassword"] ?? false));
+    }
 }

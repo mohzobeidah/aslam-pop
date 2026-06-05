@@ -41,6 +41,60 @@ public class AdminLoginPage : BasePage
     }
 }
 
+public class AdminChangePasswordPage : BasePage
+{
+    public AdminChangePasswordPage(Infrastructure.TestBase test) : base(test) { }
+
+    private static By OldPasswordInput => By.Id("oldPassword");
+    private static By NewPasswordInput => By.Id("newPassword");
+    private static By ConfirmPasswordInput => By.Id("confirmPassword");
+    private static By SubmitButton => By.CssSelector("button[type='submit']");
+    private static By SuccessMessage => By.CssSelector(".alert-success, .bg-green");
+    private static By ErrorMessage => By.CssSelector(".validation-summary-errors, .text-red, .bg-red");
+    private static By ForceChangeMessage => By.CssSelector(".text-gray-500");
+
+    public void GoTo()
+    {
+        NavigateTo("/Admin/ChangePassword");
+        Test.WaitForPageLoad();
+    }
+
+    public void ChangePassword(string oldPassword, string newPassword, string confirmPassword)
+    {
+        var oldField = Test.Driver.FindElement(OldPasswordInput);
+        if (oldField.Displayed)
+            Test.Type(OldPasswordInput, oldPassword);
+        Test.Type(NewPasswordInput, newPassword);
+        Test.Type(ConfirmPasswordInput, confirmPassword);
+        Test.Click(SubmitButton);
+        Test.WaitForPageLoad();
+    }
+
+    public void ChangePasswordForce(string newPassword, string confirmPassword)
+    {
+        Test.Type(NewPasswordInput, newPassword);
+        Test.Type(ConfirmPasswordInput, confirmPassword);
+        Test.Click(SubmitButton);
+        Test.WaitForPageLoad();
+    }
+
+    public bool IsSuccess()
+    {
+        return Test.IsElementPresent(SuccessMessage);
+    }
+
+    public bool HasError()
+    {
+        return Test.IsElementPresent(ErrorMessage);
+    }
+
+    public bool IsForceChangePage()
+    {
+        return !Test.IsElementPresent(OldPasswordInput)
+            && Test.IsElementPresent(ForceChangeMessage);
+    }
+}
+
 public class AdminDashboardPage : BasePage
 {
     public AdminDashboardPage(Infrastructure.TestBase test) : base(test) { }
@@ -167,6 +221,9 @@ public class AdminRegistrationsPage : BasePage
     private static By EditButton(int index) => By.CssSelector($"tr:nth-child({index + 1}) .btn-edit, .edit-btn-{index}");
     private static By EmptyMessage => By.CssSelector(".empty-message, .no-data, .alert-info");
     private static By RecordCount => By.CssSelector(".record-count, .total-count");
+    private static By RejectModal => By.Id("rejectModal");
+    private static By RejectReasonInput => By.Id("rejectReason");
+    private static By RejectConfirmButton => By.CssSelector("#rejectModal button[type='submit']");
 
     public void GoTo()
     {
@@ -199,10 +256,20 @@ public class AdminRegistrationsPage : BasePage
         Test.WaitForPageLoad();
     }
 
-    public void RejectRegistration(int index = 0)
+    public void RejectRegistration(int index = 0, string? reason = null)
     {
         Test.Click(RejectButton(index));
+        Test.Wait.Until(d => d.FindElement(RejectModal).Displayed);
+        var input = Test.Driver.FindElement(RejectReasonInput);
+        input.SendKeys(reason ?? "سبب الرفض");
+        Test.Click(RejectConfirmButton);
         Test.WaitForPageLoad();
+    }
+
+    public bool IsRejectModalDisplayed()
+    {
+        try { return Test.Driver.FindElement(RejectModal).Displayed; }
+        catch { return false; }
     }
 
     public void RemoveRefugee(int index = 0)
