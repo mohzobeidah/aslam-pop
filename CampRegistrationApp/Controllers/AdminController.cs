@@ -284,7 +284,7 @@ ORDER BY COUNT(*) DESC;
 
             const int pageSize = 50;
 
-            var query = _context.AuditLogs.AsQueryable();
+            var query = _context.AuditLogs.AsNoTracking().AsQueryable();
 
             if (!string.IsNullOrEmpty(actionFilter))
                 query = query.Where(l => l.Action.Contains(actionFilter));
@@ -333,6 +333,7 @@ ORDER BY COUNT(*) DESC;
 
             var adminId = GetCurrentAdminId();
             var list = await _context.Notifications
+                .AsNoTracking()
                 .Where(n => n.AdminId == adminId)
                 .OrderByDescending(n => n.CreatedAt)
                 .Take(50)
@@ -725,7 +726,11 @@ ORDER BY COUNT(*) DESC;
             var adminId = GetCurrentAdminId();
             var adminRole = HttpContext.Session.GetString("AdminRole");
 
-            var query = _context.FamilyRegistrations.AsQueryable();
+            var query = _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
+                .Include(f => f.Sector)
+                .AsNoTracking()
+                .AsQueryable();
 
             if (adminRole == "Mandoob")
             {
@@ -752,7 +757,7 @@ ORDER BY COUNT(*) DESC;
                 );
             }
 
-            var baseQuery = _context.FamilyRegistrations.AsQueryable();
+            var baseQuery = _context.FamilyRegistrations.AsNoTracking().AsQueryable();
             if (adminRole == "Mandoob")
             {
                 var admin = await _context.Admins.Include(a => a.Sector).FirstOrDefaultAsync(a => a.Id == adminId);

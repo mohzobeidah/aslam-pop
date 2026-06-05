@@ -254,15 +254,150 @@ public static class RegistrationChangeTracker
 
         var result = new Dictionary<string, object?> { ["Meta"] = meta };
 
-        if (diff.Head.Count > 0) result["head"] = diff.Head;
-        if (diff.Registration.Count > 0) result["registration"] = diff.Registration;
-        if (diff.MembersAdded.Count > 0) result["membersAdded"] = diff.MembersAdded;
-        if (diff.MembersRemoved.Count > 0) result["membersRemoved"] = diff.MembersRemoved;
-        if (diff.MembersModified.Count > 0) result["membersModified"] = diff.MembersModified;
-        if (diff.DesiresOld != null) result["desires"] = new { old = diff.DesiresOld, @new = diff.DesiresNew };
+        if (diff.Head.Count > 0) result["رب الأسرة"] = TranslateChangesDict(diff.Head);
+        if (diff.Registration.Count > 0) result["بيانات التسجيل"] = TranslateChangesDict(diff.Registration);
+        if (diff.MembersAdded.Count > 0) result["أفراد مضافون"] = TranslateMembersList(diff.MembersAdded);
+        if (diff.MembersRemoved.Count > 0) result["أفراد محذوفون"] = TranslateMembersList(diff.MembersRemoved);
+        if (diff.MembersModified.Count > 0)
+        {
+            var translated = new Dictionary<string, object?>();
+            foreach (var kv in diff.MembersModified)
+            {
+                var label = kv.Key;
+                if (kv.Value.TryGetValue("FirstName", out var fn) && kv.Value.TryGetValue("LastName", out var ln))
+                    label = $"{fn} {ln} ({kv.Key})";
+                translated[label] = TranslateFlatChanges(kv.Value);
+            }
+            result["أفراد معدّلون"] = translated;
+        }
+        if (diff.DesiresOld != null)
+        {
+            result["الرغبات"] = new
+            {
+                قديم = diff.DesiresOld,
+                جديد = diff.DesiresNew
+            };
+        }
 
         return result;
     }
+
+    private static Dictionary<string, object?> TranslateChangesDict(Dictionary<string, Dictionary<string, FieldChange>> src)
+    {
+        var dict = new Dictionary<string, object?>();
+        if (src.TryGetValue("Changes", out var changes))
+        {
+            var arabicChanges = new Dictionary<string, object?>();
+            foreach (var kv in changes)
+            {
+                var label = FieldLabels.TryGetValue(kv.Key, out var l) ? l : kv.Key;
+                arabicChanges[label] = new
+                {
+                    قديم = TranslateValue(kv.Value.Old),
+                    جديد = TranslateValue(kv.Value.New)
+                };
+            }
+            dict["التغييرات"] = arabicChanges;
+        }
+        return dict;
+    }
+
+    private static Dictionary<string, object?> TranslateFlatChanges(Dictionary<string, FieldChange> src)
+    {
+        var dict = new Dictionary<string, object?>();
+        foreach (var kv in src)
+        {
+            var label = FieldLabels.TryGetValue(kv.Key, out var l) ? l : kv.Key;
+            dict[label] = new
+            {
+                قديم = TranslateValue(kv.Value.Old),
+                جديد = TranslateValue(kv.Value.New)
+            };
+        }
+        return dict;
+    }
+
+    private static List<Dictionary<string, object?>> TranslateMembersList(List<Dictionary<string, object?>> list)
+    {
+        return list.Select(m =>
+        {
+            var t = new Dictionary<string, object?>();
+            foreach (var kv in m)
+            {
+                var label = FieldLabels.TryGetValue(kv.Key, out var l) ? l : kv.Key;
+                t[label] = TranslateValue(kv.Value);
+            }
+            return t;
+        }).ToList();
+    }
+
+    private static object? TranslateValue(object? v)
+    {
+        return v switch
+        {
+            true => "نعم",
+            false => "لا",
+            _ => v
+        };
+    }
+
+    private static readonly Dictionary<string, string> FieldLabels = new(StringComparer.Ordinal)
+    {
+        // Head — person
+        ["FirstName"] = "الاسم الأول",
+        ["SecondName"] = "الاسم الثاني",
+        ["ThirdName"] = "الاسم الثالث",
+        ["LastName"] = "اسم العائلة",
+        ["IdNumber"] = "رقم الهوية",
+        ["DateOfBirth"] = "تاريخ الميلاد",
+        ["Gender"] = "الجنس",
+        ["OriginalGovernorate"] = "المحافظة الأصلية",
+        ["MaritalStatus"] = "الحالة الاجتماعية",
+        ["EmploymentStatus"] = "الوظيفة",
+        ["EducationLevel"] = "المستوى التعليمي",
+        ["HealthStatus"] = "الحالة الصحية",
+        ["ChronicDiseases"] = "الأمراض المزمنة",
+        ["DisabilityTypes"] = "الإعاقات",
+        ["HasInjury"] = "إصابة",
+        ["InjuryDate"] = "تاريخ الإصابة",
+        ["InjuryDetails"] = "تفاصيل الإصابة",
+        ["IsHouseDestroyed"] = "هل تهدم المنزل",
+        ["IsPrisoner"] = "أسير",
+        ["IsHusbandPrisoner"] = "زوج أسير",
+        ["IsPregnant"] = "حامل",
+        ["PregnancyMonth"] = "شهر الحمل",
+        ["IsNursing"] = "مرضع",
+        ["NursingInfantName"] = "اسم الطفل الرضيع",
+        ["NursingInfantDOB"] = "تاريخ ميلاد الرضيع",
+        ["NursingInfantID"] = "رقم هوية الرضيع",
+        ["MotherIdNumber"] = "رقم هوية الأم",
+        ["BathroomStatus"] = "حالة الحمام",
+        ["RelationshipToHead"] = "صلة القرابة",
+        // Registration
+        ["SectorId"] = "القاطع",
+        ["PhoneNumber"] = "رقم الجوال",
+        ["Wallet"] = "المحفظة",
+        ["WalletType"] = "نوع المحفظة",
+        ["IsChildHeaded"] = "طفل يعيل",
+        ["ChildHeadedDetails"] = "تفاصيل طفل يعيل",
+        ["IsFemaleHeaded"] = "امرأة تعيل",
+        ["FemaleHeadedDetails"] = "تفاصيل امرأة تعيل",
+        ["SupportsOutsidePerson"] = "دعم خارج العائلة",
+        ["OutsidePersonName"] = "اسم الشخص المدعوم",
+        ["OutsidePersonRelation"] = "صلة القرابة بالشخص المدعوم",
+        ["LivesInTent"] = "يسكن خيمة",
+        ["TentType"] = "نوع الخيمة",
+        ["OtherTentType"] = "نوع خيمة آخر",
+        ["HasBathroom"] = "يوجد حمام",
+        ["BathroomType"] = "نوع الحمام",
+        ["RegBathroomStatus"] = "حالة الحمام (المسكن)",
+        ["NeedsDiapers"] = "تحتاج الحفاظات",
+        ["DiaperDetails"] = "تفاصيل الحفاظات",
+        ["HasMultipleFamiliesInTent"] = "أسر بنفس الخيمة",
+        ["AdditionalFamiliesCount"] = "عدد الأسر الإضافية",
+        ["StatusNotes"] = "ملاحظات",
+        ["IsHusbandAbroad"] = "الزوج بالخارج"
+    };
 
     private static int CountChangedFields(Diff diff)
     {
