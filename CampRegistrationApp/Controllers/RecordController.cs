@@ -336,6 +336,8 @@ namespace CampRegistrationApp.Controllers
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+                var changeSnapshot = await RegistrationChangeTracker.CaptureAsync(registration);
+
                 // Update Family Head
                 var head = registration.FamilyHead;
                 head.FirstName = model.Head.FirstName;
@@ -495,10 +497,16 @@ namespace CampRegistrationApp.Controllers
                     .Where(s => s.Id == model.SectorId)
                     .Select(s => s.Name)
                     .FirstAsync();
+
+                var diff = await RegistrationChangeTracker.BuildDiffAsync(_context, changeSnapshot, model);
+                var auditPayload = diff.IsEmpty
+                    ? (object)new { action = "تم تعديل بيانات العائلة بواسطة رب الأسرة (بدون تغييرات فعلية)", headName = head.FullName, sector = sectorName }
+                    : RegistrationChangeTracker.ToAuditPayload(diff, "تم تعديل بيانات العائلة بواسطة رب الأسرة", head.FullName, sectorName, registration.RecordId);
+
                 await _audit.LogAsync(0, "RecordEdit", "FamilyRegistrations",
                     registration.RecordId,
-                    new { action = "تم تعديل بيانات العائلة بواسطة رب الأسرة" },
-                    new { headName = head.FullName, sector = sectorName });
+                    auditPayload,
+                    null);
                 await _notificationService.NotifyMandoobsAsync(
                     sectorName,
                     $"تعديل بيانات: {head.FullName} - رقم القيد: {registration.RecordId}",

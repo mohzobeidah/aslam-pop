@@ -1299,6 +1299,8 @@ ORDER BY COUNT(*) DESC;
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+                var changeSnapshot = await RegistrationChangeTracker.CaptureAsync(registration);
+
                 // Update Family Head
                 var head = registration.FamilyHead;
                 head.FirstName = model.Head.FirstName;
@@ -1436,10 +1438,15 @@ ORDER BY COUNT(*) DESC;
                     .Select(s => s.Name)
                     .FirstAsync();
 
+                var diff = await RegistrationChangeTracker.BuildDiffAsync(_context, changeSnapshot, model);
+                var auditPayload = diff.IsEmpty
+                    ? (object)new { action = "تم تعديل بيانات العائلة بواسطة المشرف (بدون تغييرات فعلية)", headName = head.FullName, sector = sectorName }
+                    : RegistrationChangeTracker.ToAuditPayload(diff, "تم تعديل بيانات العائلة بواسطة المشرف", head.FullName, sectorName, registration.RecordId);
+
                 await _audit.LogAsync(GetCurrentAdminId(), "AdminEdit", "FamilyRegistrations",
                     registration.RecordId,
-                    new { action = "تم تعديل بيانات العائلة بواسطة المشرف" },
-                    new { headName = head.FullName, sector = sectorName },
+                    auditPayload,
+                    null,
                     source: "Web");
 
                 await _notificationService.NotifyMandoobsAsync(
