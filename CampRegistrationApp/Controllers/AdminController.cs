@@ -29,10 +29,35 @@ namespace CampRegistrationApp.Controllers
             _rateLimiter = rateLimiter;
         }
 
+        private const string MustChangePasswordSessionKey = "MustChangePassword";
+
         private static string HashPassword(string password)
         {
             var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
             return Convert.ToHexString(bytes);
+        }
+
+        private static bool IsPasswordSameAsNationalId(string nationalId, string? passwordHash) =>
+            !string.IsNullOrEmpty(passwordHash) && passwordHash == HashPassword(nationalId);
+
+        private bool RequiresPasswordChange()
+        {
+            var forced = HttpContext.Session.GetString(MustChangePasswordSessionKey) == "1";
+            if (forced) return true;
+
+            var adminId = GetCurrentAdminId();
+            if (adminId == 0) return false;
+
+            var admin = _context.Admins.AsNoTracking().FirstOrDefault(a => a.Id == adminId);
+            return admin != null && IsPasswordSameAsNationalId(admin.NationalId, admin.PasswordHash);
+        }
+
+        private void SetMustChangePassword(bool required)
+        {
+            if (required)
+                HttpContext.Session.SetString(MustChangePasswordSessionKey, "1");
+            else
+                HttpContext.Session.Remove(MustChangePasswordSessionKey);
         }
 
         private bool IsAuthenticated()
@@ -94,9 +119,15 @@ namespace CampRegistrationApp.Controllers
             if (admin.SectorId.HasValue)
                 HttpContext.Session.SetInt32("AdminSectorId", admin.SectorId.Value);
 
+            var passwordMatchesNationalId = string.Equals(password, nationalId, StringComparison.Ordinal);
+            SetMustChangePassword(passwordMatchesNationalId);
+
             await _audit.LogAsync(admin.Id, "Login", "Admins", null,
                 null,
                 new { admin.Name, admin.NationalId, role = admin.Role.ToString(), sector = admin.Sector?.Name });
+
+            if (passwordMatchesNationalId)
+                return RedirectToAction("ChangePassword");
 
             return RedirectToAction("Dashboard");
         }
@@ -109,6 +140,93 @@ namespace CampRegistrationApp.Controllers
         }
 
         // ──────────────────────────────────────
+        //  Change Password (self-service)
+        // ──────────────────────────────────────
+
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            if (!IsAuthenticated()) return RedirectToAction("Login");
+
+            var forceChange = RequiresPasswordChange();
+            ViewBag.ForcePasswordChange = forceChange;
+            ViewBag.AdminName = HttpContext.Session.GetString("AdminName") ?? "";
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(string? oldPassword, string newPassword, string confirmPassword, bool force = false)
+        {
+            if (!IsAuthenticated()) return RedirectToAction("Login");
+
+            var adminId = GetCurrentAdminId();
+            var admin = await _context.Admins.FindAsync(adminId);
+            if (admin == null) return RedirectToAction("Login");
+
+            var isForced = force || RequiresPasswordChange();
+            ViewBag.ForcePasswordChange = isForced;
+            ViewBag.AdminName = admin.Name;
+
+            if (string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(confirmPassword))
+            {
+                ModelState.AddModelError("", "جميع الحقول مطلوبة");
+                return View();
+            }
+
+            if (!isForced && string.IsNullOrEmpty(oldPassword))
+            {
+                ModelState.AddModelError("", "كلمة المرور القديمة مطلوبة");
+                return View();
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                ModelState.AddModelError("", "كلمة المرور الجديدة وتأكيدها غير متطابقين");
+                return View();
+            }
+
+            if (newPassword.Length < 4)
+            {
+                ModelState.AddModelError("", "كلمة المرور يجب أن تكون 4 أحرف على الأقل");
+                return View();
+            }
+
+            if (string.Equals(newPassword, admin.NationalId, StringComparison.Ordinal))
+            {
+                ModelState.AddModelError("", "كلمة المرور الجديدة يجب أن تكون مختلفة عن رقم الهوية");
+                return View();
+            }
+
+            if (!isForced)
+            {
+                if (admin.PasswordHash != HashPassword(oldPassword!))
+                {
+                    ModelState.AddModelError("", "كلمة المرور القديمة غير صحيحة");
+                    return View();
+                }
+            }
+            else if (!IsPasswordSameAsNationalId(admin.NationalId, admin.PasswordHash))
+            {
+                SetMustChangePassword(false);
+                TempData["Success"] = "كلمة المرور محدّثة مسبقاً";
+                return RedirectToAction("Dashboard");
+            }
+
+            admin.PasswordHash = HashPassword(newPassword);
+            await _context.SaveChangesAsync();
+            SetMustChangePassword(false);
+
+            await _audit.LogAsync(adminId, "ChangePassword", "Admins", admin.Id.ToString(),
+                new { action = isForced ? "تغيير إجباري بعد تسجيل الدخول (كلمة المرور مطابقة لرقم الهوية)" : "تغيير كلمة المرور بواسطة المسؤول" },
+                new { admin.Name, admin.NationalId },
+                source: "Web");
+
+            TempData["Success"] = "تم تغيير كلمة المرور بنجاح";
+            return RedirectToAction("Dashboard");
+        }
+
+        // ──────────────────────────────────────
         //  Dashboard
         // ──────────────────────────────────────
 
@@ -116,6 +234,7 @@ namespace CampRegistrationApp.Controllers
         public async Task<IActionResult> Dashboard()
         {
             if (!IsAuthenticated()) return RedirectToAction("Login");
+            if (RequiresPasswordChange()) return RedirectToAction("ChangePassword");
 
             var adminId = GetCurrentAdminId();
             var admin = await _context.Admins
@@ -722,6 +841,7 @@ ORDER BY COUNT(*) DESC;
         public async Task<IActionResult> Refugees(string? sector = null, string? search = null, string? status = "Approved")
         {
             if (!IsAuthenticated()) return RedirectToAction("Login");
+            if (RequiresPasswordChange()) return RedirectToAction("ChangePassword");
 
             var adminId = GetCurrentAdminId();
             var adminRole = HttpContext.Session.GetString("AdminRole");
@@ -1039,6 +1159,7 @@ ORDER BY COUNT(*) DESC;
         public async Task<IActionResult> Registrations(string status = "Pending", string? sector = null)
         {
             if (!IsAuthenticated()) return RedirectToAction("Login");
+            if (RequiresPasswordChange()) return RedirectToAction("ChangePassword");
 
             var query = _context.FamilyRegistrations
                 .Include(f => f.FamilyHead)

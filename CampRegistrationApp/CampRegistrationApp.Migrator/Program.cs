@@ -4,8 +4,8 @@ using System.Text;
 using Microsoft.Data.SqlClient;
 
 const string OldConnStr = "Server=localhost\\SQLEXPRESS;Database=AslamDbNew;Trusted_Connection=True;TrustServerCertificate=True;";
-//const string NewConnStr = "Server=localhost\\SQLEXPRESS;Database=CampRegistrationDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
-const string NewConnStr = "Server=db53123.public.databaseasp.net; Database=db53123; User Id=db53123; Password=cW@5C8t%b?6X; Encrypt=True; TrustServerCertificate=True; MultipleActiveResultSets=True;   ";
+const string NewConnStr = "Server=localhost\\SQLEXPRESS;Database=CampRegistrationDb1;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True";
+//const string NewConnStr = "Server=db53123.public.databaseasp.net; Database=db53123; User Id=db53123; Password=cW@5C8t%b?6X; Encrypt=True; TrustServerCertificate=True; MultipleActiveResultSets=True;   ";
 
 DateTime JerusalemNow()
 {
@@ -199,12 +199,14 @@ foreach (var row in refugeeRows)
             INSERT INTO Persons (FirstName, SecondName, ThirdName, LastName, IdNumber, DateOfBirth, Gender,
                 OriginalGovernorate, MaritalStatus, EmploymentStatus, EducationLevel, HealthStatus,
                 ChronicDiseases, DisabilityTypes, HasInjury, InjuryDate, InjuryDetails,
-                IsPregnant, IsNursing, IsPrisoner, IsHouseDestroyed, BathroomStatus, MotherIdNumber, Nationality)
+                IsPregnant, IsNursing, IsPrisoner, IsHouseDestroyed, BathroomStatus, MotherIdNumber,
+                IsHusbandPrisoner, Nationality)
             OUTPUT INSERTED.Id
             VALUES (@fn, @sn, @tn, @ln, @idn, @dob, @g,
                 @gov, @ms, @emp, @edu, @hs,
                 @cd, @dt, @hi, @hid, @hidet,
-                @ip, @in, @ipr, @ihd, @bs, @min, @nat)", newConn, transaction);
+                @ip, @in, @ipr, @ihd, @bs, @min,
+                @ihp, @nat)", newConn, transaction);
 
         insertPerson.Parameters.AddWithValue("@fn", row.FirstName);
         insertPerson.Parameters.AddWithValue("@sn", row.SecondName);
@@ -229,23 +231,33 @@ foreach (var row in refugeeRows)
         insertPerson.Parameters.AddWithValue("@ihd", false);
         insertPerson.Parameters.AddWithValue("@bs", DBNull.Value);
         insertPerson.Parameters.AddWithValue("@min", DBNull.Value);
+        insertPerson.Parameters.AddWithValue("@ihp", false);
         insertPerson.Parameters.AddWithValue("@nat", "فلسطين");
 
         var headPersonId = (int)await insertPerson.ExecuteScalarAsync();
         existingIdNumbers.Add(idNumber);
+
+        // Resolve sector name -> SectorId
+        if (!sectorIdMap.TryGetValue(sectorName, out var resolvedSectorId))
+        {
+            var fallback = new SqlCommand("SELECT Id FROM Sectors WHERE Name = @name", newConn, transaction);
+            fallback.Parameters.AddWithValue("@name", sectorName);
+            var fallbackId = await fallback.ExecuteScalarAsync();
+            resolvedSectorId = fallbackId != null ? (int)fallbackId : sectorIdMap.Values.FirstOrDefault();
+        }
 
         // Insert FamilyRegistration
         var insertFamily = new SqlCommand(@"
             INSERT INTO FamilyRegistrations (RecordId, RegistrationTimestamp, FamilyHeadId,
                 IsChildHeaded, IsFemaleHeaded, IsHusbandAbroad, SupportsOutsidePerson,
                 LivesInTent, HasBathroom, NeedsDiapers, DiaperDetails, HasMultipleFamiliesInTent,
-                Sector, PhoneNumber, Wallet, WalletType,
+                SectorId, PhoneNumber, Wallet, WalletType,
                 PasswordHash, StatusNotes, ApprovalStatus, ApprovedAt, IsDeleted)
             OUTPUT INSERTED.Id
             VALUES (@rid, @ts, @fhid,
                 @ich, @ifh, @iha, @sop,
                 @lit, @hb, @nd, @dd, @hmf,
-                @sec, @ph, @w, @wt,
+                @secid, @ph, @w, @wt,
                 @pw, @sn, @as, @aa, @isd)", newConn, transaction);
 
         insertFamily.Parameters.AddWithValue("@rid", recordId);
@@ -260,7 +272,7 @@ foreach (var row in refugeeRows)
         insertFamily.Parameters.AddWithValue("@nd", needsDiapers);
         insertFamily.Parameters.AddWithValue("@dd", needsDiapers ? row.NeedElderlyDiaper : "");
         insertFamily.Parameters.AddWithValue("@hmf", false);
-        insertFamily.Parameters.AddWithValue("@sec", sectorName);
+        insertFamily.Parameters.AddWithValue("@secid", resolvedSectorId);
         insertFamily.Parameters.AddWithValue("@ph", phone);
         insertFamily.Parameters.AddWithValue("@w", DBNull.Value);
         insertFamily.Parameters.AddWithValue("@wt", DBNull.Value);
@@ -401,12 +413,14 @@ static async Task MigrateMembersAsync(SqlConnection oldConn, SqlConnection newCo
             INSERT INTO Persons (FirstName, SecondName, ThirdName, LastName, IdNumber, DateOfBirth, Gender,
                 OriginalGovernorate, MaritalStatus, EmploymentStatus, EducationLevel, HealthStatus,
                 ChronicDiseases, DisabilityTypes, HasInjury, InjuryDate, InjuryDetails,
-                IsPregnant, IsNursing, IsPrisoner, IsHouseDestroyed, BathroomStatus, MotherIdNumber, Nationality)
+                IsPregnant, IsNursing, IsPrisoner, IsHouseDestroyed, BathroomStatus, MotherIdNumber,
+                IsHusbandPrisoner, Nationality)
             OUTPUT INSERTED.Id
             VALUES (@fn, @sn, @tn, @ln, @idn, @dob, @g,
                 @gov, @ms, @emp, @edu, @hs,
                 @cd, @dt, @hi, @hid, @hidet,
-                @ip, @in, @ipr, @ihd, @bs, @min, @nat)", newConn, tx);
+                @ip, @in, @ipr, @ihd, @bs, @min,
+                @ihp, @nat)", newConn, tx);
 
         ip.Parameters.AddWithValue("@fn", fn);
         ip.Parameters.AddWithValue("@sn", sn);
@@ -431,6 +445,7 @@ static async Task MigrateMembersAsync(SqlConnection oldConn, SqlConnection newCo
         ip.Parameters.AddWithValue("@ihd", false);
         ip.Parameters.AddWithValue("@bs", DBNull.Value);
         ip.Parameters.AddWithValue("@min", DBNull.Value);
+        ip.Parameters.AddWithValue("@ihp", false);
         ip.Parameters.AddWithValue("@nat", "فلسطين");
 
         var personId = (int)await ip.ExecuteScalarAsync();
@@ -492,12 +507,14 @@ static async Task MigrateWivesAsync(SqlConnection oldConn, SqlConnection newConn
             INSERT INTO Persons (FirstName, SecondName, ThirdName, LastName, IdNumber, DateOfBirth, Gender,
                 OriginalGovernorate, MaritalStatus, EmploymentStatus, EducationLevel, HealthStatus,
                 ChronicDiseases, DisabilityTypes, HasInjury, InjuryDate, InjuryDetails,
-                IsPregnant, IsNursing, IsPrisoner, IsHouseDestroyed, BathroomStatus, MotherIdNumber, Nationality)
+                IsPregnant, IsNursing, IsPrisoner, IsHouseDestroyed, BathroomStatus, MotherIdNumber,
+                IsHusbandPrisoner, Nationality)
             OUTPUT INSERTED.Id
             VALUES (@fn, @sn, @tn, @ln, @idn, @dob, @g,
                 @gov, @ms, @emp, @edu, @hs,
                 @cd, @dt, @hi, @hid, @hidet,
-                @ip, @in, @ipr, @ihd, @bs, @min, @nat)", newConn, tx);
+                @ip, @in, @ipr, @ihd, @bs, @min,
+                @ihp, @nat)", newConn, tx);
 
         ip.Parameters.AddWithValue("@fn", fn);
         ip.Parameters.AddWithValue("@sn", sn);
@@ -522,6 +539,7 @@ static async Task MigrateWivesAsync(SqlConnection oldConn, SqlConnection newConn
         ip.Parameters.AddWithValue("@ihd", false);
         ip.Parameters.AddWithValue("@bs", DBNull.Value);
         ip.Parameters.AddWithValue("@min", DBNull.Value);
+        ip.Parameters.AddWithValue("@ihp", false);
         ip.Parameters.AddWithValue("@nat", "فلسطين");
 
         var personId = (int)await ip.ExecuteScalarAsync();
