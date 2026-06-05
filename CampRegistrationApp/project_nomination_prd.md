@@ -1,4 +1,11 @@
 # PRD – نظام الترشيحات للمشاريع
+## الحالة: ✅ منفذ بالكامل (مدمج في ASP.NET Core MVC)
+
+> **ملاحظة:** هذا المستند هو الـ PRD الأصلي. تم تنفيذ الميزة بالكامل في `CampRegistrationApp/` مع
+> نماذج `Project` و `Nomination`،
+> وخدمة `NominationService`،
+> ووحدات تحكم `ProjectController` و `NominationController` مع CRUD كامل
+> وصلاحيات الأدمن/مندوب وتدقيق كامل.
 
 ## اسم الميزة
 نظام إدارة وترشيح المستفيدين للمشاريع

@@ -1,7 +1,9 @@
 # Product Requirements Document (PRD): Camp Family Registration Form
 
 ## 1. Product Overview
-The **Camp Family Registration Form** is a specialized web application developed using Google Apps Script. Its primary purpose is to collect detailed demographic, health, and socio-economic data from families residing in camp settings. The application provides a digital interface for registering the head of the family and all accompanying family members, ensuring that critical vulnerabilities (health issues, housing conditions, and unique family structures) are documented for aid distribution or administrative planning.
+The **Camp Family Registration Form** is a specialized web application available in two versions. The **original version** was developed using Google Apps Script for rapid deployment in camp settings. The system has since been expanded into a full **ASP.NET Core MVC** application (`CampRegistrationApp/`) with SQL Server, Entity Framework Core, and an extensive admin/nomination/report/financial system.
+
+The primary purpose of both versions is to collect detailed demographic, health, and socio-economic data from families residing in camp settings. The application provides a digital interface for registering the head of the family and all accompanying family members, ensuring that critical vulnerabilities (health issues, housing conditions, and unique family structures) are documented for aid distribution or administrative planning.
 
 ## 2. Target Audience
 - **Field Workers/Data Collectors:** Personnel responsible for conducting surveys and registering families in camp environments.
@@ -56,13 +58,38 @@ The **Camp Family Registration Form** is a specialized web application developed
 - **Accessibility:** Use of the 'Cairo' font for readability in Arabic.
 
 ## 6. Technical Architecture
+
+### Version 1: Google Apps Script (GAS)
 - **Frontend:** HTML5, CSS3 (Tailwind CSS), JavaScript (Client-side).
 - **Backend:** Google Apps Script (GAS).
 - **Database:** Google Sheets (as a flat-file database).
 - **File Storage:** Google Drive.
 - **Deployment:** Google Apps Script Web App.
 
-## 7. Data Schema (Google Sheet Columns)
+### Version 2: ASP.NET Core MVC (CampRegistrationApp/)
+- **Framework:** .NET 10 MVC with Razor runtime compilation.
+- **Frontend:** HTML5, Tailwind CSS (CDN), JavaScript, RTL dark theme.
+- **Backend:** ASP.NET Core controllers and services.
+- **Database:** SQL Server (LocalDB) via Entity Framework Core 10.
+- **File Storage:** Local filesystem under `wwwroot/uploads/`.
+- **Authentication:** Session-based (no ASP.NET Identity).
+- **Deployment:** GitHub Actions CI/CD → Azure Web App.
+- **Key Features Added Beyond GAS:**
+  - Admin panel with role-based access (Admin, Mandoob)
+  - Registration approval workflow (Pending/Approved/Rejected) with rejection reasons
+  - Family member management, dynamic add/remove
+  - Refugee desires (ranked dropdowns)
+  - Project & nomination system for aid distribution
+  - Report system with dynamic Excel export (ClosedXML)
+  - Detailed audit logging (JSON diffs via RegistrationChangeTracker)
+  - Notification system (bell icon polling)
+  - Assistance/beneficiary management with Excel import
+  - Force password change (if password matches ID)
+  - Dashboard with CTE-based demographic statistics
+  - Complaint management system
+  - Financial recorder module
+
+## 7. Data Schema
 | Column Name | Description |
 | :--- | :--- |
 | وقت التسجيل | Registration Timestamp |
@@ -100,8 +127,18 @@ The **Camp Family Registration Form** is a specialized web application developed
 | معرف التسجيل | Unique Record ID |
 
 ## 8. Future Improvements
+
+### GAS Version
 - **Input Validation:** Implement more robust server-side validation to prevent data corruption.
 - **Data Sanitization:** Ensure user inputs are sanitized before being written to the spreadsheet.
 - **File Type Handling:** Improve `uploadFileToDrive` to detect and set the correct MimeType for images vs PDFs.
 - **Dynamic Member IDs:** Replace index-based naming for member health fields to allow safe deletion of members during registration.
 - **Offline Support:** Implement local storage caching to allow data collection in areas with poor internet connectivity, syncing when online.
+
+### ASP.NET Core Version
+- **Document Verification:** Automated ID document verification using OCR.
+- **Mobile App:** Native mobile app for field data collection with offline sync.
+- **Advanced Analytics:** Power BI integration or built-in dashboards.
+- **SMS/Email Notifications:** Automated alerts to refugees about registration status.
+- **Multi-language Support:** English/Hebrew alongside Arabic.
+- **Biometric Verification:** Fingerprint or facial recognition for duplicate detection.

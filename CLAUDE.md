@@ -48,7 +48,7 @@ Admin (1) ──< (N) Notification
 Notification >── (0..1) Link (URL string)
 ```
 - **Person**: Shared entity for both Head of Family and Family Members. Fields include name (4 parts), ID, sector, DOB, gender, phone, governorate, **Wallet (المحفظة)**, **BathroomStatus (جيد/متوسط/سيء)**, marital/employment/education status, health info (diseases, disabilities, injuries), prisoner flag (أسير), optional maternity fields (pregnancy, nursing).
-- **FamilyRegistration**: Links to FamilyHead (Person), has list of Members, plus housing/special-case fields (tent, bathroom, child-headed, female-headed, external support, diaper needs, multiple families in tent) and **Refugee Needs** (NeedPriority enum for 7 aid items: Tents, Blankets, Mattresses, KitchenTools, Tarpaulins, Clothes, HygieneKit). Has unique 8-char `RecordId`. Approval workflow with `ApprovalStatus` (Pending/Approved/Rejected).
+- **FamilyRegistration**: Links to FamilyHead (Person), has list of Members, plus housing/special-case fields (tent, bathroom, child-headed, female-headed, external support, diaper needs, multiple families in tent) and **Refugee Needs** (NeedPriority enum for 7 aid items: Tents, Blankets, Mattresses, KitchenTools, Tarpaulins, Clothes, HygieneKit). Has unique 8-char `RecordId`. Approval workflow with `ApprovalStatus` (Pending/Approved/Rejected). Rejection tracking via `RejectedById`, `RejectedAt`, `RejectionReason`.
 - **FamilyMember**: Join table linking `FamilyRegistration` → `Person` with a `RelationshipToHead` string.
 - **Attachment**: File metadata linked to a Person (`MedicalReport` or `IDImage`), storing relative file paths.
 - **Admin**: Login system with `AdminRole` enum (`Admin`=super, `Mandoob`=sector-limited). Linked optionally to a `Sector`.
@@ -95,6 +95,9 @@ Notification >── (0..1) Link (URL string)
 | `/Admin/MarkNotificationRead/{id}` | `AdminController.MarkNotificationRead` | POST — mark single notification read |
 | `/Admin/MarkAllNotificationsRead` | `AdminController.MarkAllNotificationsRead` | POST — mark all notifications read |
 | `/Admin/GetNotificationCount` | `AdminController.GetNotificationCount` | JSON — unread notification count (polled by nav bell) |
+| `/Admin/ChangePassword` | `AdminController.ChangePassword` | GET/POST — change admin password (force-change if password == national ID) |
+| `/Admin/AuditLogs` | `AdminController.AuditLogs` | Audit log viewer with action/sector/date filters |
+| `/Record/ChangePassword` | `RecordController.ChangePassword` | GET/POST — force refugee password change if password == ID number |
 | `/Project` | `ProjectController.Index` | Project list (admin only) |
 | `/Project/Create` | `ProjectController.Create` | Create project (super admin only) |
 | `/Project/Edit/{id}` | `ProjectController.Edit` | Edit project (super admin only) |
@@ -149,6 +152,7 @@ Notification >── (0..1) Link (URL string)
 - **Triggers**:
   - New registration (`RegistrationController.Submit`) → notifies all mandoobs in that sector
   - Refugee edits data (`RecordController.Update`) → notifies all mandoobs in that sector
+  - Admin edits data (`AdminController.AdminUpdateRegistration`) → notifies all mandoobs in that sector
 - **Display**: 🔔 bell icon in nav bar with red badge (polled every 30s via `/Admin/GetNotificationCount`)
 - **Management**: `/Admin/Notifications` page lists last 50, supports per-item and bulk mark-as-read
 
@@ -158,6 +162,22 @@ Notification >── (0..1) Link (URL string)
 - **Nomination grid** (`/Nomination/Index?projectId=X`): Search persons by ID/name → add row with sector assignment → table of current nominations with delete.
 - **Duplicate check**: Client-side via `/Nomination/CheckPersonInProject` + server-side in `NominationService`.
 - **Read-only after end date**: Add-form hidden when project end date has passed.
+
+## RegistrationChangeTracker (Detailed Audit Diffs)
+- **`Services/RegistrationChangeTracker.cs`**: Static utility for structured before/after comparison of registration data during edits.
+- **`Snapshot`**: Captures head fields, registration fields, member fields (keyed by ID), and desires before edit.
+- **`BuildDiffAsync()`**: Compares snapshot against `RegistrationViewModel`, resolves sector names, categorizes into head/registration/members-added/members-removed/members-modified/desires diffs.
+- **Usage**: Both `RecordController.Update` and `AdminController.AdminUpdateRegistration` use it for audit payloads.
+- **`ToAuditPayload()`**: Produces structured JSON with Arabic section labels (رب الأسرة, بيانات التسجيل, etc.) and old/new values.
+- **Empty diff**: Logs "(بدون تغييرات فعلية)" when nothing changed.
+
+## Report System
+- **`Controllers/ReportController.cs`**: GET Index (column selection + filters), POST Preview (renders data grid), POST ExportExcel (generates .xlsx).
+- **`ReportQueryDescriptor`**: Builds human-readable SQL-like query descriptions for audit logging on Preview/ExportExcel actions.
+- **Filters**: Sector, Status, Gender, HealthStatus, Age range, Search, IncludeMembers, **NeedsDiapers**.
+- **Report types**: Normal (one row per family), Disabled/ChronicSick/Pregnant/Nursing (one row per person).
+- **`DisplayColumns`**: `ReportViewModel` property for consistent column ordering between grid preview and Excel export. Dynamic Wife/Child columns sorted by `FieldOrder`.
+- **Columns**: 7 groups, 50+ columns with Arabic labels.
 
 ## Key Conventions
 - All UI text is in Arabic; RTL layout (`dir="rtl"`) with Cairo font.
@@ -175,6 +195,19 @@ Notification >── (0..1) Link (URL string)
 - Soft delete pattern with `IsDeleted` flag + global query filters on Project and Nomination.
 - `RowVersion` (SQL Server `rowversion`) for concurrency on Project and Nomination.
 - `AuditService` logs JSON-serialized old/new values for Create/Update/Delete operations.
+- `NormalizeBathroomType()` applied via `RegistrationConstants` in `MapToViewModel` and `Update` to handle null/empty bathroom type.
+
+## Force Password Change
+- **Admin**: If admin password matches their national ID on login, `RequiresPasswordChange()` returns true → redirects to `/Admin/ChangePassword`. Blocks Dashboard, Refugees, Registrations until changed.
+- **Refugee**: If refugee password matches their ID number on login, `MustChangePassword` session flag set. Blocks `Edit` and `UploadFile` actions. `ReturnEditWithPasswordChangeRequired()` helper shows edit view with forced change banner.
+- **Validation**: New password must differ from ID number, minimum 4 characters.
+
+## Rejection with Reason
+- `RejectRegistration` POST now requires a `reason` parameter (validated server-side, min 3 chars).
+- Modal UI with textarea on both `Registrations` list and `RefugeeDetails` page.
+- `FamilyRegistration` stores `RejectedById`, `RejectedAt`, `RejectionReason`.
+- Re-approving a rejected registration clears rejection fields and logs previous rejection data in audit.
+- Rejection info (name, date, reason) displayed in `Registrations` list (with tooltip) and `RefugeeDetails` page.
 
 ## Limitations / Gotchas
 - **No proper file isolation**: All pre-submission uploads go to `TEMP` folder, not per-record folders.
@@ -192,3 +225,4 @@ Notification >── (0..1) Link (URL string)
 - **Sequential tabs**: User cannot skip registration steps by clicking tab headers — each step must be completed before advancing.
 - **Nominations use N+1 on initial load**: The nomination grid loads persons via service call; no batching yet.
 - **NullReferenceException in Update**: Prevented by recovering the `RegistrationViewModel` from the session and loading attachments if model binding fails during POST `/Record/Update`.
+- **ApprovedBy FK**: Changed from `SetNull` to `NoAction` delete behavior to allow rejecting after approving without FK conflicts.

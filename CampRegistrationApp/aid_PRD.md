@@ -1,3 +1,11 @@
+# نظام إدارة المساعدات والمستفيدين
+## الحالة: ✅ منفذ بالكامل (مدمج في ASP.NET Core MVC)
+
+> **ملاحظة:** هذا المستند هو الـ PRD الأصلي. تم تنفيذ الميزة بالكامل في `CampRegistrationApp/` مع
+> نماذج `Assistance` و `AssistanceBeneficiary` و `AssistanceImport`،
+> وخدمات `AssistanceService` و `ImportService`،
+> ووحدة تحكم `AssistanceController` مع CRUD كامل واستيراد Excel وتصدير.
+
 – نظام إدارة المساعدات والمستفيدين
 اسم الميزة
 

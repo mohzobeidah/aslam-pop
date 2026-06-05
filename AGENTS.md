@@ -3,7 +3,7 @@
 ## Overview
 Camp family registration system in two versions:
 - **Google Apps Script** (root `Code.gs` + `Index.html`): Serves HTML, writes to Google Sheets, uploads PDFs to Drive.
-- **ASP.NET Core MVC** (`CampRegistrationApp/`): .NET 10, SQL Server (LocalDB), Entity Framework Core, full admin/nomination/project system.
+- **ASP.NET Core MVC** (`CampRegistrationApp/`): .NET 10, SQL Server (LocalDB), Entity Framework Core, full admin/nomination/project/report/financial system.
 
 ## How to run / deploy
 ### GAS
@@ -29,7 +29,7 @@ Camp family registration system in two versions:
 ## ASP.NET Core Architecture
 ### Data Model
 - **Person**: Shared entity for family head and members (4-part name, ID, sector, DOB, gender, phone, Wallet (المحفظة), BathroomStatus (جيد/متوسط/سيء), health, maternity, prisoner flag, etc.).
-- **FamilyRegistration**: Links to head (Person), members (FamilyMembers), housing/special-case fields (HasBathroom, BathroomType), approval workflow, and **Refugee Needs** (NeedPriority enum for 7 aid items: Tents, Blankets, Mattresses, KitchenTools, Tarpaulins, Clothes, HygieneKit).
+- **FamilyRegistration**: Links to head (Person), members (FamilyMembers), housing/special-case fields (HasBathroom, BathroomType, BathroomStatus), approval workflow, and **Refugee Needs** (NeedPriority enum for 7 aid items: Tents, Blankets, Mattresses, KitchenTools, Tarpaulins, Clothes, HygieneKit).
 - **FamilyMember**: Join table `FamilyRegistration → Person` with `RelationshipToHead`.
 - **Attachment**: File metadata (`MedicalReport` or `IDImage`), stores relative paths.
 - **Admin**: Login with `AdminRole` (`Admin`=super, `Mandoob`=sector-limited), session-based auth, SHA256 password hashing.
@@ -46,7 +46,7 @@ Camp family registration system in two versions:
 
 ### Admin Edit
 - **AdminEditRegistration** GET: loads any registration (Pending/Approved/Rejected), reuses `Record/Edit.cshtml` view
-- **AdminUpdateRegistration** POST: saves changes (head, members, desires) with audit log + mandoob notification
+- **AdminUpdateRegistration** POST: saves changes (head, members, desires) with audit log (via `RegistrationChangeTracker`) + mandoob notification
 - Accessible for all statuses (Approved/Rejected are no longer blocked)
 - Edit button shown in `RefugeeDetails` page and `Registrations` list for Pending items
 
@@ -55,6 +55,56 @@ Camp family registration system in two versions:
 - Each select corresponds to a rank position; selections are mutually exclusive per rank
 - Stored as `FamilyDesire` join records with Order (rank position) and DesireId
 - **Model binding**: Before submit, comma-separated hidden input is converted to indexed inputs (`DesireIds[0]`, `DesireIds[1]`, ...) for proper `List<int>` binding
+
+### Admin Change Password
+- **`GET/POST /Admin/ChangePassword`**: Self-service password change for admins
+- **Force change on login**: If admin password matches their national ID, they are redirected to ChangePassword on login (`RequiresPasswordChange()` check)
+- **Same password guard**: New password must differ from national ID
+- **Layout nav**: "تغيير كلمة المرور" link in desktop and mobile nav bars
+- **Audit**: Logged as `ChangePassword` action with forced vs voluntary distinction
+
+### Refugee Force Password Change
+- **`GET/POST /Record/ChangePassword`**: Force change if refugee password equals their ID number
+- On login (`RecordController.Login`): sets `MustChangePassword` session flag when password == ID
+- Blocks `Edit` and `UploadFile` actions until password is changed
+- `ReturnEditWithPasswordChangeRequired()` helper shows edit view with forced change banner
+
+### Rejection with Reason
+- **Rejection requires reason**: `RejectRegistration` POST now requires a `reason` parameter (validated server-side, min 3 chars)
+- **UI**: Modal popup with reason textarea on both `Registrations` list and `RefugeeDetails` page
+- **Fields**: `FamilyRegistration.RejectedById`, `RejectedAt`, `RejectionReason` (stored in DB)
+- **Display**: Rejection info shown in `Registrations` list (name, date, reason preview with tooltip) and `RefugeeDetails` page
+- **Re-approve clears rejection**: Approving a previously-rejected registration clears `RejectedById`, `RejectedAt`, `RejectionReason` and adds previous rejection data to audit log
+- **Audit**: Full rejection details (reason, rejecter name, timestamp) logged in audit
+
+### RegistrationChangeTracker (Detailed Audit Diffs)
+- **`Services/RegistrationChangeTracker.cs`**: Static utility for before/after snapshots of registration data
+- **`Snapshot`**: Captures head fields, registration fields, member fields, and desires before edit
+- **`BuildDiffAsync()`**: Compares snapshot against `RegistrationViewModel` after changes, categorizes into:
+  - Head changes (field-level old/new)
+  - Registration changes (sector name resolution, field-level)
+  - Members added/removed/modified (per-field diffs)
+  - Desires changed (old vs new list)
+- **Usage**: Both `RecordController.Update` (refugee edit) and `AdminController.AdminUpdateRegistration` (admin edit) use it
+- **Audit payload**: `ToAuditPayload()` produces structured JSON with Arabic field labels, categorized by section (رب الأسرة, بيانات التسجيل, أفراد مضافون/محذوفون/معدّلون, الرغبات)
+- **Empty diff handling**: If no fields changed, audit still logs "(بدون تغييرات فعلية)"
+
+### Report Audit Logging
+- **`ReportQueryDescriptor`**: Builds human-readable SQL-like query description for audit
+- Both `Preview` and `ExportExcel` actions log to `AuditLog` with:
+  - Action type: `PreviewReport` or `ExportExcel`
+  - Filter parameters (SectorId, Status, Gender, HealthStatus, Search, Age range, NeedsDiapers)
+  - Selected columns with Arabic labels
+  - SQL-like WHERE clause summary
+  - Row count
+- **AdminSectorId** stored in session (login) for ماندوب sector-scoped reports
+
+### Report System Improvements
+- **`NeedsDiapers` filter**: New checkbox filter in report UI, filters registrations where `NeedsDiapers == true`
+- **`DisplayColumns`**: `ReportViewModel` now has `DisplayColumns` (key + label) for consistent ordering between grid preview and Excel export
+- **Dynamic key ordering**: Wife/Child member columns sorted by consistent `FieldOrder` (Name, IdNumber, DOB, Age, Gender, HealthStatus, etc.)
+- **Excel export form**: Uses JavaScript to copy selected columns and filters from the preview form on submit (avoids stale filter values)
+- **`NormalizeBathroomType()`**: Applied via `RegistrationConstants` in both `MapToViewModel` and `Update` to handle null/empty bathroom type
 
 ## GAS Architecture
 - `doGet()` serves `Index.html`, `google.script.run` for server calls.
