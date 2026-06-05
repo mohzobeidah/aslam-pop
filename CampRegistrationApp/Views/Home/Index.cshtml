@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "الرئيسية";
 }
 
@@ -27,7 +27,7 @@
     <div class="relative overflow-hidden rounded-lg h-64 md:h-[500px]" id="slider" dir="ltr">
         <div class="flex h-full transition-transform duration-500 ease-in-out" id="sliderTrack">
             <div class="w-full flex-shrink-0 h-full relative">
-                <img src="@Url.Content("~/img_landing/1.jpeg")" alt="توزيع الخيام" class="w-full h-full object-cover absolute inset-0">
+                <img src="@Url.Content("~/img_landing/3.jpeg")" alt="توزيع الخيام" class="w-full h-full object-cover absolute inset-0">
                 @* <div class="absolute inset-0 z-10 bg-gradient-to-tr from-blue-900/80 to-blue-700/80 flex items-center justify-center p-12 md:p-20 text-center">
                     <div>
                         <h3 class="text-2xl font-bold text-white mb-2">توزيع الخيام</h3>
@@ -144,25 +144,7 @@
     </a>
 </section>
 
-<!-- Landing Page Notification Modal -->
-<div id="landing-modal" class="fixed inset-0 z-50 bg-black/70 hidden items-center justify-center" onclick="if(event.target===this)closeLandingModal()">
-    <div class="bg-camp-accent-grey rounded-lg border-r-4 border-camp-gold shadow-xl p-8 max-w-lg mx-4 w-full">
-        <div class="text-center mb-6">
-            <div class="text-5xl text-camp-gold mb-4">📢</div>
-            <h3 class="text-2xl font-bold text-camp-gold">تنبيه هام</h3>
-        </div>
-        <div class="text-gray-200 text-lg leading-relaxed text-center mb-8 space-y-4">
-            <p>هذا النظام لمخيم السلام لتحديث البيانات.</p>
-            <p>اليوم يتم إدراج الأسماء في النظام، وهذا النظام الذي ستعتمد عليه في ترشيح الأسماء للمساعدات.</p>
-            <p class="text-camp-gold font-bold text-xl">يجب على الجميع التحديث.</p>
-        </div>
-        <div class="text-center">
-            <button onclick="closeLandingModal()" class="px-10 py-3 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors text-lg">
-                حسناً
-            </button>
-        </div>
-    </div>
-</div>
+
 
 <script>
     let currentSlide = 0;
@@ -189,16 +171,5 @@
     // Auto-slide every 5 seconds
     setInterval(slideNext, 5000);
 
-    function closeLandingModal() {
-        document.getElementById('landing-modal').classList.add('hidden');
-        document.getElementById('landing-modal').classList.remove('flex');
-    }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const modal = document.getElementById('landing-modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-    });
 </script>

@@ -667,22 +667,7 @@
     </div>
 }
 
-<!-- Reminder Modal -->
-<div id="reminder-modal" class="fixed inset-0 z-50 bg-black/70 hidden items-center justify-center" onclick="if(event.target===this)closeReminderModal()">
-    <div class="bg-camp-accent-grey rounded-lg border-r-4 border-camp-gold shadow-xl p-8 max-w-lg mx-4 w-full">
-        <div class="text-center mb-6">
-            <h3 class="text-2xl font-bold text-camp-gold">تذكير بتعبئة البيانات</h3>
-            <p class="text-gray-300 mt-2">يرجى التأكد من تعبئة المعلومات التالية قبل حفظ التعديلات:</p>
-            <p class="text-yellow-400 mt-2 text-sm font-semibold">يجب عليك تعبئة البيانات كاملة حتى يتم إدراج اسمك في المساعدات في المؤسسات</p>
-        </div>
-        <ul id="reminder-modal-list" class="space-y-3 mb-8 text-right"></ul>
-        <div class="text-center">
-            <button onclick="closeReminderModal()" class="px-8 py-3 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors text-lg">
-                حسناً
-            </button>
-        </div>
-    </div>
-</div>
+
 
     <style>
         .field-error { border-color: #ef4444 !important; }
@@ -1460,91 +1445,10 @@
             if (input) input.value = ids.join(',');
         }
 
-        function checkMissingSections() {
-            const missing = [];
 
-            // 1. Health - Head
-            const headHealth = document.querySelector('[name="Head.HealthStatus"]:checked');
-            if (!headHealth) {
-                missing.push('الحالة الصحية لرب الأسرة - لم يتم تحديدها بعد');
-            } else if (headHealth.value !== 'سليم') {
-                const diseases = document.querySelectorAll('[name="Head.ChronicDiseases"]:checked');
-                const disabilities = document.querySelectorAll('[name="Head.DisabilityTypes"]:checked');
-                if (diseases.length === 0 && disabilities.length === 0) {
-                    missing.push('الحالة الصحية - تم اختيار مريض ولكن لم يتم تحديد الأمراض المزمنة أو أنواع الإعاقة');
-                }
-            }
 
-            // 2. Health - Members
-            document.querySelectorAll('.member-card').forEach((card) => {
-                const healthRadios = card.querySelectorAll('[name$=".HealthStatus"]');
-                let isSick = false;
-                let isChecked = false;
-                healthRadios.forEach(r => { if (r.checked) { isChecked = true; if (r.value !== 'سليم') isSick = true; } });
-                if (isChecked && isSick) {
-                    const diseases = card.querySelectorAll('[name$=".ChronicDiseases"]:checked');
-                    const disabilities = card.querySelectorAll('[name$=".DisabilityTypes"]:checked');
-                    if (diseases.length === 0 && disabilities.length === 0) {
-                        missing.push('الحالة الصحية لأحد أفراد الأسرة - تم اختيار مريض ولكن لم يتم تحديد الأمراض أو الإعاقات');
-                    }
-                }
-            });
-
-            // 3. Tent
-            const livesInTentTrue = document.querySelector('[name="LivesInTent"][value="true"]:checked');
-            const livesInTentFalse = document.querySelector('[name="LivesInTent"][value="false"]:checked');
-            if (!livesInTentTrue && !livesInTentFalse) {
-                missing.push('السكن - لم يتم تحديد ما إذا كانت العائلة تسكن في خيمة');
-            } else if (livesInTentTrue) {
-                const tentType = document.querySelector('[name="TentType"]');
-                if (!tentType || !tentType.value) {
-                    missing.push('السكن في خيمة - تم اختيار السكن في خيمة ولكن لم يتم تحديد نوع الخيمة');
-                }
-            }
-
-            // 4. Bathroom
-            const hasBathroomTrue = document.querySelector('[name="HasBathroom"][value="true"]:checked');
-            const hasBathroomFalse = document.querySelector('[name="HasBathroom"][value="false"]:checked');
-            if (!hasBathroomTrue && !hasBathroomFalse) {
-                missing.push('الحمام - لم يتم تحديد ما إذا كان يوجد حمام');
-            } else if (hasBathroomTrue) {
-                const bathroomType = document.querySelector('[name="BathroomType"]:checked');
-                const bathroomStatus = document.querySelector('[name="Head.BathroomStatus"]');
-                if (!bathroomType) {
-                    missing.push('الحمام - تم اختيار وجود حمام ولكن لم يتم تحديد نوعه (خاص/مشترك)');
-                }
-                if (!bathroomStatus || !bathroomStatus.value) {
-                    missing.push('الحمام - تم اختيار وجود حمام ولكن لم يتم تحديد حالة الحمام');
-                }
-            }
-
-            if (missing.length > 0) {
-                const list = document.getElementById('reminder-modal-list');
-                if (list) {
-                    list.innerHTML = '';
-                    missing.forEach(function (item) {
-                        const li = document.createElement('li');
-                        li.className = 'text-right pr-2 text-white border-b border-gray-700 pb-2 last:border-0';
-                        li.textContent = '• ' + item;
-                        list.appendChild(li);
-                    });
-                    const modal = document.getElementById('reminder-modal');
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                }
-            }
-        }
-
-        function closeReminderModal() {
-            const modal = document.getElementById('reminder-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        // Render desires on page load
         document.addEventListener('DOMContentLoaded', function () {
             renderDesires();
-            checkMissingSections();
         });
     </script>
 </div>
