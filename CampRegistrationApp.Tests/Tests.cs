@@ -176,6 +176,7 @@ public class RegistrationControllerTests
         var compression = new Mock<IFileCompressionService>();
         var rateLimiter = new Mock<IRateLimiterService>();
         var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object, validator.Object, compression.Object, rateLimiter.Object);
+        Helpers.SetupControllerContext(ctrl);
 
         var result = ctrl.CheckId("999999999");
         var json = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result);
@@ -204,6 +205,7 @@ public class RegistrationControllerTests
         var compression = new Mock<IFileCompressionService>();
         var rateLimiter = new Mock<IRateLimiterService>();
         var ctrl = new RegistrationController(db, idGen.Object, env.Object, notifService.Object, auditService.Object, validator.Object, compression.Object, rateLimiter.Object);
+        Helpers.SetupControllerContext(ctrl);
 
         var result = ctrl.CheckId("123456789");
         var json = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result);
@@ -554,7 +556,8 @@ public class AdminControllerTests
         var auditService = new Mock<IAuditService>();
         var notifService = new Mock<INotificationService>();
         var validator = new Mock<IRegistrationValidationService>();
-        var ctrl = new AdminController(db, auditService.Object, notifService.Object, validator.Object);
+        var rateLimiter = new Mock<IRateLimiterService>();
+        var ctrl = new AdminController(db, auditService.Object, notifService.Object, validator.Object, rateLimiter.Object);
         var http = new DefaultHttpContext();
         http.Session = new TestSession();
         ctrl.ControllerContext = new ControllerContext { HttpContext = http };
