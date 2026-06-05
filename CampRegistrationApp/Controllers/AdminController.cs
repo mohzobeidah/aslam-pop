@@ -1019,6 +1019,7 @@ ORDER BY COUNT(*) DESC;
             var reg = await _context.FamilyRegistrations
                 .Include(f => f.FamilyHead).ThenInclude(h => h.Attachments)
                 .Include(f => f.ApprovedBy)
+                .Include(f => f.RejectedBy)
                 .Include(f => f.Members).ThenInclude(m => m.Person)
                 .Include(f => f.FamilyDesires).ThenInclude(fd => fd.Desire)
                 .Include(f => f.Sector)
@@ -1037,6 +1038,7 @@ ORDER BY COUNT(*) DESC;
             var query = _context.FamilyRegistrations
                 .Include(f => f.FamilyHead)
                 .Include(f => f.ApprovedBy)
+                .Include(f => f.RejectedBy)
                 .AsQueryable();
 
             var adminId = GetCurrentAdminId();
@@ -1068,6 +1070,9 @@ ORDER BY COUNT(*) DESC;
                     ApprovalStatus = f.ApprovalStatus,
                     ApprovedByName = f.ApprovedBy != null ? f.ApprovedBy.Name : null,
                     ApprovedAt = f.ApprovedAt,
+                    RejectedByName = f.RejectedBy != null ? f.RejectedBy.Name : null,
+                    RejectedAt = f.RejectedAt,
+                    RejectionReason = f.RejectionReason,
                     MemberCount = f.Members.Count
                 })
                 .ToListAsync();
@@ -1094,22 +1099,57 @@ ORDER BY COUNT(*) DESC;
             if (registration == null) return NotFound();
 
             var oldStatus = registration.ApprovalStatus;
+            var wasRejected = oldStatus == RegistrationApprovalStatus.Rejected;
+
+            string? previousRejectionByName = null;
+            if (wasRejected && registration.RejectedById.HasValue)
+            {
+                previousRejectionByName = await _context.Admins
+                    .Where(a => a.Id == registration.RejectedById.Value)
+                    .Select(a => a.Name)
+                    .FirstOrDefaultAsync();
+            }
+
+            var previousRejection = wasRejected
+                ? (object)new
+                {
+                    rejectedByName = previousRejectionByName ?? $"#{registration.RejectedById}",
+                    rejectedAt = registration.RejectedAt,
+                    rejectionReason = registration.RejectionReason
+                }
+                : null;
+
             registration.ApprovalStatus = RegistrationApprovalStatus.Approved;
             registration.ApprovedById = GetCurrentAdminId();
             registration.ApprovedAt = JerusalemTime.Now;
+            registration.RejectedById = null;
+            registration.RejectedAt = null;
+            registration.RejectionReason = null;
             await _context.SaveChangesAsync();
 
+            var approverName = await _context.Admins
+                .Where(a => a.Id == GetCurrentAdminId())
+                .Select(a => a.Name)
+                .FirstOrDefaultAsync();
+
+            var auditNew = new
+            {
+                status = RegistrationApprovalStatus.Approved.ToString(),
+                headName = registration.FamilyHead.FullName,
+                approvedByName = approverName ?? $"#{GetCurrentAdminId()}",
+                clearedPreviousRejection = previousRejection
+            };
             await _audit.LogAsync(GetCurrentAdminId(), "Approve", "FamilyRegistrations",
                 registration.RecordId,
-                new { status = oldStatus.ToString() },
-                new { status = RegistrationApprovalStatus.Approved.ToString(), headName = registration.FamilyHead.FullName });
+                new { status = oldStatus.ToString(), previousRejection },
+                auditNew);
 
             TempData["Success"] = "تم الموافقة على التسجيل بنجاح";
             return RedirectToAction("Registrations");
         }
 
         [HttpPost]
-        public async Task<IActionResult> RejectRegistration(int id)
+        public async Task<IActionResult> RejectRegistration(int id, string? reason)
         {
             if (!IsAuthenticated()) return Unauthorized();
 
@@ -1121,16 +1161,36 @@ ORDER BY COUNT(*) DESC;
                 .FirstOrDefaultAsync(f => f.Id == id);
             if (registration == null) return NotFound();
 
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                TempData["Error"] = "يجب إدخال سبب الرفض";
+                return RedirectToAction("Registrations", new { status = registration.ApprovalStatus.ToString() });
+            }
+
             var oldStatus = registration.ApprovalStatus;
+            var currentAdminId = GetCurrentAdminId();
             registration.ApprovalStatus = RegistrationApprovalStatus.Rejected;
-            registration.ApprovedById = GetCurrentAdminId();
-            registration.ApprovedAt = JerusalemTime.Now;
+            registration.RejectedById = currentAdminId;
+            registration.RejectedAt = JerusalemTime.Now;
+            registration.RejectionReason = reason.Trim();
             await _context.SaveChangesAsync();
 
-            await _audit.LogAsync(GetCurrentAdminId(), "Reject", "FamilyRegistrations",
+            var rejecterName = await _context.Admins
+                .Where(a => a.Id == currentAdminId)
+                .Select(a => a.Name)
+                .FirstOrDefaultAsync();
+
+            await _audit.LogAsync(currentAdminId, "Reject", "FamilyRegistrations",
                 registration.RecordId,
                 new { status = oldStatus.ToString() },
-                new { status = RegistrationApprovalStatus.Rejected.ToString(), headName = registration.FamilyHead.FullName });
+                new
+                {
+                    status = RegistrationApprovalStatus.Rejected.ToString(),
+                    headName = registration.FamilyHead.FullName,
+                    reason = registration.RejectionReason,
+                    rejectedByName = rejecterName ?? $"#{currentAdminId}",
+                    rejectedAt = registration.RejectedAt
+                });
 
             TempData["Success"] = "تم رفض التسجيل";
             return RedirectToAction("Registrations");

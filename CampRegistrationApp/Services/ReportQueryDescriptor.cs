@@ -85,6 +85,8 @@ public static class ReportQueryDescriptor
         if (!isPersonReport)
             sb.AppendLine($"• عرض أفراد العائلة في البيانات: {(filter.IncludeMembers ? "نعم" : "لا")}");
 
+        sb.AppendLine($"• تحتاج الحفاظات: {(filter.NeedsDiapers ? "نعم" : "لا")}");
+
         sb.AppendLine("── الأعمدة المختارة ──");
         var labels = ResolveColumnLabels(selectedColumns, displayColumns, columnGroups);
         if (labels.Count == 0)
@@ -169,7 +171,8 @@ public static class ReportQueryDescriptor
             ["AgeFrom"] = filter.AgeFrom,
             ["AgeTo"] = filter.AgeTo,
             ["Search"] = filter.Search,
-            ["IncludeMembers"] = filter.IncludeMembers
+            ["IncludeMembers"] = filter.IncludeMembers,
+            ["NeedsDiapers"] = filter.NeedsDiapers
         };
     }
 

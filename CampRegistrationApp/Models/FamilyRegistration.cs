@@ -51,6 +51,11 @@ namespace CampRegistrationApp.Models
         public virtual Admin? ApprovedBy { get; set; }
         public DateTime? ApprovedAt { get; set; }
 
+        public int? RejectedById { get; set; }
+        public virtual Admin? RejectedBy { get; set; }
+        public DateTime? RejectedAt { get; set; }
+        public string? RejectionReason { get; set; }
+
         public bool IsDeleted { get; set; }
         public int? DeletedById { get; set; }
         public virtual Admin? DeletedBy { get; set; }

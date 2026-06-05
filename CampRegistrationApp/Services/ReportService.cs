@@ -92,6 +92,8 @@ namespace CampRegistrationApp.Services
                         new() { Key = "IsFemaleHeaded", Label = "امرأة تعيل" },
                         new() { Key = "SupportsOutsidePerson", Label = "دعم خارج العائلة" },
                         new() { Key = "HasMultipleFamiliesInTent", Label = "أسر بنفس الخيمة" },
+                        new() { Key = "NeedsDiapers", Label = "تحتاج الحفاظات" },
+                        new() { Key = "DiaperDetails", Label = "تفاصيل الحفاظات" },
                     }
                 },
                 new ColumnGroup
@@ -177,6 +179,9 @@ namespace CampRegistrationApp.Services
             if (!string.IsNullOrEmpty(filter.HealthStatus))
                 query = query.Where(f => f.FamilyHead.HealthStatus == filter.HealthStatus);
 
+            if (filter.NeedsDiapers)
+                query = query.Where(f => f.NeedsDiapers);
+
             var registrations = await query
                 .OrderByDescending(f => f.RegistrationTimestamp)
                 .ToListAsync();
@@ -238,6 +243,8 @@ namespace CampRegistrationApp.Services
                 v["IsFemaleHeaded"] = reg.IsFemaleHeaded ? "نعم" : "لا";
                 v["SupportsOutsidePerson"] = reg.SupportsOutsidePerson ? "نعم" : "لا";
                 v["HasMultipleFamiliesInTent"] = reg.HasMultipleFamiliesInTent ? "نعم" : "لا";
+                v["NeedsDiapers"] = reg.NeedsDiapers ? "نعم" : "لا";
+                v["DiaperDetails"] = reg.DiaperDetails ?? "";
 
                 if (includeMembers)
                 {
@@ -322,6 +329,9 @@ namespace CampRegistrationApp.Services
                     f.FamilyHead.LastName.Contains(s) ||
                     f.RecordId.Contains(s));
             }
+
+            if (filter.NeedsDiapers)
+                familyQuery = familyQuery.Where(f => f.NeedsDiapers);
 
             var registrations = await familyQuery
                 .OrderByDescending(f => f.RegistrationTimestamp)

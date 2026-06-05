@@ -71,6 +71,9 @@ namespace CampRegistrationApp.Models.ViewModels
         public RegistrationApprovalStatus ApprovalStatus { get; set; }
         public string? ApprovedByName { get; set; }
         public DateTime? ApprovedAt { get; set; }
+        public string? RejectedByName { get; set; }
+        public DateTime? RejectedAt { get; set; }
+        public string? RejectionReason { get; set; }
         public int MemberCount { get; set; }
     }
 

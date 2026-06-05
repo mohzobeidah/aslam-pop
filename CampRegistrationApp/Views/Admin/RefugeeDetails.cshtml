@@ -158,6 +158,18 @@
                 <div><span class="text-gray-400">تمت الموافقة بواسطة:</span> <span class="text-white">@Model.ApprovedBy.Name</span></div>
                 <div><span class="text-gray-400">تاريخ الموافقة:</span> <span class="text-white">@Model.ApprovedAt?.ToString("yyyy/MM/dd HH:mm")</span></div>
             }
+            @if (Model.RejectedBy != null)
+            {
+                <div><span class="text-gray-400">رفض بواسطة:</span> <span class="text-white">@Model.RejectedBy.Name</span></div>
+                <div><span class="text-gray-400">تاريخ الرفض:</span> <span class="text-white">@Model.RejectedAt?.ToString("yyyy/MM/dd HH:mm")</span></div>
+                @if (!string.IsNullOrWhiteSpace(Model.RejectionReason))
+                {
+                    <div class="col-span-2 mt-1">
+                        <span class="text-gray-400">سبب الرفض:</span>
+                        <span class="text-white whitespace-pre-wrap">@Model.RejectionReason</span>
+                    </div>
+                }
+            }
         </div>
 
         <div class="mt-4 pt-4 border-t border-gray-700 flex gap-3 flex-wrap">
@@ -165,6 +177,22 @@
                class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition text-sm font-bold">
                 تعديل البيانات
             </a>
+            @if (Model.ApprovalStatus == RegistrationApprovalStatus.Pending)
+            {
+                <form method="post" asp-action="ApproveRegistration" asp-route-id="@Model.Id" class="inline">
+                    <button type="submit" class="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition text-sm font-bold">موافقة</button>
+                </form>
+                <button type="button" onclick="showRejectModal(@Model.Id, '@Model.FamilyHead.FullName')"
+                        class="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition text-sm font-bold">
+                    رفض
+                </button>
+            }
+            else if (Model.ApprovalStatus == RegistrationApprovalStatus.Rejected)
+            {
+                <form method="post" asp-action="ApproveRegistration" asp-route-id="@Model.Id" class="inline">
+                    <button type="submit" class="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition text-sm font-bold">إلغاء الرفض وتحويل إلى مقبول</button>
+                </form>
+            }
             @if (Model.ApprovalStatus == RegistrationApprovalStatus.Approved)
             {
                 <button type="button" onclick="resetPassword(@Model.Id, '@Model.FamilyHead.FullName')"
@@ -181,6 +209,36 @@
         </div>
     </div>
 </div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+    <div class="bg-camp-accent-grey rounded-xl border border-gray-700 p-6 w-full max-w-md">
+        <h3 class="text-lg text-camp-gold font-bold mb-3">رفض تسجيل: <span id="rejectModalHeadName"></span></h3>
+        <form id="rejectForm" method="post" asp-action="RejectRegistration">
+            <input type="hidden" name="id" id="rejectModalId" />
+            <label class="block text-camp-gold text-sm mb-1">سبب الرفض <span class="text-red-400">*</span></label>
+            <textarea name="reason" id="rejectReason" required minlength="3" rows="4"
+                      class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none"
+                      placeholder="اكتب سبب الرفض..."></textarea>
+            <div class="mt-4 flex gap-2 justify-end">
+                <button type="button" onclick="closeRejectModal()" class="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm">إلغاء</button>
+                <button type="submit" class="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm font-bold">تأكيد الرفض</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showRejectModal(id, name) {
+        document.getElementById('rejectModalId').value = id;
+        document.getElementById('rejectModalHeadName').textContent = name;
+        document.getElementById('rejectReason').value = '';
+        document.getElementById('rejectModal').classList.remove('hidden');
+    }
+    function closeRejectModal() {
+        document.getElementById('rejectModal').classList.add('hidden');
+    }
+</script>
 
 <!-- Family Members -->
 <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700 mt-6">

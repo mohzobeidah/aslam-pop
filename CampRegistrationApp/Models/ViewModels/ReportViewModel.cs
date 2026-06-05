@@ -43,6 +43,7 @@ namespace CampRegistrationApp.Models.ViewModels
         public int? AgeFrom { get; set; }
         public int? AgeTo { get; set; }
         public bool IncludeMembers { get; set; }
+        public bool NeedsDiapers { get; set; }
     }
 
     public class ReportRow

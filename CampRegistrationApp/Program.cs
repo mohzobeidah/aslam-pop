@@ -233,6 +233,15 @@ using (var scope = app.Services.CreateScope())
     db.Database.ExecuteSqlRaw(@"
         IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'ApprovedAt')
         ALTER TABLE [FamilyRegistrations] ADD [ApprovedAt] datetime2 NULL");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'RejectedById')
+        ALTER TABLE [FamilyRegistrations] ADD [RejectedById] int NULL");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'RejectedAt')
+        ALTER TABLE [FamilyRegistrations] ADD [RejectedAt] datetime2 NULL");
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('FamilyRegistrations') AND name = 'RejectionReason')
+        ALTER TABLE [FamilyRegistrations] ADD [RejectionReason] nvarchar(1000) NULL");
 
     // Create new lookup tables for existing databases
     db.Database.ExecuteSqlRaw(@"

@@ -104,8 +104,18 @@ else
                         </td>
                         @if (currentStatus != "Pending")
                         {
-                            <td class="p-3 text-center text-gray-300">@reg.ApprovedByName</td>
-                            <td class="p-3 text-center text-gray-400">@reg.ApprovedAt?.ToString("yyyy-MM-dd")</td>
+                            <td class="p-3 text-center text-gray-300">
+                                @(reg.ApprovalStatus == RegistrationApprovalStatus.Rejected ? reg.RejectedByName : reg.ApprovedByName)
+                                @if (reg.ApprovalStatus == RegistrationApprovalStatus.Rejected && !string.IsNullOrWhiteSpace(reg.RejectionReason))
+                                {
+                                    <div class="text-xs text-gray-400 mt-1" title="@reg.RejectionReason">
+                                        💬 @(reg.RejectionReason.Length > 40 ? reg.RejectionReason.Substring(0, 40) + "…" : reg.RejectionReason)
+                                    </div>
+                                }
+                            </td>
+                            <td class="p-3 text-center text-gray-400">
+                                @((reg.ApprovalStatus == RegistrationApprovalStatus.Rejected ? reg.RejectedAt : reg.ApprovedAt)?.ToString("yyyy-MM-dd HH:mm"))
+                            </td>
                         }
                         <td class="p-3 text-center">
                             <a asp-action="AdminEditRegistration" asp-route-id="@reg.Id"
@@ -118,10 +128,8 @@ else
                                     <input type="hidden" name="id" value="@reg.Id" />
                                     <button type="submit" class="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 transition ml-1 font-semibold">موافقة</button>
                                 </form>
-                                <form method="post" asp-action="RejectRegistration" class="inline">
-                                    <input type="hidden" name="id" value="@reg.Id" />
-                                    <button type="submit" class="bg-red-700 text-white px-3 py-1 rounded hover:bg-red-600 transition font-semibold">رفض</button>
-                                </form>
+                                <button type="button" onclick="showRejectModal(@reg.Id, '@reg.HeadName')"
+                                        class="bg-red-700 text-white px-3 py-1 rounded hover:bg-red-600 transition font-semibold">رفض</button>
                             }
                         </td>
                     </tr>
@@ -130,3 +138,33 @@ else
         </table>
     </div>
 }
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+    <div class="bg-camp-accent-grey rounded-xl border border-gray-700 p-6 w-full max-w-md">
+        <h3 class="text-lg text-camp-gold font-bold mb-3">رفض تسجيل: <span id="rejectModalHeadName"></span></h3>
+        <form id="rejectForm" method="post" asp-action="RejectRegistration">
+            <input type="hidden" name="id" id="rejectModalId" />
+            <label class="block text-camp-gold text-sm mb-1">سبب الرفض <span class="text-red-400">*</span></label>
+            <textarea name="reason" id="rejectReason" required minlength="3" rows="4"
+                      class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none"
+                      placeholder="اكتب سبب الرفض..."></textarea>
+            <div class="mt-4 flex gap-2 justify-end">
+                <button type="button" onclick="closeRejectModal()" class="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm">إلغاء</button>
+                <button type="submit" class="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm font-bold">تأكيد الرفض</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showRejectModal(id, name) {
+        document.getElementById('rejectModalId').value = id;
+        document.getElementById('rejectModalHeadName').textContent = name;
+        document.getElementById('rejectReason').value = '';
+        document.getElementById('rejectModal').classList.remove('hidden');
+    }
+    function closeRejectModal() {
+        document.getElementById('rejectModal').classList.add('hidden');
+    }
+</script>

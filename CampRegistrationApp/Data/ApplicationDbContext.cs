@@ -61,6 +61,12 @@ namespace CampRegistrationApp.Data
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<FamilyRegistration>()
+                .HasOne(f => f.RejectedBy)
+                .WithMany()
+                .HasForeignKey(f => f.RejectedById)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<FamilyRegistration>()
                 .HasOne(f => f.DeletedBy)
                 .WithMany()
                 .HasForeignKey(f => f.DeletedById)
