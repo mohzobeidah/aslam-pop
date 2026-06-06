@@ -1287,9 +1287,9 @@ ORDER BY COUNT(*) DESC;
                 .FirstOrDefaultAsync(f => f.Id == id);
             if (registration == null) return NotFound();
 
-            if (string.IsNullOrWhiteSpace(reason))
+            if (string.IsNullOrWhiteSpace(reason) || reason.Trim().Length < 3)
             {
-                TempData["Error"] = "يجب إدخال سبب الرفض";
+                TempData["Error"] = "يجب إدخال سبب الرفض (3 أحرف على الأقل)";
                 return RedirectToAction("Registrations", new { status = registration.ApprovalStatus.ToString() });
             }
 
