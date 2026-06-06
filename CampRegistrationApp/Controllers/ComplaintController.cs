@@ -115,9 +115,14 @@ namespace CampRegistrationApp.Controllers
             var complaint = await _context.Complaints
                 .AsNoTracking()
                 .Include(c => c.ResolvedBy)
+                .Include(c => c.FamilyRegistration!).ThenInclude(f => f.FamilyHead)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (complaint == null) return NotFound();
+
+            var headName = complaint.FamilyRegistration?.FamilyHead?.FullName;
+            var headId = complaint.FamilyRegistration?.FamilyHead?.IdNumber;
+            var recordId = complaint.FamilyRegistration?.RecordId;
 
             var vm = new ComplaintDetailsViewModel
             {
@@ -131,7 +136,10 @@ namespace CampRegistrationApp.Controllers
                 AdminResponse = complaint.AdminResponse,
                 ResolvedByName = complaint.ResolvedBy?.Name,
                 ResolvedAt = complaint.ResolvedAt,
-                CreatedAt = complaint.CreatedAt
+                CreatedAt = complaint.CreatedAt,
+                RefugeeName = headName,
+                RefugeeIdNumber = headId,
+                RefugeeRecordId = recordId
             };
 
             return View(vm);

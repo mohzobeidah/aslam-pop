@@ -38,6 +38,9 @@ public class Complaint
     public virtual Admin? ResolvedBy { get; set; }
     public DateTime? ResolvedAt { get; set; }
 
+    public int? FamilyRegistrationId { get; set; }
+    public virtual FamilyRegistration? FamilyRegistration { get; set; }
+
     public DateTime CreatedAt { get; set; } = JerusalemTime.Now;
 
     public bool IsDeleted { get; set; }

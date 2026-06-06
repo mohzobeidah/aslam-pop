@@ -349,10 +349,19 @@ namespace CampRegistrationApp.Data
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Complaint>()
+                .HasOne(c => c.FamilyRegistration)
+                .WithMany()
+                .HasForeignKey(c => c.FamilyRegistrationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Complaint>()
                 .HasQueryFilter(c => !c.IsDeleted);
 
             modelBuilder.Entity<Complaint>()
                 .HasIndex(c => c.CreatedAt);
+
+            modelBuilder.Entity<Complaint>()
+                .HasIndex(c => c.FamilyRegistrationId);
 
             base.OnModelCreating(modelBuilder);
         }

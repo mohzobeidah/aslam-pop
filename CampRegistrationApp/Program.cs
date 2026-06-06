@@ -499,6 +499,16 @@ using (var scope = app.Services.CreateScope())
         IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Complaints_TicketId')
         CREATE UNIQUE INDEX [IX_Complaints_TicketId] ON [Complaints] ([TicketId])");
 
+    // Add FamilyRegistrationId column to Complaints (migration for existing DBs)
+    db.Database.ExecuteSqlRaw(@"
+        IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Complaints') AND name = 'FamilyRegistrationId')
+        BEGIN
+            ALTER TABLE [Complaints] ADD [FamilyRegistrationId] int NULL;
+            ALTER TABLE [Complaints] ADD CONSTRAINT [FK_Complaints_FamilyRegistrations_FamilyRegistrationId]
+                FOREIGN KEY ([FamilyRegistrationId]) REFERENCES [FamilyRegistrations]([Id]) ON DELETE NO ACTION;
+            CREATE INDEX [IX_Complaints_FamilyRegistrationId] ON [Complaints] ([FamilyRegistrationId]);
+        END");
+
     // Seed default super admin if none exist
     if (!db.Admins.Any())
     {

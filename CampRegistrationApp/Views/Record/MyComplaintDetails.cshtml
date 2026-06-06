@@ -1,0 +1,79 @@
+@model RefugeeComplaintDetail
+@{
+    ViewData["Title"] = "تفاصيل الشكوى";
+}
+
+<div class="min-h-screen bg-camp-dark-grey text-white font-cairo" dir="rtl">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto">
+            <div class="mb-6">
+                <a asp-action="MyComplaints" class="text-gray-400 hover:text-camp-gold text-sm transition">← الشكاوى</a>
+                <h1 class="text-2xl text-camp-gold font-bold mt-1">@Model.Subject</h1>
+                <p class="text-gray-400 text-sm">رقم التتبع: <span class="font-mono text-camp-gold" dir="ltr">@Model.TicketId</span></p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Complaint Details -->
+                <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700">
+                    <h2 class="text-lg text-camp-gold font-bold mb-4">تفاصيل الشكوى</h2>
+                    <div class="space-y-3 text-sm">
+                        <div>
+                            <span class="text-gray-400">الحالة:</span>
+                            @{
+                                var statusColor = Model.Status switch
+                                {
+                                    "Pending" => "text-yellow-400",
+                                    "InProgress" => "text-blue-400",
+                                    "Resolved" => "text-green-400",
+                                    _ => "text-gray-400"
+                                };
+                                var statusText = Model.Status switch
+                                {
+                                    "Pending" => "قيد الانتظار",
+                                    "InProgress" => "قيد المعالجة",
+                                    "Resolved" => "تم الحل",
+                                    _ => Model.Status
+                                };
+                            }
+                            <span class="@statusColor font-bold">@statusText</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">تاريخ التقديم:</span>
+                            <span class="text-white">@Model.CreatedAt.ToString("yyyy/MM/dd HH:mm")</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.ResolvedByName))
+                        {
+                            <div><span class="text-gray-400">تم الحل بواسطة:</span> <span class="text-white">@Model.ResolvedByName</span></div>
+                            <div><span class="text-gray-400">تاريخ الحل:</span> <span class="text-white">@Model.ResolvedAt?.ToString("yyyy/MM/dd HH:mm")</span></div>
+                        }
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <label class="block text-sm text-gray-400 mb-2">الرسالة</label>
+                        <div class="bg-camp-dark-grey p-3 rounded text-sm text-white whitespace-pre-wrap">@Model.Message</div>
+                    </div>
+                </div>
+
+                <!-- Admin Response -->
+                <div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700">
+                    <h2 class="text-lg text-camp-gold font-bold mb-4">الرد على الشكوى</h2>
+                    @if (!string.IsNullOrEmpty(Model.AdminResponse))
+                    {
+                        <div class="bg-camp-dark-grey p-3 rounded text-sm text-white whitespace-pre-wrap border border-gray-600">
+                            @Model.AdminResponse
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-gray-500 text-sm text-center py-8">
+                            لم يتم الرد على الشكوى بعد
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <a asp-action="MyComplaints" class="text-gray-400 hover:text-camp-gold text-sm transition">← العودة إلى قائمة الشكاوى</a>
+            </div>
+        </div>
+    </div>
+</div>

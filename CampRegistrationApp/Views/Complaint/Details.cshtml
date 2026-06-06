@@ -34,6 +34,15 @@
             {
                 <div><span class="text-gray-400">الهاتف:</span> <span class="text-white" dir="ltr">@Model.SenderPhone</span></div>
             }
+            @if (!string.IsNullOrEmpty(Model.RefugeeName))
+            {
+                <div class="border-t border-gray-700 pt-3 mt-3">
+                    <h3 class="text-sm text-camp-gold font-bold mb-2">بيانات المسجل</h3>
+                    <div><span class="text-gray-400">الاسم:</span> <span class="text-white">@Model.RefugeeName</span></div>
+                    <div><span class="text-gray-400">رقم الهوية:</span> <span class="text-white">@Model.RefugeeIdNumber</span></div>
+                    <div><span class="text-gray-400">معرف التسجيل:</span> <span class="font-mono text-camp-gold">@Model.RefugeeRecordId</span></div>
+                </div>
+            }
             @if (!string.IsNullOrEmpty(Model.ResolvedByName))
             {
                 <div><span class="text-gray-400">تم الحل بواسطة:</span> <span class="text-white">@Model.ResolvedByName</span></div>

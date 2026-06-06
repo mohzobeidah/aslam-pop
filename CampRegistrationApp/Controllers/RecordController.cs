@@ -18,8 +18,9 @@ namespace CampRegistrationApp.Controllers
         private readonly IRegistrationValidationService _validator;
         private readonly IFileCompressionService _compression;
         private readonly IRateLimiterService _rateLimiter;
+        private readonly IComplaintIdGenerator _complaintIdGen;
 
-        public RecordController(ApplicationDbContext context, IAuditService audit, INotificationService notificationService, IWebHostEnvironment env, IRegistrationValidationService validator, IFileCompressionService compression, IRateLimiterService rateLimiter)
+        public RecordController(ApplicationDbContext context, IAuditService audit, INotificationService notificationService, IWebHostEnvironment env, IRegistrationValidationService validator, IFileCompressionService compression, IRateLimiterService rateLimiter, IComplaintIdGenerator complaintIdGen)
         {
             _context = context;
             _audit = audit;
@@ -28,6 +29,7 @@ namespace CampRegistrationApp.Controllers
             _validator = validator;
             _compression = compression;
             _rateLimiter = rateLimiter;
+            _complaintIdGen = complaintIdGen;
         }
 
         private const string MustChangePasswordSessionKey = "MustChangePassword";
@@ -624,13 +626,133 @@ namespace CampRegistrationApp.Controllers
             return RedirectToAction("Edit");
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpGet]
         public IActionResult Logout()
         {
             HttpContext.Session.Remove("EditRegistrationId");
             HttpContext.Session.Remove(MustChangePasswordSessionKey);
             return RedirectToAction("Login");
+        }
+
+        // ========== REFUGEE COMPLAINTS ==========
+
+        [HttpGet]
+        public async Task<IActionResult> MyComplaints()
+        {
+            var regId = HttpContext.Session.GetInt32("EditRegistrationId");
+            if (regId == null) return RedirectToAction("Login");
+
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
+                .FirstOrDefaultAsync(f => f.Id == regId);
+            if (registration == null) return RedirectToAction("Login");
+
+            var complaints = await _context.Complaints
+                .AsNoTracking()
+                .Where(c => c.FamilyRegistrationId == regId)
+                .OrderByDescending(c => c.CreatedAt)
+                .Select(c => new RefugeeComplaintListItem
+                {
+                    Id = c.Id,
+                    TicketId = c.TicketId,
+                    Subject = c.Subject,
+                    Status = c.Status.ToString(),
+                    StatusNum = (int)c.Status,
+                    AdminResponse = c.AdminResponse,
+                    CreatedAt = c.CreatedAt
+                })
+                .ToListAsync();
+
+            ViewBag.HeadName = registration.FamilyHead.FullName;
+            return View(complaints);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> MyComplaintDetails(string ticketId)
+        {
+            var regId = HttpContext.Session.GetInt32("EditRegistrationId");
+            if (regId == null) return RedirectToAction("Login");
+
+            var complaint = await _context.Complaints
+                .AsNoTracking()
+                .Include(c => c.ResolvedBy)
+                .FirstOrDefaultAsync(c => c.TicketId == ticketId && c.FamilyRegistrationId == regId);
+
+            if (complaint == null) return NotFound();
+
+            var vm = new RefugeeComplaintDetail
+            {
+                Id = complaint.Id,
+                TicketId = complaint.TicketId,
+                Subject = complaint.Subject,
+                Message = complaint.Message,
+                Status = complaint.Status.ToString(),
+                StatusNum = (int)complaint.Status,
+                AdminResponse = complaint.AdminResponse,
+                ResolvedByName = complaint.ResolvedBy?.Name,
+                ResolvedAt = complaint.ResolvedAt,
+                CreatedAt = complaint.CreatedAt
+            };
+
+            return View(vm);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateComplaint()
+        {
+            var regId = HttpContext.Session.GetInt32("EditRegistrationId");
+            if (regId == null) return RedirectToAction("Login");
+
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
+                .FirstOrDefaultAsync(f => f.Id == regId);
+            if (registration == null) return RedirectToAction("Login");
+
+            ViewBag.HeadName = registration.FamilyHead.FullName;
+            ViewBag.HeadPhone = registration.PhoneNumber;
+            return View(new RefugeeComplaintCreate());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateComplaint(RefugeeComplaintCreate model)
+        {
+            var regId = HttpContext.Session.GetInt32("EditRegistrationId");
+            if (regId == null) return RedirectToAction("Login");
+
+            var registration = await _context.FamilyRegistrations
+                .Include(f => f.FamilyHead)
+                .FirstOrDefaultAsync(f => f.Id == regId);
+            if (registration == null) return RedirectToAction("Login");
+
+            ViewBag.HeadName = registration.FamilyHead.FullName;
+            ViewBag.HeadPhone = registration.PhoneNumber;
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var ticketId = await _complaintIdGen.GenerateUniqueIdAsync();
+
+            var complaint = new Complaint
+            {
+                TicketId = ticketId,
+                Subject = model.Subject,
+                Message = model.Message,
+                SenderName = registration.FamilyHead.FullName,
+                SenderPhone = registration.PhoneNumber,
+                FamilyRegistrationId = regId,
+                Status = ComplaintStatus.Pending
+            };
+
+            _context.Complaints.Add(complaint);
+            await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(0, "CreateComplaint", "Complaints",
+                complaint.Id.ToString(), null,
+                new { complaint.TicketId, complaint.Subject, registrationId = regId });
+
+            TempData["Success"] = "تم إرسال الشكوى بنجاح. رقم التتبع: " + ticketId;
+            return RedirectToAction("MyComplaints");
         }
 
         private RegistrationViewModel MapToViewModel(FamilyRegistration registration)

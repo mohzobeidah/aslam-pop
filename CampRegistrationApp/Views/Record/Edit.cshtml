@@ -11,9 +11,12 @@
                 <p class="text-gray-400">معرف التسجيل: <span class="font-mono text-camp-gold">@Model.RecordId</span></p>
                 @if (!mustChangePassword)
                 {
-                    <div class="mt-4">
+                    <div class="mt-4 flex gap-3 justify-center flex-wrap">
                         <a href="@Url.Action("ChangePassword")" class="inline-block px-6 py-2 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors text-sm">
                             تغيير كلمة المرور
+                        </a>
+                        <a href="@Url.Action("MyComplaints")" class="inline-block px-6 py-2 rounded border border-camp-gold text-camp-gold font-bold hover:bg-camp-gold hover:text-camp-dark-grey transition-colors text-sm">
+                            الشكاوى
                         </a>
                     </div>
                 }
@@ -511,7 +514,7 @@
 
                         <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
                             <input type="checkbox" name="NeedsDiapers" value="true" class="accent-camp-gold" @(Model.NeedsDiapers ? "checked" : "") onchange="toggleSection(this, 'diaper-details')" />
-                            <label>هل تحتاج العائلة حفائظ (لكبار السن أو آخرين)؟</label>
+                             <label>هل تحتاج العائلة حفائظ لكبار السن؟</label>
                         </div>
                         <div id="diaper-details" class="@(Model.NeedsDiapers ? "" : "hidden") p-4 bg-camp-dark-grey rounded border border-gray-700">
                             <textarea name="DiaperDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2">@Model.DiaperDetails</textarea>

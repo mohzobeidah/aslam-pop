@@ -14,6 +14,11 @@
         <div class="bg-red-900/50 text-red-300 p-3 rounded-lg mb-4 text-sm">@errorMsg</div>
     }
 
+    <div class="bg-blue-900/30 border border-blue-500/50 text-blue-300 p-4 rounded-lg mb-6 text-sm">
+        <p class="font-bold mb-1">⚠️ ملاحظة هامة</p>
+        <p>لتتمكن من متابعة حالة شكواك والتعرّف على الرد، يجب عليك <a href="@Url.Action("Login", "Record")" class="text-camp-gold hover:text-yellow-500 underline">تسجيل الدخول</a> أولاً كمسجل (رب أسرة) ثم تقديم الشكوى من داخل حسابك. الشكاوى المقدمة بدون تسجيل دخول لا يمكن تتبعها.</p>
+    </div>
+
     <form method="post" class="bg-camp-accent-grey p-6 rounded-xl border border-gray-700 space-y-4">
         <div>
             <label class="block text-sm mb-1">الموضوع <span class="text-red-500">*</span></label>
