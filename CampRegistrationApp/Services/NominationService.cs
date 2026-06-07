@@ -1,3 +1,4 @@
+using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
 using CampRegistrationApp.Data;
 using CampRegistrationApp.Models;
@@ -9,10 +10,31 @@ public interface INominationService
 {
     Task<NominationPageViewModel> GetNominationPageAsync(int projectId, int delegateId, bool isAdmin);
     Task AddOrUpdateRowAsync(int projectId, int personId, int sectorId, int delegateId, string? description, string? notes);
+    Task AddMultipleRowsAsync(int projectId, List<int> personIds, int delegateId, string? notes);
     Task DeleteRowAsync(int nominationId);
     Task<bool> PersonIsNominatedInProjectAsync(int projectId, int personId);
     Task<Person?> FindPersonByIdNumberAsync(string idNumber);
     Task<List<Person>> SearchPersonsAsync(string query, string? sectorName = null);
+    Task<List<FamilyHeadListItem>> GetFamilyHeadsAsync(string? sectorName = null, int? projectId = null);
+    Task<BulkImportResult> ImportFromExcelAsync(Stream excelStream, int projectId, int delegateId);
+}
+
+public class FamilyHeadListItem
+{
+    public int Id { get; set; }
+    public string FullName { get; set; } = string.Empty;
+    public string IdNumber { get; set; } = string.Empty;
+    public string? Phone { get; set; }
+    public string? Sector { get; set; }
+    public bool AlreadyNominated { get; set; }
+}
+
+public class BulkImportResult
+{
+    public int SuccessCount { get; set; }
+    public int SkippedCount { get; set; }
+    public int NotFoundCount { get; set; }
+    public List<string> Errors { get; set; } = new();
 }
 
 public class NominationService : INominationService
@@ -207,5 +229,198 @@ public class NominationService : INominationService
                 || (p.FirstName + " " + p.SecondName + " " + p.ThirdName + " " + p.LastName).Contains(query))
             .Take(20)
             .ToListAsync();
+    }
+
+    public async Task AddMultipleRowsAsync(int projectId, List<int> personIds, int delegateId, string? notes)
+    {
+        foreach (var personId in personIds)
+        {
+            var existing = await _context.Nominations
+                .AnyAsync(n => n.ProjectId == projectId && n.PersonId == personId && !n.IsDeleted);
+            if (existing) continue;
+
+            var sectorName = await _context.FamilyRegistrations
+                .Where(fr => fr.FamilyHeadId == personId)
+                .Select(fr => fr.Sector.Name)
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrEmpty(sectorName)) continue;
+
+            var sectorEntity = await _context.Sectors
+                .FirstOrDefaultAsync(s => s.Name == sectorName);
+            if (sectorEntity == null) continue;
+
+            var quota = await _context.ProjectSectorQuotas
+                .AsNoTracking()
+                .FirstOrDefaultAsync(q => q.ProjectId == projectId && q.SectorId == sectorEntity.Id);
+
+            if (quota != null && quota.MaxCount > 0)
+            {
+                var currentCount = await _context.Nominations
+                    .CountAsync(n => n.ProjectId == projectId && n.SectorId == sectorEntity.Id && !n.IsDeleted);
+                if (currentCount >= quota.MaxCount) continue;
+            }
+
+            _context.Nominations.Add(new Nomination
+            {
+                ProjectId = projectId,
+                PersonId = personId,
+                SectorId = sectorEntity.Id,
+                DelegateId = delegateId,
+                Notes = notes,
+                Status = NominationStatus.Draft
+            });
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<FamilyHeadListItem>> GetFamilyHeadsAsync(string? sectorName = null, int? projectId = null)
+    {
+        var query = _context.FamilyRegistrations
+            .AsNoTracking()
+            .Include(fr => fr.FamilyHead)
+            .Include(fr => fr.Sector)
+            .Where(fr => !fr.IsDeleted);
+
+        if (!string.IsNullOrEmpty(sectorName))
+            query = query.Where(fr => fr.Sector.Name == sectorName);
+
+        var heads = await query
+            .Select(fr => new
+            {
+                fr.FamilyHead.Id,
+                fr.FamilyHead.FirstName,
+                fr.FamilyHead.SecondName,
+                fr.FamilyHead.ThirdName,
+                fr.FamilyHead.LastName,
+                fr.FamilyHead.IdNumber,
+                fr.PhoneNumber,
+                SectorName = fr.Sector.Name
+            })
+            .ToListAsync();
+
+        List<int>? alreadyNominatedIds = null;
+        if (projectId.HasValue)
+        {
+            alreadyNominatedIds = await _context.Nominations
+                .AsNoTracking()
+                .Where(n => n.ProjectId == projectId.Value && !n.IsDeleted)
+                .Select(n => n.PersonId)
+                .ToListAsync();
+        }
+
+        return heads
+            .OrderBy(h => h.FirstName)
+            .ThenBy(h => h.SecondName)
+            .ThenBy(h => h.ThirdName)
+            .ThenBy(h => h.LastName)
+            .Select(h => new FamilyHeadListItem
+            {
+                Id = h.Id,
+                FullName = $"{h.FirstName} {h.SecondName} {h.ThirdName} {h.LastName}",
+                IdNumber = h.IdNumber,
+                Phone = h.PhoneNumber,
+                Sector = h.SectorName,
+                AlreadyNominated = alreadyNominatedIds?.Contains(h.Id) ?? false
+            }).ToList();
+    }
+
+    public async Task<BulkImportResult> ImportFromExcelAsync(Stream excelStream, int projectId, int delegateId)
+    {
+        var result = new BulkImportResult();
+
+        using var workbook = new ClosedXML.Excel.XLWorkbook(excelStream);
+        var ws = workbook.Worksheet(1);
+        var range = ws.RangeUsed();
+        var rows = range != null ? range.RowsUsed().Skip(1) : Enumerable.Empty<ClosedXML.Excel.IXLRangeRow>();
+
+        foreach (var row in rows)
+        {
+            var nationalId = row.Cell(1).GetString().Trim();
+            var notes = row.Cell(2).GetString().Trim();
+
+            if (string.IsNullOrEmpty(nationalId))
+            {
+                result.NotFoundCount++;
+                continue;
+            }
+
+            var person = await _context.Persons
+                .FirstOrDefaultAsync(p => p.IdNumber == nationalId);
+
+            if (person == null)
+            {
+                result.NotFoundCount++;
+                result.Errors.Add($"رقم الهوية {nationalId} غير موجود في النظام");
+                continue;
+            }
+
+            var isHead = await _context.FamilyRegistrations
+                .AnyAsync(fr => fr.FamilyHeadId == person.Id && !fr.IsDeleted);
+
+            if (!isHead)
+            {
+                result.SkippedCount++;
+                result.Errors.Add($"{person.FullName} ({nationalId}) ليس رب أسرة");
+                continue;
+            }
+
+            var existing = await _context.Nominations
+                .AnyAsync(n => n.ProjectId == projectId && n.PersonId == person.Id && !n.IsDeleted);
+            if (existing)
+            {
+                result.SkippedCount++;
+                result.Errors.Add($"{person.FullName} ({nationalId}) مرشح مسبقاً");
+                continue;
+            }
+
+            var sectorName = await _context.FamilyRegistrations
+                .Where(fr => fr.FamilyHeadId == person.Id)
+                .Select(fr => fr.Sector.Name)
+                .FirstOrDefaultAsync();
+            if (string.IsNullOrEmpty(sectorName))
+            {
+                result.SkippedCount++;
+                continue;
+            }
+
+            var sectorEntity = await _context.Sectors
+                .FirstOrDefaultAsync(s => s.Name == sectorName);
+            if (sectorEntity == null)
+            {
+                result.SkippedCount++;
+                continue;
+            }
+
+            var quota = await _context.ProjectSectorQuotas
+                .AsNoTracking()
+                .FirstOrDefaultAsync(q => q.ProjectId == projectId && q.SectorId == sectorEntity.Id);
+            if (quota != null && quota.MaxCount > 0)
+            {
+                var currentCount = await _context.Nominations
+                    .CountAsync(n => n.ProjectId == projectId && n.SectorId == sectorEntity.Id && !n.IsDeleted);
+                if (currentCount >= quota.MaxCount)
+                {
+                    result.SkippedCount++;
+                    result.Errors.Add($"{person.FullName} ({nationalId}) تجاوز الحد الأقصى للقطاع");
+                    continue;
+                }
+            }
+
+            _context.Nominations.Add(new Nomination
+            {
+                ProjectId = projectId,
+                PersonId = person.Id,
+                SectorId = sectorEntity.Id,
+                DelegateId = delegateId,
+                Notes = string.IsNullOrEmpty(notes) ? null : notes,
+                Status = NominationStatus.Draft
+            });
+            result.SuccessCount++;
+        }
+
+        await _context.SaveChangesAsync();
+        return result;
     }
 }
