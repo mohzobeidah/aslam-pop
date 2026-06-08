@@ -6,22 +6,31 @@ public class ProjectViewModel
 {
     public int Id { get; set; }
 
+    [Display(Name = "اسم المشروع")]
     [Required(ErrorMessage = "اسم المشروع مطلوب")]
     [MaxLength(200)]
     public string Name { get; set; } = string.Empty;
 
+    [Display(Name = "تاريخ البداية")]
     [Required(ErrorMessage = "تاريخ بداية الترشيح مطلوب")]
     public DateTime StartDate { get; set; } = DateTime.Today;
 
+    [Display(Name = "تاريخ النهاية")]
     [Required(ErrorMessage = "تاريخ نهاية الترشيح مطلوب")]
     public DateTime EndDate { get; set; } = DateTime.Today.AddDays(30);
 
+    [Display(Name = "العدد المطلوب")]
     [Required(ErrorMessage = "العدد المطلوب مطلوب")]
     [Range(1, 1000, ErrorMessage = "العدد المطلوب يجب أن يكون بين 1 و 1000")]
     public int RequiredCount { get; set; } = 10;
 
+    [Display(Name = "الحالة")]
     public ProjectStatus Status { get; set; } = ProjectStatus.Draft;
+
+    [Display(Name = "الوصف")]
     public string? Description { get; set; }
+
+    [Display(Name = "ملاحظات")]
     public string? Notes { get; set; }
 
     public List<SectorQuotaViewModel> SectorQuotas { get; set; } = new();

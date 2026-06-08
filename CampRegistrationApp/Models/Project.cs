@@ -4,8 +4,11 @@ namespace CampRegistrationApp.Models;
 
 public enum ProjectStatus
 {
+    [Display(Name = "مسودة")]
     Draft,
+    [Display(Name = "نشط")]
     Active,
+    [Display(Name = "مغلق")]
     Closed
 }
 
