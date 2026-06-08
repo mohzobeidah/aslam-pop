@@ -204,6 +204,12 @@ Camp family registration system in two versions:
   - Row count
 - **AdminSectorId** stored in session on login (`AdminController`) for ماندوب sector-scoped reports.
 
+### Nomination Audit Logging — Names not Numbers
+- All nomination audit log entries (`AddNomination`, `AddMultipleNominations`, `DeleteNomination`, `ImportNominationsExcel`) must log **names** (project name, person name, sector name, admin name) instead of numeric IDs
+- Logs use Arabic property names for `NewValues` (e.g. `المشروع`, `الشخص`, `القطاع`, `المسؤول`)
+- Each entry fetches the related entity name from DB before logging, never logs raw `projectId`, `personId`, `sectorId` alone
+- `RecordId` includes human-readable description like `المشروع:{projectName},الشخص:{personName}`
+
 ## Key Conventions (both versions)
 - All UI text in Arabic, RTL layout, Cairo font, dark theme (`#121212` + `#d4af37` gold).
 - 8-char Record ID from charset `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`.

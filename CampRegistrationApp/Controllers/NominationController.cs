@@ -92,7 +92,14 @@ public class NominationController : Controller
                 throw new InvalidOperationException("لم يتم العثور على القطاع في النظام");
 
             await _nominationService.AddOrUpdateRowAsync(projectId, personId, sectorEntity.Id, delegateId, description, notes);
-            await _audit.LogAsync(delegateId, "AddNomination", "Nominations", $"project:{projectId},person:{personId}", null, new { projectId, personId, sectorId = sectorEntity.Id });
+
+            var projectName = await _context.Projects.Where(p => p.Id == projectId).Select(p => p.Name).FirstOrDefaultAsync();
+            var personName = await _context.Persons.Where(p => p.Id == personId).Select(p => p.FullName).FirstOrDefaultAsync();
+            var adminName = await _context.Admins.Where(a => a.Id == delegateId).Select(a => a.Name).FirstOrDefaultAsync();
+            await _audit.LogAsync(delegateId, "AddNomination", "Nominations",
+                $"المشروع:{projectName},الشخص:{personName}",
+                null,
+                new { المشروع = projectName, الشخص = personName, القطاع = sectorEntity.Name, المسؤول = adminName });
             TempData["Success"] = "تمت إضافة الترشيح بنجاح";
         }
         catch (Exception ex)
@@ -109,8 +116,19 @@ public class NominationController : Controller
     {
         if (!IsAuthenticated()) return RedirectToAction("Login", "Admin");
 
+        var nomination = await _context.Nominations
+            .Include(n => n.Person)
+            .Include(n => n.Project)
+            .FirstOrDefaultAsync(n => n.Id == id);
+        var personName = nomination?.Person?.FullName;
+        var projectName = nomination?.Project?.Name;
+        var adminName = await _context.Admins.Where(a => a.Id == GetCurrentAdminId()).Select(a => a.Name).FirstOrDefaultAsync();
+
         await _nominationService.DeleteRowAsync(id);
-        await _audit.LogAsync(GetCurrentAdminId(), "DeleteNomination", "Nominations", id.ToString(), null, null);
+        await _audit.LogAsync(GetCurrentAdminId(), "DeleteNomination", "Nominations",
+            $"المشروع:{projectName},الشخص:{personName}",
+            nomination != null ? new { المشروع = projectName, الشخص = personName, تاريخ_الحذف = DateTime.UtcNow, المسؤول = adminName } : null,
+            null);
 
         TempData["Success"] = "تم حذف الترشيح";
         return RedirectToAction("Index", new { projectId });
@@ -184,9 +202,14 @@ public class NominationController : Controller
         try
         {
             await _nominationService.AddMultipleRowsAsync(projectId, personIds, delegateId, notes);
+
+            var projectName = await _context.Projects.Where(p => p.Id == projectId).Select(p => p.Name).FirstOrDefaultAsync();
+            var personNames = await _context.Persons.Where(p => personIds.Contains(p.Id)).Select(p => p.FullName).ToListAsync();
+            var adminName = await _context.Admins.Where(a => a.Id == delegateId).Select(a => a.Name).FirstOrDefaultAsync();
             await _audit.LogAsync(delegateId, "AddMultipleNominations", "Nominations",
-                $"project:{projectId},count:{personIds.Count}", null,
-                new { projectId, personIds, count = personIds.Count });
+                $"المشروع:{projectName},عدد:{personIds.Count}",
+                null,
+                new { المشروع = projectName, الأشخاص = string.Join("، ", personNames), العدد = personIds.Count, المسؤول = adminName });
             TempData["Success"] = $"تمت إضافة {personIds.Count} ترشيح بنجاح";
         }
         catch (Exception ex)
@@ -219,14 +242,17 @@ public class NominationController : Controller
 
             var result = await _nominationService.ImportFromExcelAsync(stream, projectId, delegateId);
 
+            var projectName = await _context.Projects.Where(p => p.Id == projectId).Select(p => p.Name).FirstOrDefaultAsync();
+            var importAdmin = await _context.Admins.Where(a => a.Id == delegateId).Select(a => a.Name).FirstOrDefaultAsync();
             await _audit.LogAsync(delegateId, "ImportNominationsExcel", "Nominations",
-                $"project:{projectId}", null,
+                $"المشروع:{projectName}", null,
                 new
                 {
-                    projectId,
-                    result.SuccessCount,
-                    result.SkippedCount,
-                    result.NotFoundCount
+                    المشروع = projectName,
+                    تم_الاستيراد = result.SuccessCount,
+                    تم_التخطي = result.SkippedCount,
+                    غير_موجودين = result.NotFoundCount,
+                    المسؤول = importAdmin
                 });
 
             var msg = $"تم استيراد {result.SuccessCount} ترشيح";
