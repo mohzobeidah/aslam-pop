@@ -218,17 +218,32 @@ public class NominationService : INominationService
 
         if (!string.IsNullOrEmpty(sectorName))
         {
-            var sectorPersonIds = _context.FamilyRegistrations
-                .Where(fr => fr.Sector.Name == sectorName)
-                .Select(fr => fr.FamilyHeadId);
-            q = q.Where(p => sectorPersonIds.Contains(p.Id));
+            var regsInSector = _context.FamilyRegistrations
+                .Where(fr => fr.Sector.Name == sectorName);
+            var headIds = regsInSector.Select(fr => fr.FamilyHeadId);
+            var regIds = regsInSector.Select(fr => fr.Id);
+            var memberIds = _context.FamilyMembers
+                .Where(fm => regIds.Contains(fm.RegistrationId))
+                .Select(fm => fm.PersonId);
+            q = q.Where(p => headIds.Contains(p.Id) || memberIds.Contains(p.Id));
         }
 
-        return await q
-            .Where(p => p.IdNumber.Contains(query)
-                || (p.FirstName + " " + p.SecondName + " " + p.ThirdName + " " + p.LastName).Contains(query))
-            .Take(20)
-            .ToListAsync();
+        if (query.Contains('%'))
+        {
+            var parts = query.Split('%', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var part in parts)
+            {
+                var pn = part;
+                q = q.Where(p => (p.FirstName + " " + p.SecondName + " " + p.ThirdName + " " + p.LastName).Contains(pn));
+            }
+        }
+        else
+        {
+            q = q.Where(p => p.IdNumber.Contains(query)
+                || (p.FirstName + " " + p.SecondName + " " + p.ThirdName + " " + p.LastName).Contains(query));
+        }
+
+        return await q.Take(100).ToListAsync();
     }
 
     public async Task AddMultipleRowsAsync(int projectId, List<int> personIds, int delegateId, string? notes)

@@ -135,6 +135,7 @@
             <button onclick="searchPerson()" class="w-full sm:w-auto bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition font-bold text-sm">بحث</button>
             <button onclick="openBulkModal()" class="w-full sm:w-auto bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-500 transition font-bold text-sm">إضافة متعددة</button>
             <button onclick="openExcelModal()" class="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition font-bold text-sm">رفع Excel</button>
+            <a asp-action="ExportExcel" asp-route-projectId="@Model.ProjectId" class="w-full sm:w-auto bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition font-bold text-sm text-center">تصدير Excel</a>
         </div>
 
         <div id="searchResults" class="hidden">
@@ -320,7 +321,7 @@
                     return;
                 }
 
-                const items = data.slice(0, 10);
+                const items = data.slice(0, 100);
 
                 const checkPromises = items.map(p =>
                     fetch(`/Nomination/CheckPersonInProject?projectId=@Model.ProjectId&personId=${p.id}`)

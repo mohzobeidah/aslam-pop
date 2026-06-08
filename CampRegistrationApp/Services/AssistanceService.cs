@@ -161,11 +161,24 @@ public class AssistanceService : IAssistanceService
         }
 
         if (query.All(char.IsDigit))
+        {
             q = q.Where(p => p.IdNumber.Contains(query));
+        }
+        else if (query.Contains('%'))
+        {
+            var parts = query.Split('%', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var part in parts)
+            {
+                var pn = part;
+                q = q.Where(p => (p.FirstName + " " + p.SecondName + " " + p.ThirdName + " " + p.LastName).Contains(pn));
+            }
+        }
         else
+        {
             q = q.Where(p => (p.FirstName + " " + p.SecondName + " " + p.ThirdName + " " + p.LastName).Contains(query));
+        }
 
-        return await q.Take(20).ToListAsync();
+        return await q.Take(100).ToListAsync();
     }
 
     // ── Beneficiaries ──

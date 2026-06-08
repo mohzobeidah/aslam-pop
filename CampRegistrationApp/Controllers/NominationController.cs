@@ -5,6 +5,7 @@ using CampRegistrationApp.Data;
 using CampRegistrationApp.Models;
 using CampRegistrationApp.Models.ViewModels;
 using CampRegistrationApp.Services;
+using System.Data;
 
 namespace CampRegistrationApp.Controllers;
 
@@ -260,5 +261,139 @@ public class NominationController : Controller
         workbook.SaveAs(stream);
         var bytes = stream.ToArray();
         return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "قالب_ترشيحات.xlsx");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExportExcel(int projectId)
+    {
+        if (!IsAuthenticated()) return RedirectToAction("Login", "Admin");
+
+        var isAdmin = IsSuperAdmin();
+        var delegateId = GetCurrentAdminId();
+
+        int? adminSectorId = null;
+        if (!isAdmin)
+        {
+            var admin = await _context.Admins
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == delegateId);
+            adminSectorId = admin?.SectorId;
+        }
+
+        var nominationsQuery = _context.Nominations
+            .AsNoTracking()
+            .Include(n => n.Person)
+            .Where(n => n.ProjectId == projectId && !n.IsDeleted);
+
+        if (adminSectorId.HasValue)
+            nominationsQuery = nominationsQuery.Where(n => n.SectorId == adminSectorId.Value);
+
+        var nominations = await nominationsQuery.ToListAsync();
+        var personIds = nominations.Select(n => n.PersonId).ToList();
+
+        var registrations = await _context.FamilyRegistrations
+            .AsNoTracking()
+            .Include(fr => fr.FamilyHead)
+            .Include(fr => fr.Members).ThenInclude(m => m.Person)
+            .Where(fr => personIds.Contains(fr.FamilyHeadId) && !fr.IsDeleted)
+            .ToListAsync();
+
+        var regMap = registrations.ToDictionary(fr => fr.FamilyHeadId);
+
+        int maxWives = 0;
+        foreach (var reg in registrations)
+        {
+            var wifeCount = reg.Members.Count(m => m.RelationshipToHead == "زوجة");
+            if (wifeCount > maxWives) maxWives = wifeCount;
+        }
+
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add("الترشيحات");
+        ws.RightToLeft = true;
+
+        var headers = new List<string>
+        {
+            "م", "رقم التسجيل", "الهوية", "الاسم", "الجوال",
+            "عدد الأفراد", "نوع المسكن", "نوع الضرر", "الحالة الاجتماعية"
+        };
+
+        for (int i = 1; i <= maxWives; i++)
+        {
+            headers.Add($"الزوجة {i} - الاسم");
+            headers.Add($"الزوجة {i} - الهوية");
+        }
+
+        for (int c = 0; c < headers.Count; c++)
+        {
+            var cell = ws.Cell(1, c + 1);
+            cell.Value = headers[c];
+            cell.Style.Font.Bold = true;
+            cell.Style.Fill.BackgroundColor = XLColor.Gold;
+            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        }
+
+        int row = 2;
+        for (int i = 0; i < nominations.Count; i++)
+        {
+            var nom = nominations[i];
+            regMap.TryGetValue(nom.PersonId, out var reg);
+
+            var recordId = reg?.RecordId ?? "";
+            var idNumber = nom.Person.IdNumber;
+            var name = nom.Person.FullName;
+            var phone = reg?.PhoneNumber ?? "";
+            var memberCount = reg?.Members.Count ?? 0;
+
+            string housingType;
+            if (reg?.LivesInTent == true)
+                housingType = reg.TentType ?? "خيمة";
+            else
+                housingType = "منزل";
+
+            var damageType = nom.Person.IsHouseDestroyed ? "مدمر كلي" : "سليم";
+            var maritalStatus = nom.Person.MaritalStatus;
+
+            var wives = reg?.Members.Where(m => m.RelationshipToHead == "زوجة").ToList() ?? new();
+
+            ws.Cell(row, 1).Value = i + 1;
+            ws.Cell(row, 2).Value = recordId;
+            ws.Cell(row, 3).Value = idNumber;
+            ws.Cell(row, 4).Value = name;
+            ws.Cell(row, 5).Value = phone;
+            ws.Cell(row, 6).Value = memberCount;
+            ws.Cell(row, 7).Value = housingType;
+            ws.Cell(row, 8).Value = damageType;
+            ws.Cell(row, 9).Value = maritalStatus;
+
+            int col = 10;
+            for (int w = 0; w < maxWives; w++)
+            {
+                if (w < wives.Count)
+                {
+                    ws.Cell(row, col).Value = wives[w].Person.FullName;
+                    ws.Cell(row, col + 1).Value = wives[w].Person.IdNumber;
+                }
+                else
+                {
+                    ws.Cell(row, col).Value = "";
+                    ws.Cell(row, col + 1).Value = "";
+                }
+                col += 2;
+            }
+
+            for (int c = 1; c <= headers.Count; c++)
+            {
+                ws.Cell(row, c).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            }
+
+            row++;
+        }
+
+        ws.Columns().AdjustToContents();
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        var bytes = stream.ToArray();
+        return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ترشيحات_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
     }
 }
