@@ -92,6 +92,13 @@
     </div>
 }
 
+<div class="bg-camp-accent-grey p-5 rounded-xl border border-gray-700 mb-8">
+    <h2 class="text-xl text-camp-gold font-bold mb-4">إجمالي التسجيلات حسب القاطع</h2>
+    <div class="relative" style="height: 300px;">
+        <canvas id="registrationsChart"></canvas>
+    </div>
+</div>
+
 <h2 class="text-xl text-camp-gold font-bold mb-4">إحصائيات تفصيلية حسب القاطع</h2>
 
 <div class="overflow-x-auto">
@@ -237,3 +244,42 @@
         </tbody>
     </table>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('registrationsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [@Html.Raw(string.Join(",", Model.Sectors.Select(s => $"'{s.SectorName}'")))],
+                    datasets: [{
+                        label: 'عدد التسجيلات',
+                        data: [@string.Join(",", Model.Sectors.Select(s => s.RegistrationCount))],
+                        backgroundColor: '#D4AF37',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#9CA3AF', stepSize: 1 },
+                            grid: { color: '#374151' }
+                        },
+                        x: {
+                            ticks: { color: '#9CA3AF' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

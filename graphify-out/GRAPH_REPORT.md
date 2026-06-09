@@ -1,16 +1,16 @@
-# Graph Report - aslam pop  (2026-06-04)
+how to use # Graph Report - aslam pop  (2026-06-09)
 
 ## Corpus Check
-- 145 files · ~157,118 words
+- 195 files · ~200,035 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1406 nodes · 2233 edges · 162 communities (84 shown, 78 thin omitted)
-- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 122 edges (avg confidence: 0.8)
+- 1758 nodes · 2960 edges · 183 communities (103 shown, 80 thin omitted)
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 136 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `077709d8`
+- Built from commit: `2f3ad2d9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -81,6 +81,7 @@
 - [[_COMMUNITY_Community 64|Community 64]]
 - [[_COMMUNITY_Community 65|Community 65]]
 - [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 67|Community 67]]
 - [[_COMMUNITY_Community 68|Community 68]]
 - [[_COMMUNITY_Community 69|Community 69]]
 - [[_COMMUNITY_Community 70|Community 70]]
@@ -158,18 +159,36 @@
 - [[_COMMUNITY_Community 143|Community 143]]
 - [[_COMMUNITY_Community 144|Community 144]]
 - [[_COMMUNITY_Community 145|Community 145]]
+- [[_COMMUNITY_Community 147|Community 147]]
+- [[_COMMUNITY_Community 148|Community 148]]
+- [[_COMMUNITY_Community 162|Community 162]]
+- [[_COMMUNITY_Community 163|Community 163]]
+- [[_COMMUNITY_Community 164|Community 164]]
+- [[_COMMUNITY_Community 165|Community 165]]
+- [[_COMMUNITY_Community 166|Community 166]]
+- [[_COMMUNITY_Community 167|Community 167]]
+- [[_COMMUNITY_Community 168|Community 168]]
+- [[_COMMUNITY_Community 169|Community 169]]
+- [[_COMMUNITY_Community 170|Community 170]]
+- [[_COMMUNITY_Community 171|Community 171]]
+- [[_COMMUNITY_Community 172|Community 172]]
+- [[_COMMUNITY_Community 173|Community 173]]
+- [[_COMMUNITY_Community 174|Community 174]]
+- [[_COMMUNITY_Community 175|Community 175]]
+- [[_COMMUNITY_Community 176|Community 176]]
+- [[_COMMUNITY_Community 177|Community 177]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `RegistrationPage` - 48 edges
-2. `AdminController` - 44 edges
-3. `Fact` - 31 edges
-4. `Task` - 31 edges
-5. `Task` - 30 edges
-6. `IActionResult` - 30 edges
-7. `AssistanceController` - 28 edges
-8. `AssistancePage` - 27 edges
-9. `TestBase` - 25 edges
-10. `BasePage` - 24 edges
+1. `Fact` - 52 edges
+2. `Task` - 50 edges
+3. `AdminController` - 49 edges
+4. `RegistrationPage` - 48 edges
+5. `Task` - 32 edges
+6. `IActionResult` - 31 edges
+7. `RecordController` - 30 edges
+8. `AssistanceController` - 28 edges
+9. `Btn` - 27 edges
+10. `AssistancePage` - 27 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `AdminController` --inherits--> `Controller`  [EXTRACTED]
@@ -186,15 +205,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (162 total, 78 thin omitted)
+## Communities (183 total, 80 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.09
-Nodes (20): AdminController, AdminControllerTests, AdminDashboardTests, AdminEditTests, ApplicationDbContext, Fact, FamilyRegistration, RegistrationViewModel (+12 more)
+Cohesion: 0.07
+Nodes (25): AdminController, AdminChangePasswordTests, AdminControllerTests, AdminDashboardTests, AdminEditTests, ApplicationDbContext, Dictionary, Fact (+17 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.14
-Nodes (19): Admin, ApplicationDbContext, FamilyRegistration, HttpGet, HttpPost, IActionResult, IAuditService, INotificationService (+11 more)
+Cohesion: 0.13
+Nodes (20): Admin, ApplicationDbContext, FamilyRegistration, HttpGet, HttpPost, IActionResult, IAuditService, INotificationService (+12 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.07
@@ -205,16 +224,16 @@ Cohesion: 0.08
 Nodes (18): AdminAuditLogsPage, AdminNotificationsPage, AdminDashboardPage, AdminLoginPage, Fact, ITestOutputHelper, RegistrationPage, AdminDashboardPage (+10 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.05
-Nodes (43): 10. الـ Auditing المطلوب, 11. تفاصيل الـ Audit Log, 12. قاعدة البيانات المقترحة, 13. الـ API المطلوبة, 14. المتطلبات التقنية, 15. التقارير المطلوبة, 16. تحسينات مستقبلية, 17. ملاحظات مهمة للتنفيذ (+35 more)
+Cohesion: 0.04
+Nodes (44): 10. الـ Auditing المطلوب, 11. تفاصيل الـ Audit Log, 12. قاعدة البيانات المقترحة, 13. الـ API المطلوبة, 14. المتطلبات التقنية, 15. التقارير المطلوبة, 16. تحسينات مستقبلية, 17. ملاحظات مهمة للتنفيذ (+36 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.22
 Nodes (13): ApplicationDbContext, AssistanceBeneficiary, CreateAssistanceViewModel, EditAssistanceViewModel, HttpGet, HttpPost, IActionResult, IAssistanceService (+5 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.11
-Nodes (15): AdminCrudPage, AdminSectorsPage, AdminDashboardPage, AdminLoginPage, Fact, ITestOutputHelper, AdminDashboardPage, AdminLoginPage (+7 more)
+Cohesion: 0.22
+Nodes (7): AdminCrudPage, AdminSectorsPage, AdminDashboardPage, AdminLoginPage, Fact, ITestOutputHelper, AdminCrudAndSectorTests
 
 ### Community 7 - "Community 7"
 Cohesion: 0.06
@@ -225,16 +244,16 @@ Cohesion: 0.14
 Nodes (17): ApplicationDbContext, HttpGet, IActionResult, IWebHostEnvironment, Task, ApplicationDbContext, HttpGet, HttpPost (+9 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.15
-Nodes (16): ApplicationDbContext, FamilyRegistration, HttpGet, HttpPost, IActionResult, IAuditService, IFileCompressionService, IFormFile (+8 more)
+Cohesion: 0.13
+Nodes (20): ApplicationDbContext, FamilyRegistration, HttpGet, HttpPost, IActionResult, IAuditService, IComplaintIdGenerator, IFileCompressionService (+12 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.11
-Nodes (9): By, IWebDriver, string, CustomWebApplicationFactory, ICollectionFixture, IDisposable, SeleniumTestCollection, TestBase (+1 more)
+Cohesion: 0.07
+Nodes (18): AdminRefugeesPage, AdminRegistrationsPage, By, IWebDriver, string, AdminDashboardPage, AdminLoginPage, Fact (+10 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.08
-Nodes (24): Admin Edit, AGENTS.md — Camp Registration (Google Apps Script + ASP.NET Core), ASP.NET Core, ASP.NET Core Architecture, Assistance System (Beneficiary Management), Client-Side Validation (Registration wizards), Dashboard CTE (Demographic Statistics), Data Model (+16 more)
+Cohesion: 0.06
+Nodes (34): Admin Change Password, Admin Edit, AGENTS.md — Camp Registration (Google Apps Script + ASP.NET Core), ASP.NET Core, ASP.NET Core Architecture, Assistance System (Beneficiary Management), Client-Side Validation (Registration wizards), Dashboard CTE (Demographic Statistics) (+26 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.14
@@ -245,28 +264,28 @@ Cohesion: 0.17
 Nodes (9): ApplicationDbContext, Assistance, AssistanceBeneficiary, IAuditService, List, Person, Task, IAssistanceService (+1 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.22
-Nodes (11): ApplicationDbContext, HttpGet, HttpPost, IActionResult, IAuditService, PublicSubmitViewModel, Task, ValidateAntiForgeryToken (+3 more)
+Cohesion: 0.20
+Nodes (12): ApplicationDbContext, HttpGet, HttpPost, IActionResult, IAuditService, IComplaintIdGenerator, PublicSubmitViewModel, Task (+4 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.10
-Nodes (19): Context, Controller, Daily closing, Data, Feature Flows (end-to-end), High-Level Architecture, Layout / Navigation, Manager reporting (+11 more)
+Nodes (20): Context, Controller, Daily closing, Data, Feature Flows (end-to-end), High-Level Architecture, Layout / Navigation, Manager reporting (+12 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.21
 Nodes (6): Assistance, AssistanceBeneficiary, List, Person, Task, IAssistanceService
 
 ### Community 18 - "Community 18"
-Cohesion: 0.19
-Nodes (7): ApplicationDbContext, List, NominationPageViewModel, Person, Task, INominationService, NominationService
+Cohesion: 0.13
+Nodes (12): BulkImportResult, ApplicationDbContext, List, NominationPageViewModel, Person, Stream, Task, FamilyHeadListItem (+4 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.10
-Nodes (18): Admin System, Architecture, ASP.NET Core Data Model (Entity Relationships), ASP.NET Core (.NET 10), ASP.NET Core Version (`CampRegistrationApp/`), Common Commands, File Upload Pattern, Google Apps Script (+10 more)
+Cohesion: 0.08
+Nodes (22): Admin System, Architecture, ASP.NET Core Data Model (Entity Relationships), ASP.NET Core (.NET 10), ASP.NET Core Version (`CampRegistrationApp/`), Common Commands, File Upload Pattern, Force Password Change (+14 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.26
-Nodes (9): ApplicationDbContext, HttpGet, HttpPost, IActionResult, IAuditService, Task, ValidateAntiForgeryToken, NominationController (+1 more)
+Cohesion: 0.24
+Nodes (11): ApplicationDbContext, HttpGet, HttpPost, IActionResult, IAuditService, IFormFile, List, Task (+3 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.25
@@ -293,16 +312,16 @@ Cohesion: 0.15
 Nodes (10): ApplicationDbContext, AssistanceImport, Error, IAuditService, List, Row, Stream, Task (+2 more)
 
 ### Community 30 - "Community 30"
-Cohesion: 0.14
-Nodes (13): 1. Product Overview, 2. Target Audience, 3. Goals & Objectives, 4.1 Family Head Registration, 4.2 Family Member Registration, 4.3 Housing & Special Cases, 4.4 Data Processing & Storage, 4. Functional Requirements (+5 more)
+Cohesion: 0.11
+Nodes (18): 1. Product Overview, 2. Target Audience, 3. Goals & Objectives, 4.1 Family Head Registration, 4.2 Family Member Registration, 4.3 Housing & Special Cases, 4.4 Data Processing & Storage, 4. Functional Requirements (+10 more)
 
 ### Community 31 - "Community 31"
-Cohesion: 0.17
-Nodes (9): AdminRefugeesPage, AdminRegistrationsPage, AdminDashboardPage, AdminLoginPage, Fact, ITestOutputHelper, RegistrationPage, RefugeeDetailsPage (+1 more)
+Cohesion: 0.11
+Nodes (21): Btn, MemberFields, Modal, Msg, Nav, RegistrationStep1, RegistrationStep3, Report (+13 more)
 
 ### Community 32 - "Community 32"
-Cohesion: 0.26
-Nodes (5): Fact, ITestOutputHelper, HomePage, TestBase, HomePageTests
+Cohesion: 0.13
+Nodes (11): AdminChangePasswordPage, AdminDashboardPage, AdminLoginPage, Fact, ITestOutputHelper, Fact, ITestOutputHelper, HomePage (+3 more)
 
 ### Community 33 - "Community 33"
 Cohesion: 0.23
@@ -321,7 +340,7 @@ Cohesion: 0.18
 Nodes (7): AssistanceImport, Error, List, Row, Stream, Task, IImportService
 
 ### Community 38 - "Community 38"
-Cohesion: 0.25
+Cohesion: 0.23
 Nodes (7): RegistrationViewModel, string, ModelStateDictionary, CampRegistrationApp.Services, IRegistrationValidationService, RegistrationConstants, RegistrationValidationService
 
 ### Community 42 - "Community 42"
@@ -352,17 +371,21 @@ Nodes (3): IWebDriver, WebDriverFactory, Version
 Cohesion: 0.33
 Nodes (4): ApplicationDbContext, Task, INotificationService, NotificationService
 
+### Community 51 - "Community 51"
+Cohesion: 0.09
+Nodes (3): RecordEditPage, RecordLoginPage, RecordSearchPage
+
 ### Community 52 - "Community 52"
 Cohesion: 0.32
 Nodes (5): ApplicationDbContext, Task, IHttpContextAccessor, AuditService, IAuditService
 
 ### Community 53 - "Community 53"
-Cohesion: 0.25
-Nodes (7): 5. أمان الصلاحيات, 6. اختبار API, TC-5.1: المندوب يرى فقط تسجيلات قطاعه, TC-5.2: المندوب لا يستطيع إدارة المسؤولين, TC-6.1: CheckId endpoint, اختبار شامل يدوي (E2E), تشغيل النظام: `cd CampRegistrationApp && dotnet run`
+Cohesion: 0.17
+Nodes (11): 16. التقارير — تصفية جديدة وتحسينات, 5. أمان الصلاحيات, 6. اختبار API, TC-16.1: فلتر "تحتاج الحفاظات", TC-16.2: ترتيب أعمدة الزوجات والأبناء, TC-16.3: تصدير Excel — نسخ الفلاتر مباشرة, TC-5.1: المندوب يرى فقط تسجيلات قطاعه, TC-5.2: المندوب لا يستطيع إدارة المسؤولين (+3 more)
 
 ### Community 56 - "Community 56"
-Cohesion: 0.29
-Nodes (3): string, TestBase, BasePage
+Cohesion: 0.14
+Nodes (4): string, TestBase, AdminChangePasswordPage, BasePage
 
 ### Community 57 - "Community 57"
 Cohesion: 0.29
@@ -375,6 +398,14 @@ Nodes (7): 4. لوحة تحكم المسؤول, TC-4.1: تسجيل دخول ال
 ### Community 59 - "Community 59"
 Cohesion: 0.29
 Nodes (6): mcp, playwright, command, enabled, type, $schema
+
+### Community 60 - "Community 60"
+Cohesion: 0.13
+Nodes (17): ApplicationDbContext, ColumnGroup, Dictionary, List, ReportDisplayColumn, ReportFilter, ReportRow, string (+9 more)
+
+### Community 62 - "Community 62"
+Cohesion: 0.13
+Nodes (14): ApplicationDbContext, Dictionary, FamilyRegistration, List, RegistrationViewModel, string, Task, MemberViewModel (+6 more)
 
 ### Community 63 - "Community 63"
 Cohesion: 0.29
@@ -391,6 +422,14 @@ Nodes (4): ApplicationDbContext, CampRegistrationApp.Data, DbContext, ModelBuild
 ### Community 66 - "Community 66"
 Cohesion: 0.33
 Nodes (6): 7. قائمة النازحين, TC-7.1: عرض قائمة النازحين, TC-7.2: تصفية النازحين حسب القاطع, TC-7.3: البحث في النازحين, TC-7.4: عرض تفاصيل النازح, TC-7.5: مندوب يرى فقط نازحي قطاعه
+
+### Community 67 - "Community 67"
+Cohesion: 0.14
+Nodes (17): ApplicationDbContext, ColumnGroup, Dictionary, HttpGet, HttpPost, IActionResult, IAuditService, IReportService (+9 more)
+
+### Community 68 - "Community 68"
+Cohesion: 0.29
+Nodes (6): ColumnGroup, Dictionary, List, ReportDisplayColumn, ReportFilter, ReportQueryDescriptor
 
 ### Community 69 - "Community 69"
 Cohesion: 0.40
@@ -413,8 +452,8 @@ Cohesion: 0.40
 Nodes (5): 9. تعيين مندوب للقاطع, TC-9.1: تعيين مندوب للقاطع, TC-9.2: إزالة مندوب من القاطع, TC-9.3: عرض أسماء المندوبين في قائمة القواطع, TC-9.4: مندوب بدون قطاع يظهر في قائمة الإضافة
 
 ### Community 74 - "Community 74"
-Cohesion: 0.40
-Nodes (4): ComplaintDetailsViewModel, ComplaintListViewModel, ComplaintResponseViewModel, PublicSubmitViewModel
+Cohesion: 0.25
+Nodes (7): ComplaintDetailsViewModel, ComplaintListViewModel, ComplaintResponseViewModel, PublicSubmitViewModel, RefugeeComplaintCreate, RefugeeComplaintDetail, RefugeeComplaintListItem
 
 ### Community 75 - "Community 75"
 Cohesion: 0.40
@@ -448,25 +487,73 @@ Nodes (3): NominationPageViewModel, NominationRowViewModel, SectorQuotaInfo
 Cohesion: 0.50
 Nodes (3): ProjectListViewModel, ProjectViewModel, SectorQuotaViewModel
 
+### Community 111 - "Community 111"
+Cohesion: 0.50
+Nodes (3): dependencies, @kilocode/plugin, @opencode-ai/plugin
+
+### Community 162 - "Community 162"
+Cohesion: 0.17
+Nodes (8): AdminDashboardPage, AdminLoginPage, Fact, ITestOutputHelper, RegistrationPage, NominationPage, ProjectPage, ProjectAndNominationTests
+
+### Community 163 - "Community 163"
+Cohesion: 0.23
+Nodes (8): ColumnGroup, List, ReportDisplayColumn, ReportFilter, ReportRow, Task, CampRegistrationApp.Services, IReportService
+
+### Community 164 - "Community 164"
+Cohesion: 0.25
+Nodes (7): name, private, scripts, report, test, test:debug, test:headed
+
+### Community 165 - "Community 165"
+Cohesion: 0.25
+Nodes (7): CampRegistrationApp.Models.ViewModels, ColumnDef, ColumnGroup, ReportDisplayColumn, ReportFilter, ReportRow, ReportViewModel
+
+### Community 166 - "Community 166"
+Cohesion: 0.33
+Nodes (5): Error details, Instructions, Page snapshot, Test info, Test source
+
+### Community 167 - "Community 167"
+Cohesion: 0.33
+Nodes (5): Error details, Instructions, Page snapshot, Test info, Test source
+
+### Community 168 - "Community 168"
+Cohesion: 0.40
+Nodes (4): Error details, Instructions, Page snapshot, Test info
+
+### Community 169 - "Community 169"
+Cohesion: 0.40
+Nodes (4): Error details, Instructions, Test info, Test source
+
+### Community 170 - "Community 170"
+Cohesion: 0.50
+Nodes (4): 14. الرفض مع سبب, TC-14.1: رفض مع سبب (من صفحة التسجيلات), TC-14.2: الرفض من صفحة التفاصيل, TC-14.3: إلغاء الرفض (إعادة الموافقة على مرفوض سابقاً)
+
+### Community 171 - "Community 171"
+Cohesion: 0.50
+Nodes (4): 15. تغيير كلمة المرور القسري, TC-15.1: المسؤول — تغيير كلمة المرور القسري عند تسجيل الدخول, TC-15.2: المسؤول — تغيير كلمة المرور الاختياري, TC-15.3: اللاجئ — تغيير كلمة المرور القسري
+
+### Community 172 - "Community 172"
+Cohesion: 0.50
+Nodes (4): 17. تدقيق التعديلات (Audit Diffs), TC-17.1: تدقيق تعديل المسؤول للبيانات, TC-17.2: تدقيق تعديل اللاجئ لبياناته, TC-17.3: تدقيق فارغ (بدون تغييرات)
+
 ## Knowledge Gaps
-- **471 isolated node(s):** `allow`, `$schema`, `plugin`, `@opencode-ai/plugin`, `version` (+466 more)
+- **592 isolated node(s):** `allow`, `$schema`, `plugin`, `@kilocode/plugin`, `@opencode-ai/plugin` (+587 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **78 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **80 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Controller` connect `Community 8` to `Community 0`, `Community 1`, `Community 5`, `Community 9`, `Community 12`, `Community 15`, `Community 20`?**
-  _High betweenness centrality (0.027) - this node is a cross-community bridge._
-- **Why does `BasePage` connect `Community 56` to `Community 2`, `Community 36`, `Community 68`, `Community 39`, `Community 40`, `Community 41`, `Community 46`, `Community 14`, `Community 50`, `Community 51`, `Community 21`, `Community 22`, `Community 55`, `Community 54`, `Community 60`, `Community 29`, `Community 62`?**
-  _High betweenness centrality (0.025) - this node is a cross-community bridge._
-- **Why does `RegistrationPage` connect `Community 2` to `Community 56`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `BasePage` connect `Community 56` to `Community 2`, `Community 36`, `Community 39`, `Community 40`, `Community 41`, `Community 46`, `Community 14`, `Community 50`, `Community 51`, `Community 21`, `Community 22`, `Community 55`, `Community 54`, `Community 29`?**
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
+- **Why does `Controller` connect `Community 8` to `Community 0`, `Community 1`, `Community 67`, `Community 5`, `Community 9`, `Community 12`, `Community 15`, `Community 20`?**
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
+- **Why does `AdminController` connect `Community 1` to `Community 8`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **What connects `allow`, `$schema`, `plugin` to the rest of the system?**
-  _471 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _592 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.08904428904428904 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07046442461679249 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.13696456901110524 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.127996381727725 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.06778476589797344 - nodes in this community are weakly interconnected._
