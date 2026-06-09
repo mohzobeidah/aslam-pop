@@ -1,0 +1,9 @@
+{
+    "chat.mcp.serverSampling": {
+        "aslam pop/.vscode/mcp.json: testsprite": {
+            "allowedModels": [
+                "copilot/auto"
+            ]
+        }
+    }
+}

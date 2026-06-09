@@ -317,6 +317,8 @@ public class NominationController : Controller
         var nominations = await nominationsQuery.ToListAsync();
         var personIds = nominations.Select(n => n.PersonId).ToList();
 
+        var nomineeNationalIds = nominations.Select(n => n.Person.IdNumber).ToList();
+
         var registrations = await _context.FamilyRegistrations
             .AsNoTracking()
             .Include(fr => fr.FamilyHead)
@@ -420,6 +422,18 @@ public class NominationController : Controller
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);
         var bytes = stream.ToArray();
+
+        var project = await _context.Projects.AsNoTracking().FirstOrDefaultAsync(p => p.Id == projectId);
+        var auditPayload = new
+        {
+            Project = project?.Name,
+            ProjectId = projectId,
+            NomineeCount = nominations.Count,
+            NomineeNationalIds = nomineeNationalIds,
+            FilteredBySector = adminSectorId
+        };
+        await _audit.LogAsync(delegateId, "ExportExcel", "Nominations", $"تصدير ترشيحات المشروع: {project?.Name}", projectId.ToString(), System.Text.Json.JsonSerializer.Serialize(auditPayload, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+
         return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"ترشيحات_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
     }
 }
