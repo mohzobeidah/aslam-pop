@@ -111,7 +111,18 @@ namespace CampRegistrationApp.Controllers
         public async Task<IActionResult> Submit(RegistrationViewModel model)
         {
             await PopulateLookupViewBags();
-            if (!ModelState.IsValid) return View("Index", model);
+            if (!ModelState.IsValid)
+            {
+                var fieldErrors = ModelState
+                    .Where(ms => ms.Value?.Errors.Count > 0)
+                    .Select(ms => $"{ms.Key}: {string.Join("، ", ms.Value.Errors.Select(e => e.ErrorMessage))}")
+                    .ToList();
+                if (fieldErrors.Any())
+                {
+                    ModelState.AddModelError("", "حقول بها أخطاء:\n- " + string.Join("\n- ", fieldErrors));
+                }
+                return View("Index", model);
+            }
 
             if (!_validator.ValidateRegistration(model, ModelState))
             {
@@ -169,7 +180,7 @@ namespace CampRegistrationApp.Controllers
                     ThirdName = model.Head.ThirdName,
                     LastName = model.Head.LastName,
                     IdNumber = model.Head.IdNumber,
-                    DateOfBirth = model.Head.DateOfBirth,
+                    DateOfBirth = model.Head.DateOfBirth ?? DateTime.Today,
                     Gender = model.Head.Gender,
                     OriginalGovernorate = model.Head.OriginalGovernorate,
                     MaritalStatus = model.Head.MaritalStatus,
@@ -273,7 +284,7 @@ namespace CampRegistrationApp.Controllers
                         ThirdName = mViewModel.ThirdName,
                         LastName = mViewModel.LastName,
                         IdNumber = mViewModel.IdNumber,
-                        DateOfBirth = mViewModel.DateOfBirth,
+                        DateOfBirth = mViewModel.DateOfBirth ?? DateTime.Today,
                         Gender = mViewModel.Gender,
                         OriginalGovernorate = mViewModel.OriginalGovernorate,
                         MaritalStatus = mViewModel.MaritalStatus,

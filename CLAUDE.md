@@ -3,9 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-This repository contains two versions of a Camp Family Registration application:
-1. A Google Apps Script (GAS) web app (root directory `Code.gs` + `Index.html`).
-2. An **ASP.NET Core MVC** application (`CampRegistrationApp/`).
+This repository contains an **ASP.NET Core MVC** application (`CampRegistrationApp/`) for camp family registration, admin management, projects/nominations, assistance, complaint system, and reporting.
 
 ## Common Commands
 ### ASP.NET Core (.NET 10)
@@ -13,18 +11,7 @@ This repository contains two versions of a Camp Family Registration application:
 - Run: `dotnet run --project CampRegistrationApp/CampRegistrationApp.csproj`
 - Test: `dotnet test`
 
-### Google Apps Script
-- No local build/test tools.
-- Deployment: Use the Google Apps Script editor (Extensions > Apps Script > Deploy > New deployment).
-- Testing: Open the deployed web app URL or run `doGet()` in the GAS editor.
-
 ## Architecture
-### Google Apps Script Version
-- **Frontend**: `Index.html` (HTML5, Tailwind CSS, JS) using RTL layout and Cairo font.
-- **Backend**: `Code.gs` (JavaScript/GAS) handling server-side logic, Google Sheets integration, and Google Drive file uploads.
-- **Data Store**: Google Sheets (as a database) and Google Drive (for file storage).
-- **Communication**: Client-to-server via `google.script.run`.
-
 ### ASP.NET Core Version (`CampRegistrationApp/`)
 - **Framework**: .NET 10 MVC with Razor runtime compilation.
 - **Structure**: Standard MVC pattern with `Controllers/`, `Models/`, and `Views/`.
@@ -47,8 +34,8 @@ Nomination >── (1) Sector, (1) Admin (Delegate), (1?) Admin (ApprovedBy)
 Admin (1) ──< (N) Notification
 Notification >── (0..1) Link (URL string)
 ```
-- **Person**: Shared entity for both Head of Family and Family Members. Fields include name (4 parts), ID, sector, DOB, gender, phone, governorate, **Wallet (المحفظة)**, **BathroomStatus (جيد/متوسط/سيء)**, marital/employment/education status, health info (diseases, disabilities, injuries), prisoner flag (أسير), optional maternity fields (pregnancy, nursing).
-- **FamilyRegistration**: Links to FamilyHead (Person), has list of Members, plus housing/special-case fields (tent, bathroom, child-headed, female-headed, external support, diaper needs, multiple families in tent) and **Refugee Needs** (NeedPriority enum for 7 aid items: Tents, Blankets, Mattresses, KitchenTools, Tarpaulins, Clothes, HygieneKit). Has unique 8-char `RecordId`. Approval workflow with `ApprovalStatus` (Pending/Approved/Rejected). Rejection tracking via `RejectedById`, `RejectedAt`, `RejectionReason`.
+- **Person**: Shared entity for both Head of Family and Family Members. Fields include name (4 parts), ID, DOB, gender, governorate, **BathroomStatus (جيد/متوسط/سيء)**, marital/employment/education status, health info (diseases, disabilities, injuries), prisoner flag (أسير), optional maternity fields (pregnancy, nursing), MotherIdNumber. Sector, PhoneNumber, Wallet/WalletType are on FamilyRegistration, not Person.
+- **FamilyRegistration**: Links to FamilyHead (Person), has list of Members, plus housing/special-case fields (tent, bathroom, child-headed, female-headed, external support, diaper needs, multiple families in tent, HasBathroom, BathroomType, BathroomStatus), sector, phone, wallet/wallet type, and **Refugee Desires** (ranked dropdowns stored as FamilyDesire join records). Has unique 8-char `RecordId`. Approval workflow with `ApprovalStatus` (Pending/Approved/Rejected). Rejection tracking via `RejectedById`, `RejectedAt`, `RejectionReason`.
 - **FamilyMember**: Join table linking `FamilyRegistration` → `Person` with a `RelationshipToHead` string.
 - **Attachment**: File metadata linked to a Person (`MedicalReport` or `IDImage`), storing relative file paths.
 - **Admin**: Login system with `AdminRole` enum (`Admin`=super, `Mandoob`=sector-limited). Linked optionally to a `Sector`.
@@ -121,10 +108,9 @@ Notification >── (0..1) Link (URL string)
 **Submit**: Wraps everything in a DB transaction — creates FamilyHead `Person`, then `FamilyRegistration`, then each Member `Person` + `FamilyMember`. On success, creates notifications for all sector mandoobs.
 
 ## Registration ViewModel (`RegistrationViewModel`)
-- `Head` (PersonViewModel) + `Members` (List of MemberViewModel) + housing/special-case fields + `StatusNotes` (string) + **Refugee Needs** (7 `int` fields mapped to `NeedPriority` enum).
+- `Head` (PersonViewModel) + `Members` (List of MemberViewModel) + housing/special-case fields + `StatusNotes` (string) + **Refugee Desires** (`List<int> DesireIds` — ranked dropdown selections).
 - `MemberViewModel` is a **standalone class** (does NOT inherit `PersonViewModel`). It has its own fields without Sector, PhoneNumber, or Wallet — these are head-only.
 - `CurrentStep` (1-4) tracks wizard progress.
-- `UploadedFiles` (List<string>) tracks client-side uploaded file paths.
 - `Password` string — set in Step 4, hashed on server.
 
 ## Refugee Desires (الرغبات)

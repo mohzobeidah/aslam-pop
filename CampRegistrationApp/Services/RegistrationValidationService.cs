@@ -122,6 +122,16 @@ namespace CampRegistrationApp.Services
                     modelState.AddModelError("", $"الفرد رقم {i + 1}: لا يمكن أن تكون الحالة الصحية سليماً مع وجود أمراض مزمنة أو إعاقات");
                     return false;
                 }
+
+                // 6. MotherIdNumber Validation: required for all registrations
+                if (string.IsNullOrWhiteSpace(m.MotherIdNumber))
+                {
+                    var name = Normalized(m.FullName);
+                    if (string.IsNullOrEmpty(name))
+                        name = $"رقم {i + 1}";
+                    modelState.AddModelError("", $"يرجى إدخال رقم هوية الأم للفرد: {name}");
+                    return false;
+                }
             }
 
             return true;

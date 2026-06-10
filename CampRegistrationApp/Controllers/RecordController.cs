@@ -290,7 +290,18 @@ namespace CampRegistrationApp.Controllers
 
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("", "يرجى تصحيح الأخطاء في البيانات");
+                var fieldErrors = ModelState
+                    .Where(ms => ms.Value?.Errors.Count > 0)
+                    .Select(ms => $"{ms.Key}: {string.Join("، ", ms.Value.Errors.Select(e => e.ErrorMessage))}")
+                    .ToList();
+                if (fieldErrors.Any())
+                {
+                    ModelState.AddModelError("", "حقول بها أخطاء:\n- " + string.Join("\n- ", fieldErrors));
+                }
+                else
+                {
+                    ModelState.AddModelError("", "يرجى تصحيح الأخطاء في البيانات");
+                }
                 return View("Edit", model);
             }
 
@@ -347,7 +358,7 @@ namespace CampRegistrationApp.Controllers
                 head.ThirdName = model.Head.ThirdName;
                 head.LastName = model.Head.LastName;
                 head.IdNumber = model.Head.IdNumber;
-                head.DateOfBirth = model.Head.DateOfBirth;
+                head.DateOfBirth = model.Head.DateOfBirth ?? DateTime.Today;
                 head.Gender = model.Head.Gender;
                 head.OriginalGovernorate = model.Head.OriginalGovernorate;
                 head.MaritalStatus = model.Head.MaritalStatus;
@@ -458,7 +469,7 @@ namespace CampRegistrationApp.Controllers
                         ThirdName = mViewModel.ThirdName,
                         LastName = mViewModel.LastName,
                         IdNumber = mViewModel.IdNumber,
-                        DateOfBirth = mViewModel.DateOfBirth,
+                        DateOfBirth = mViewModel.DateOfBirth ?? DateTime.Today,
                         Gender = mViewModel.Gender,
                         OriginalGovernorate = mViewModel.OriginalGovernorate,
                         MaritalStatus = mViewModel.MaritalStatus,

@@ -67,7 +67,7 @@ namespace CampRegistrationApp.Models.ViewModels
         [RegularExpression(@"^\d{9}$", ErrorMessage = "رقم الهوية يجب أن يتكون من 9 أرقام")]
         public string IdNumber { get; set; } = string.Empty;
         [Required(ErrorMessage = "تاريخ الميلاد مطلوب")]
-        public DateTime DateOfBirth { get; set; } = DateTime.Today;
+        public DateTime? DateOfBirth { get; set; }
         [Required(ErrorMessage = "الجنس مطلوب")]
         public string Gender { get; set; } = "ذكر";
         public string OriginalGovernorate { get; set; } = string.Empty;
@@ -113,7 +113,7 @@ namespace CampRegistrationApp.Models.ViewModels
         [RegularExpression(@"^\d{9}$", ErrorMessage = "رقم الهوية يجب أن يتكون من 9 أرقام")]
         public string IdNumber { get; set; } = string.Empty;
         [Required(ErrorMessage = "تاريخ الميلاد مطلوب")]
-        public DateTime DateOfBirth { get; set; } = DateTime.Today;
+        public DateTime? DateOfBirth { get; set; }
         [Required(ErrorMessage = "الجنس مطلوب")]
         public string Gender { get; set; } = "ذكر";
         public string OriginalGovernorate { get; set; } = string.Empty;
@@ -136,7 +136,9 @@ namespace CampRegistrationApp.Models.ViewModels
         public bool IsPrisoner { get; set; }
         public bool IsHusbandPrisoner { get; set; }
         public string? BathroomStatus { get; set; }
-        public string? MotherIdNumber { get; set; }
+        [Required(ErrorMessage = "رقم هوية الأم مطلوب")]
+        [RegularExpression(@"^\d{9}$", ErrorMessage = "رقم هوية الأم يجب أن يتكون من 9 أرقام")]
+        public string MotherIdNumber { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "صلة القرابة مطلوبة")]
         public string RelationshipToHead { get; set; } = string.Empty;

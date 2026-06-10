@@ -1,19 +1,13 @@
-# AGENTS.md — Camp Registration (Google Apps Script + ASP.NET Core)
+# AGENTS.md — Camp Registration (ASP.NET Core MVC)
 
 ## Overview
-Camp family registration system in two versions:
-- **Google Apps Script** (root `Code.gs` + `Index.html`): Serves HTML, writes to Google Sheets, uploads PDFs to Drive.
-- **ASP.NET Core MVC** (`CampRegistrationApp/`): .NET 10, SQL Server (LocalDB), Entity Framework Core, full admin/nomination/project/report/financial system.
+Camp family registration system implemented as an **ASP.NET Core MVC** application (`CampRegistrationApp/`): .NET 10, SQL Server (LocalDB), Entity Framework Core, full admin/nomination/project/report/financial/complaint system.
 
 ## How to run / deploy
-### GAS
-- Deploy via Google Apps Script editor (Extensions > Apps Script > Deploy > New deployment). No local dev server.
-
 ### ASP.NET Core
 - Build: `dotnet build`
 - Run: `dotnet run --project CampRegistrationApp/CampRegistrationApp.csproj`
 - Test: `dotnet test`
-- Selenium E2E: `dotnet test CampRegistrationApp.SeleniumTests/CampRegistrationApp.SeleniumTests.csproj`
 - Ports: HTTP `localhost:5392`, HTTPS `localhost:7126`
 - Production: CI/CD via `.github/workflows/publish.yml`, Azure deploy via `.deployment`
 
@@ -22,14 +16,14 @@ Camp family registration system in two versions:
 - **Run**: `BASE_URL=http://localhost:5392 npx playwright test` (app must be running on that URL)
 - **Run headed (debug)**: `BASE_URL=http://localhost:5392 npx playwright test --headed`
 - **HTML report**: After run, open `playwright-report/index.html`
-- **Tests**: (No test files exist yet — placeholder directory with node_modules only)
+- **Tests**: 30 test files covering registration, admin CRUD, approvals, rejections, edit, record login/password, projects/nominations, assistance, reports, complaints, notifications, audit logs, sectors, dashboard, authorization, file download, error pages.
 - **Helpers**: Valid Palestinian ID generation, selector constants
-- Requires the ASP.NET Core app to be running (the Selenium tests use an in-process server; Playwright tests connect to a running instance)
+- Requires the ASP.NET Core app to be running
 
 ## ASP.NET Core Architecture
 ### Data Model
-- **Person**: Shared entity for family head and members (4-part name, ID, sector, DOB, gender, phone, Wallet (المحفظة), BathroomStatus (جيد/متوسط/سيء), health, maternity, prisoner flag, etc.).
-- **FamilyRegistration**: Links to head (Person), members (FamilyMembers), housing/special-case fields (HasBathroom, BathroomType, BathroomStatus), approval workflow, and **Refugee Needs** (NeedPriority enum for 7 aid items: Tents, Blankets, Mattresses, KitchenTools, Tarpaulins, Clothes, HygieneKit).
+- **Person**: Shared entity for family head and members (4-part name, ID, DOB, gender, health, maternity, prisoner flag, BathroomStatus, MotherIdNumber, etc.). Sector, PhoneNumber, Wallet/WalletType are on FamilyRegistration, not Person.
+- **FamilyRegistration**: Links to head (Person), members (FamilyMembers), housing/special-case fields (HasBathroom, BathroomType, BathroomStatus), sector, phone, wallet, approval workflow, and **Refugee Desires** (ranked dropdowns stored as FamilyDesire join records).
 - **FamilyMember**: Join table `FamilyRegistration → Person` with `RelationshipToHead`.
 - **Attachment**: File metadata (`MedicalReport` or `IDImage`), stores relative paths.
 - **Admin**: Login with `AdminRole` (`Admin`=super, `Mandoob`=sector-limited), session-based auth, SHA256 password hashing.
@@ -48,7 +42,7 @@ Camp family registration system in two versions:
 - **AdminEditRegistration** GET: loads any registration (Pending/Approved/Rejected), reuses `Record/Edit.cshtml` view
 - **AdminUpdateRegistration** POST: saves changes (head, members, desires) with audit log (via `RegistrationChangeTracker`) + mandoob notification
 - Accessible for all statuses (Approved/Rejected are no longer blocked)
-- Edit button shown in `RefugeeDetails` page and `Registrations` list for Pending items
+- Edit button shown in `RefugeeDetails` page, `Registrations` list, and `Refugees` list for all statuses
 
 ### Refugee Desires
 - Ranked dropdowns (الرغبة رقم 1, 2, ...) populated from `Desires` DB table
@@ -76,6 +70,16 @@ Camp family registration system in two versions:
 - **Display**: Rejection info shown in `Registrations` list (name, date, reason preview with tooltip) and `RefugeeDetails` page
 - **Re-approve clears rejection**: Approving a previously-rejected registration clears `RejectedById`, `RejectedAt`, `RejectionReason` and adds previous rejection data to audit log
 - **Audit**: Full rejection details (reason, rejecter name, timestamp) logged in audit
+
+### Complaint / Ticket System
+- **Complaint System**: Fully implemented for both admin and refugee users.
+- **Refugee side** (`RecordController`): `MyComplaints` — list personal complaints, `MyComplaintDetails` — view details/replies, `CreateComplaint` — submit new complaint with subject, description, attachment (ticket-based).
+- **Admin side** (`ComplaintController`): `Index` — filterable grid (status, date range), `Details` — view complaint + respond, `Respond` — update status (Open/InProgress/Resolved/Closed), `Delete` — soft delete.
+- **Model**: `Complaint` entity — `TicketId` (unique 8-char ID), Subject, Description, AttachmentPath, `FamilyRegistrationId` (optional link), `Status` (Pending/InProgress/Resolved/Closed), `AdminResponse`, `ResolvedById`, `ResolvedAt`.
+- **Id Generator**: `ComplaintIdGenerator` creates unique ticket IDs (same charset as Record IDs).
+- **Database**: `Complaints` table created via raw SQL `IF NOT EXISTS` in `Program.cs`. Has indexes on `TicketId` (unique) and `FamilyRegistrationId`.
+- **Views**: `Views/Complaint/{Index,Details,Create,Confirmation}.cshtml` + `Views/Record/MyComplaints.cshtml`.
+- **Playwright tests**: `tests/complaint.spec.ts` covers create, list, respond, delete flows.
 
 ### RegistrationChangeTracker (Detailed Audit Diffs)
 - **`Services/RegistrationChangeTracker.cs`**: Static utility for before/after snapshots of registration data
@@ -105,12 +109,6 @@ Camp family registration system in two versions:
 - **Dynamic key ordering**: Wife/Child member columns sorted by consistent `FieldOrder` (Name, IdNumber, DOB, Age, Gender, HealthStatus, etc.)
 - **Excel export form**: Uses JavaScript to copy selected columns and filters from the preview form on submit (avoids stale filter values)
 - **`NormalizeBathroomType()`**: Applied via `RegistrationConstants` in both `MapToViewModel` and `Update` to handle null/empty bathroom type
-
-## GAS Architecture
-- `doGet()` serves `Index.html`, `google.script.run` for server calls.
-- `processForm(data)` appends row to sheet `البيانات`.
-- `uploadFileToDrive(base64Data, fileName)` saves to Drive folder `التقارير الطبية`.
-- Record ID: first 8 chars of `Utilities.getUuid()`.
 
 ### Client-Side Validation (Registration wizards)
 - **Step 1 check** (`validateStep1`): 13 required text/select fields + 2 radio groups (Gender, HealthStatus): FirstName, SecondName, ThirdName, LastName, IdNumber, Sector, DateOfBirth, PhoneNumber, Wallet, OriginalGovernorate, MaritalStatus, EmploymentStatus, EducationLevel. Field-specific Arabic error messages listed in alert.
@@ -195,22 +193,13 @@ Camp family registration system in two versions:
 - **Server-side** (`RegistrationValidationService.ValidateRegistration`): Rejects submission if HealthStatus = "سليم" with ChronicDiseases or DisabilityTypes present.
 - Rationale: A person cannot be "سليم" (healthy) and have diseases at the same time.
 
-### Report Audit Logging
-- Both `Preview` and `ExportExcel` actions in `ReportController` log to `AuditLog` with:
-  - Action type: `PreviewReport` or `ExportExcel`
-  - Filter parameters (SectorId, Status, Gender, HealthStatus, Search, Age range)
-  - Selected columns
-  - SQL-like query string via `BuildSqlQuery()` showing WHERE clauses
-  - Row count
-- **AdminSectorId** stored in session on login (`AdminController`) for ماندوب sector-scoped reports.
-
 ### Nomination Audit Logging — Names not Numbers
 - All nomination audit log entries (`AddNomination`, `AddMultipleNominations`, `DeleteNomination`, `ImportNominationsExcel`) must log **names** (project name, person name, sector name, admin name) instead of numeric IDs
 - Logs use Arabic property names for `NewValues` (e.g. `المشروع`, `الشخص`, `القطاع`, `المسؤول`)
 - Each entry fetches the related entity name from DB before logging, never logs raw `projectId`, `personId`, `sectorId` alone
 - `RecordId` includes human-readable description like `المشروع:{projectName},الشخص:{personName}`
 
-## Key Conventions (both versions)
+## Key Conventions
 - All UI text in Arabic, RTL layout, Cairo font, dark theme (`#121212` + `#d4af37` gold).
 - 8-char Record ID from charset `23456789ABCDEFGHJKLMNPQRSTUVWXYZ`.
 - No input sanitization; no migrations (`EnsureCreated()` + raw SQL).

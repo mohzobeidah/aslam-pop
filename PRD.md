@@ -1,9 +1,9 @@
 # Product Requirements Document (PRD): Camp Family Registration Form
 
 ## 1. Product Overview
-The **Camp Family Registration Form** is a specialized web application available in two versions. The **original version** was developed using Google Apps Script for rapid deployment in camp settings. The system has since been expanded into a full **ASP.NET Core MVC** application (`CampRegistrationApp/`) with SQL Server, Entity Framework Core, and an extensive admin/nomination/report/financial system.
+The **Camp Family Registration Form** is a specialized web application built as an **ASP.NET Core MVC** application (`CampRegistrationApp/`) with SQL Server, Entity Framework Core, and an extensive admin/nomination/report/financial/complaint system.
 
-The primary purpose of both versions is to collect detailed demographic, health, and socio-economic data from families residing in camp settings. The application provides a digital interface for registering the head of the family and all accompanying family members, ensuring that critical vulnerabilities (health issues, housing conditions, and unique family structures) are documented for aid distribution or administrative planning.
+The primary purpose of the application is to collect detailed demographic, health, and socio-economic data from families residing in camp settings. The application provides a digital interface for registering the head of the family and all accompanying family members, ensuring that critical vulnerabilities (health issues, housing conditions, and unique family structures) are documented for aid distribution or administrative planning.
 
 ## 2. Target Audience
 - **Field Workers/Data Collectors:** Personnel responsible for conducting surveys and registering families in camp environments.
@@ -12,8 +12,8 @@ The primary purpose of both versions is to collect detailed demographic, health,
 ## 3. Goals & Objectives
 - **Digitize Registration:** Replace paper-based registration with a digital form to reduce errors and improve data accessibility.
 - **Detailed Vulnerability Mapping:** Capture specific health/disability data and housing conditions (e.g., tent types) to identify high-priority cases.
-- **Document Verification:** Allow the upload of medical reports and identity documents directly to a centralized cloud storage (Google Drive).
-- **Simplified Data Management:** Automate the storage of registration data into a Google Sheet for easy analysis and reporting.
+- **Document Verification:** Allow the upload of medical reports and identity images for verification.
+- **Simplified Data Management:** Structured storage in SQL Server database for easy analysis and reporting.
 
 ## 4. Functional Requirements
 
@@ -28,7 +28,7 @@ The primary purpose of both versions is to collect detailed demographic, health,
 
 ### 4.2 Family Member Registration
 - **Dynamic Addition:** Ability to add multiple family members to a single registration.
-- **Member Details:** Collect name, ID, date of birth, gender, age (in months for infants), phone, governorate, relationship to head of family, marital status, job, and education.
+- **Member Details:** Collect name, ID, date of birth, gender, age (in months for infants), governorate, relationship to head of family, marital status, job, and education. (No phone/wallet — these are head-only.)
 - **Member Health Profile:** Same health tracking capabilities as the family head (diseases, disabilities, injuries).
 - **Gender-Specific Data:** 
     - For female members: Track pregnancy (with month) and nursing status.
@@ -46,27 +46,20 @@ The primary purpose of both versions is to collect detailed demographic, health,
 
 ### 4.4 Data Processing & Storage
 - **Unique Identification:** Generate a unique 8-character Record ID for every successful registration.
-- **Cloud Storage:** Upload all files to a dedicated Google Drive folder named "التقارير الطبية".
-- **Spreadsheet Integration:** Append all collected data as a single row in a Google Sheet named "البيانات".
+- **File Storage:** Uploaded files (medical reports, ID images) stored on local filesystem under `wwwroot/uploads/registrations/TEMP/`.
+- **Data Storage:** All data stored in SQL Server database via Entity Framework Core.
 
 ## 5. Non-Functional Requirements
 - **User Interface (UI):** 
     - Full Right-to-Left (RTL) support for Arabic language.
     - Mobile-responsive design for use on tablets and smartphones in the field.
     - High-contrast "Dark Theme" (Gold and Dark Grey) for better visibility.
-- **Performance:** Low latency for form submissions, leveraging Google's infrastructure.
+- **Performance:** Low latency for form submissions with efficient database queries.
 - **Accessibility:** Use of the 'Cairo' font for readability in Arabic.
 
 ## 6. Technical Architecture
 
-### Version 1: Google Apps Script (GAS)
-- **Frontend:** HTML5, CSS3 (Tailwind CSS), JavaScript (Client-side).
-- **Backend:** Google Apps Script (GAS).
-- **Database:** Google Sheets (as a flat-file database).
-- **File Storage:** Google Drive.
-- **Deployment:** Google Apps Script Web App.
-
-### Version 2: ASP.NET Core MVC (CampRegistrationApp/)
+### ASP.NET Core MVC (CampRegistrationApp/)
 - **Framework:** .NET 10 MVC with Razor runtime compilation.
 - **Frontend:** HTML5, Tailwind CSS (CDN), JavaScript, RTL dark theme.
 - **Backend:** ASP.NET Core controllers and services.
@@ -74,7 +67,7 @@ The primary purpose of both versions is to collect detailed demographic, health,
 - **File Storage:** Local filesystem under `wwwroot/uploads/`.
 - **Authentication:** Session-based (no ASP.NET Identity).
 - **Deployment:** GitHub Actions CI/CD → Azure Web App.
-- **Key Features Added Beyond GAS:**
+- **Key Features:**
   - Admin panel with role-based access (Admin, Mandoob)
   - Registration approval workflow (Pending/Approved/Rejected) with rejection reasons
   - Family member management, dynamic add/remove
@@ -86,54 +79,41 @@ The primary purpose of both versions is to collect detailed demographic, health,
   - Assistance/beneficiary management with Excel import
   - Force password change (if password matches ID)
   - Dashboard with CTE-based demographic statistics
-  - Complaint management system
-  - Financial recorder module
+  - Complaint / ticket management system
+  - Financial recorder module (planned)
 
-## 7. Data Schema
-| Column Name | Description |
+## 7. Data Schema (ASP.NET Core)
+
+### Core Tables
+
+| Table | Description |
 | :--- | :--- |
-| وقت التسجيل | Registration Timestamp |
-| الاسم الأول...العائلة | Head of Family Full Name |
-| رقم الهوية | ID Number |
-| القاطع | Sector (A/B/C/D) |
-| تاريخ الميلاد | Date of Birth |
-| الجنس | Gender |
-| رقم الجوال | Phone Number |
-| المحافظة الأصلية | Original Governorate |
-| الحالة الاجتماعية | Marital Status |
-| الحالة الوظيفية | Job Status |
-| المؤهل العلمي | Education Level |
-| الحالة الصحية | Health Status (Healthy/Sick) |
-| الأمراض المزمنة | List of chronic diseases |
-| أنواع الإعاقة | Types of disabilities |
-| هل تعرض لإصابة | Injury history (Yes/No) |
-| تاريخ الإصابة | Date of injury |
-| تفاصيل الإصابة | Injury details |
-| رابط التقرير الطبي | URL to medical report in Drive |
-| رابط صورة الهوية | URL to ID image in Drive |
-| يعيل أسرتك طفل | Child-headed flag (Yes/No) |
-| تفاصيل الطفل | Child-head details |
-| تعيل أسرتك امرأة | Female-headed flag (Yes/No) |
-| تفاصيل المرأة | Female-head details |
-| يعيل شخص خارج العائلة | Supports outside person (Yes/No) |
-| اسم الشخص | Outside person name |
-| صلة القرابة | Relationship to outside person |
-| يسكن خيمة | Lives in tent (Yes/No) |
-| نوع الخيمة | Tent type |
-| نوع الخيمة أخرى | Other tent type description |
-| يوجد حمام | Bathroom exists (Yes/No) |
-| نوع الحمام | Bathroom type (Private/Shared) |
-| أفراد الأسرة (JSON) | JSON string containing all members' data |
-| معرف التسجيل | Unique Record ID |
+| **Persons** | Family heads and members — name (4 parts), ID, DOB, gender, health/disease/disability, injury, maternity fields, prisoner flags, BathroomStatus, MotherIdNumber |
+| **FamilyRegistrations** | Links to head Person, sector, phone, wallet, housing fields (tent/bathroom), approval workflow, rejection tracking, soft delete |
+| **FamilyMembers** | Join table linking FamilyRegistration → Person with RelationshipToHead |
+| **Attachments** | File metadata linked to Person (MedicalReport or IDImage), stores relative paths |
+| **Sectors** | Camp sectors with name, camp, coordinates, area, tent/bathroom counts |
+| **Admins** | Admin login with role (Admin/Mandoob), SHA256 password hashing, optional sector assignment |
+| **Desires** | Available refugee desire options (aid items) |
+| **FamilyDesires** | Join table — ranked desires per FamilyRegistration (Order + DesireId) |
+| **Projects** | Aid campaign projects with start/end dates, required count, status, soft delete |
+| **Nominations** | Person-project links per sector, approval workflow, soft delete |
+| **AuditLogs** | Immutable audit trail with JSON old/new values and source tracking (Web/Mobile) |
+| **Notifications** | Per-admin notification with message, link, read status |
+| **Assistance** | Aid campaigns with name, type, source, date, sector, status |
+| **AssistanceBeneficiaries** | Standalone beneficiary records (FullName, NationalId, Phone, SectorId, BenefitType) |
+| **Complaints** | Ticket-based complaint system with status (Pending/InProgress/Resolved/Closed) |
+
+### Key Registration Fields
+
+| Category | Fields |
+| :--- | :--- |
+| **Family Head** | FirstName, SecondName, ThirdName, LastName, IdNumber, DateOfBirth, Gender, OriginalGovernorate, MaritalStatus, EmploymentStatus, EducationLevel, HealthStatus, ChronicDiseases, DisabilityTypes, Injury fields, Maternity fields, Prisoner flags, BathroomStatus, MotherIdNumber |
+| **Registration** | Sector, PhoneNumber, Wallet, WalletType, StatusNotes, LivesInTent, HasBathroom, BathroomType, BathroomStatus, IsChildHeaded, IsFemaleHeaded, IsHusbandAbroad, SupportsOutsidePerson, NeedsDiapers, HasMultipleFamiliesInTent |
+| **Members** | Same as Family Head fields + RelationshipToHead. No Sector/PhoneNumber/Wallet (head-only) |
+| **Refugee Desires** | Ranked selections from Desires table stored as FamilyDesire join records |
 
 ## 8. Future Improvements
-
-### GAS Version
-- **Input Validation:** Implement more robust server-side validation to prevent data corruption.
-- **Data Sanitization:** Ensure user inputs are sanitized before being written to the spreadsheet.
-- **File Type Handling:** Improve `uploadFileToDrive` to detect and set the correct MimeType for images vs PDFs.
-- **Dynamic Member IDs:** Replace index-based naming for member health fields to allow safe deletion of members during registration.
-- **Offline Support:** Implement local storage caching to allow data collection in areas with poor internet connectivity, syncing when online.
 
 ### ASP.NET Core Version
 - **Document Verification:** Automated ID document verification using OCR.

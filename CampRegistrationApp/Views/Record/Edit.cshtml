@@ -40,7 +40,7 @@
                 @Html.ValidationSummary(false, "", new { @class = "text-red-500 text-sm" })
             </div>
 
-            <form id="editForm" asp-action="@(ViewBag.FormAction ?? "Update")" asp-controller="@(ViewBag.FormController ?? "Record")" method="post" class="space-y-8 novalidate @(mustChangePassword ? "pointer-events-none opacity-40 select-none" : "")">
+            <form id="editForm" asp-action="@(ViewBag.FormAction ?? "Update")" asp-controller="@(ViewBag.FormController ?? "Record")" method="post" class="space-y-8 novalidate @(mustChangePassword ? "pointer-events-none opacity-40 select-none" : "")" onsubmit="return submitEditForm()">
                 <input type="hidden" name="Id" value="@Model.Id" />
                 <input type="hidden" name="RecordId" value="@Model.RecordId" />
                 <input type="hidden" name="CurrentStep" value="1" />
@@ -85,7 +85,7 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">تاريخ الميلاد</label>
-                            <input name="Head.DateOfBirth" type="date" value="@Model.Head.DateOfBirth.ToString("yyyy-MM-dd")" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                            <input name="Head.DateOfBirth" type="date" value="@(Model.Head.DateOfBirth?.ToString("yyyy-MM-dd") ?? "")" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
                         </div>
                         <div>
                             <label class="block text-sm mb-1">الجنس</label>
@@ -317,7 +317,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-xs mb-1">تاريخ الميلاد</label>
-                                        <input type="date" name="Members[@i].DateOfBirth" value="@m.DateOfBirth.ToString("yyyy-MM-dd")" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                                        <input type="date" name="Members[@i].DateOfBirth" value="@(m.DateOfBirth?.ToString("yyyy-MM-dd") ?? "")" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
                                     </div>
                                     <div>
                                         <label class="block text-xs mb-1">الجنس</label>
@@ -325,6 +325,11 @@
                                             <option value="ذكر" selected="@(m.Gender == "ذكر" )">ذكر</option>
                                             <option value="أنثى" selected="@(m.Gender == "أنثى" )">أنثى</option>
                                         </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs mb-1">رقم هوية الأم</label>
+                                        <input name="Members[@i].MotherIdNumber" value="@m.MotherIdNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onblur="validateMotherIdField(this)" oninput="clearMotherIdError(this)" />
+                                        <span class="mother-id-error text-red-500 text-xs hidden">رقم هوية الأم يجب أن يتكون من 9 أرقام صحيحة</span>
                                     </div>
                                     <div>
                                         <label class="block text-xs mb-1">صلة القرابة</label>
@@ -616,7 +621,7 @@
 
             <!-- Submit -->
             <div class="flex gap-4 justify-center pt-4">
-                    <button type="submit" onclick="return submitEditForm()" class="px-10 py-3 rounded bg-green-600 text-white font-bold hover:bg-green-700 transition-colors text-lg">
+                    <button type="submit" class="px-10 py-3 rounded bg-green-600 text-white font-bold hover:bg-green-700 transition-colors text-lg">
                         حفظ التعديلات
                     </button>
                     <button type="button" onclick="confirmLogout()" class="px-6 py-3 rounded border border-gray-600 text-gray-400 hover:text-white hover:border-gray-400 transition-colors">
@@ -740,7 +745,14 @@
             const val = el.value.trim();
             const errorSpan = el.parentElement.querySelector('.mother-id-error');
             if (!errorSpan) return true;
-            if (val && !validatePalestinianId(val)) {
+            if (!val) {
+                errorSpan.textContent = 'رقم هوية الأم مطلوب';
+                errorSpan.classList.remove('hidden');
+                el.classList.add('field-error');
+                return false;
+            }
+            if (!validatePalestinianId(val)) {
+                errorSpan.textContent = 'رقم هوية الأم يجب أن يتكون من 9 أرقام صحيحة';
                 errorSpan.classList.remove('hidden');
                 el.classList.add('field-error');
                 return false;
@@ -1054,20 +1066,26 @@
                 alert('يجب تغيير كلمة المرور أولاً');
                 return false;
             }
+            let missingFields = [];
             let valid = true;
 
             // Validate IDs
             document.querySelectorAll('[name$=".IdNumber"], [name="Head.IdNumber"]').forEach(el => {
-                if (!validateIdField(el)) valid = false;
+                if (!validateIdField(el)) { valid = false; missingFields.push('رقم الهوية'); }
+            });
+
+            // Validate MotherIdNumber format
+            document.querySelectorAll('[name$=".MotherIdNumber"]').forEach(el => {
+                if (el.value.trim() && !validateMotherIdField(el)) { valid = false; missingFields.push('رقم هوية الأم'); }
             });
 
             // Validate phone
             const phoneEl = document.querySelector('[name="PhoneNumber"]');
-            if (phoneEl && !validatePhoneField(phoneEl)) { highlightError(phoneEl); valid = false; }
+            if (phoneEl && !validatePhoneField(phoneEl)) { highlightError(phoneEl); missingFields.push('رقم الهاتف'); valid = false; }
 
             // Validate wallet if provided
             const walletEl = document.querySelector('[name="Wallet"]');
-            if (walletEl && walletEl.value.trim() && !validateWalletField(walletEl)) { highlightError(walletEl); valid = false; }
+            if (walletEl && walletEl.value.trim() && !validateWalletField(walletEl)) { highlightError(walletEl); missingFields.push('المحفظة'); valid = false; }
 
             const fieldLabels = {
                 'Head.FirstName': 'الاسم الأول',
@@ -1085,7 +1103,6 @@
                 'Head.EmploymentStatus': 'الوظيفة',
                 'Head.EducationLevel': 'المستوى التعليمي'
             };
-            let missingFields = [];
             for (const [key, label] of Object.entries(fieldLabels)) {
                 const el = document.querySelector(`[name="${key}"]`);
                 if (!el || !el.value.trim()) {
@@ -1154,14 +1171,14 @@
             }
 
             // Validate member required fields
-            const memberFields = ['FirstName', 'IdNumber', 'RelationshipToHead', 'Gender', 'DateOfBirth'];
+            const memberFields = ['FirstName', 'IdNumber', 'RelationshipToHead', 'Gender', 'DateOfBirth', 'MotherIdNumber'];
             document.querySelectorAll('.member-card').forEach((card, idx) => {
                 let memberMissing = [];
                 memberFields.forEach(field => {
                     const el = card.querySelector(`[name$=".${field}"]`);
                     if (!el || !el.value.trim()) {
                         highlightError(el);
-                        memberMissing.push(field === 'FirstName' ? 'الاسم الأول' : field === 'IdNumber' ? 'رقم الهوية' : field === 'RelationshipToHead' ? 'صلة القرابة' : field === 'Gender' ? 'الجنس' : 'تاريخ الميلاد');
+                        memberMissing.push(field === 'FirstName' ? 'الاسم الأول' : field === 'IdNumber' ? 'رقم الهوية' : field === 'RelationshipToHead' ? 'صلة القرابة' : field === 'Gender' ? 'الجنس' : field === 'DateOfBirth' ? 'تاريخ الميلاد' : 'رقم هوية الأم');
                         valid = false;
                     } else {
                         clearHighlight(el);
@@ -1229,6 +1246,7 @@
             const hasBathroomValue = document.querySelector('[name="HasBathroom"]:checked')?.value || 'false';
             const bathroomTypeValue = document.querySelector('[name="BathroomType"]:checked')?.value || '';
 
+            try {
             // Disable ALL checkboxes + radios so only hidden inputs submit values
             form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
             form.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
@@ -1305,7 +1323,7 @@
                 hidden.value = value;
                 form.appendChild(hidden);
             });
-            ['NeedsDiapers', 'HasMultipleFamiliesInTent', 'IsChildHeaded', 'IsFemaleHeaded', 'SupportsOutsidePerson'].forEach(field => {
+            ['NeedsDiapers', 'HasMultipleFamiliesInTent', 'IsChildHeaded', 'IsFemaleHeaded', 'SupportsOutsidePerson', 'IsHusbandAbroad'].forEach(field => {
                 const el = form.querySelector(`[name="${field}"]`);
                 const hidden = document.createElement('input');
                 hidden.type = 'hidden';
@@ -1321,7 +1339,7 @@
             const desireInput = document.getElementById('desireIdsInput');
             if (desireInput && desireInput.value) {
                 const ids = desireInput.value.split(',').filter(Boolean);
-                desireInput.remove();
+                desireInput.name = '_DesireIds_raw';
                 ids.forEach((id, i) => {
                     const hidden = document.createElement('input');
                     hidden.type = 'hidden';
@@ -1329,6 +1347,12 @@
                     hidden.value = id.trim();
                     form.appendChild(hidden);
                 });
+            }
+
+            } catch (e) {
+                console.error('Form processing error:', e);
+                alert('حدث خطأ أثناء تجهيز البيانات: ' + e.message);
+                return false;
             }
 
             return true;
@@ -1350,7 +1374,7 @@
             if (!container) return;
 
             const selected = getSavedDesireIds();
-            const RANK_COUNT = Math.max(5, selected.length);
+            const RANK_COUNT = DESIRES.length;
 
             if (!DESIRES || DESIRES.length === 0) {
                 container.innerHTML = '<p class="text-gray-500 text-center col-span-full">لا توجد رغبات متاحة حالياً</p>';
@@ -1406,26 +1430,30 @@
 
         function updateDesireOptions() {
             const selects = document.querySelectorAll('.desire-select');
-            const selectedValues = [];
 
-            selects.forEach(sel => {
-                const val = sel.value;
-                selectedValues.push(val);
+            selects.forEach((sel, index) => {
+                const curOrder = parseInt(sel.getAttribute('data-order'));
+
+                if (sel.value !== '') {
+                    const duplicateInEarlier = Array.from(selects).some(s => {
+                        const sOrder = parseInt(s.getAttribute('data-order'));
+                        return sOrder < curOrder && s.value === sel.value;
+                    });
+                    if (duplicateInEarlier) {
+                        sel.value = '';
+                    }
+                }
 
                 Array.from(sel.options).forEach(opt => {
                     if (opt.value === '') return;
-                    if (opt.value === val) {
-                        opt.disabled = false;
-                        opt.hidden = false;
-                        return;
-                    }
-                    const alreadySelectedInEarlier = Array.from(selects).some(s => {
+
+                    const isSelectedInEarlier = Array.from(selects).some(s => {
                         const sOrder = parseInt(s.getAttribute('data-order'));
-                        const curOrder = parseInt(sel.getAttribute('data-order'));
                         return sOrder < curOrder && s.value === opt.value;
                     });
-                    opt.disabled = alreadySelectedInEarlier;
-                    opt.hidden = alreadySelectedInEarlier;
+
+                    opt.disabled = isSelectedInEarlier;
+                    opt.hidden = isSelectedInEarlier;
                 });
             });
         }
