@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');</script>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title> - نظام تسجيل العائلات</title>
+
+    <!-- Google Fonts: Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'camp-gold': '#D4AF37',
+                        'camp-dark-grey': '#1A1A1A',
+                        'camp-accent-grey': '#2D2D2D',
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+    </style>
+    <link rel="stylesheet" href="/css/site.css?v=j6fhJSuuyLpOSLuPJU0TsDV0iNjor5S3rDnvxJrt4bg" />
+</head>
+<body class="bg-camp-dark-grey">
+    <header b-4669mldcdy>
+        <nav b-4669mldcdy class="bg-camp-accent-grey border-b border-camp-gold p-4 shadow-lg">
+            <div b-4669mldcdy class="container mx-auto flex justify-between items-center">
+                <a class="text-xl sm:text-2xl font-bold text-camp-gold" href="/">
+                    نظام تسجيل العائلات
+                </a>
+
+
+                <!-- Hamburger button (mobile) -->
+                <button b-4669mldcdy id="menuBtn" class="sm:hidden text-gray-300 hover:text-camp-gold p-2" onclick="toggleMenu()">
+                    <svg b-4669mldcdy class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path b-4669mldcdy id="menuIcon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+
+                <!-- Desktop nav -->
+                <div b-4669mldcdy class="hidden sm:flex gap-2 items-center">
+                    <button b-4669mldcdy id="themeToggle" onclick="toggleTheme()" class="text-gray-300 hover:text-camp-gold transition-colors px-2 py-2 rounded text-sm" title="تغيير السمة">
+                        <span b-4669mldcdy id="themeIcon">☀️</span>
+                    </button>
+                    <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" href="/Registration">تسجيل جديد</a>
+                    <a class="text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" href="/Record/Login">تسجيل الدخول</a>
+                    <a class="text-gray-300 hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" href="/Complaint/Create">تقديم شكوى</a>
+                        <a class="text-camp-gold hover:text-yellow-500 transition-colors px-3 py-2 rounded text-sm font-bold" href="/Admin/Login">دخول المشرفين</a>
+                </div>
+            </div>
+
+            <!-- Mobile dropdown menu -->
+            <div b-4669mldcdy id="mobileMenu" class="hidden sm:hidden mt-4 space-y-1 border-t border-gray-700 pt-3">
+                <a b-4669mldcdy id="mobileThemeToggle" href="#" onclick="toggleTheme(); return false;" class="block text-gray-300 hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm">
+                    <span b-4669mldcdy id="mobileThemeIcon">☀️</span> تغيير السمة
+                </a>
+                <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" href="/Registration">تسجيل جديد</a>
+                <a class="block text-white hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" href="/Record/Login">تسجيل الدخول</a>
+                <a class="block text-gray-300 hover:text-camp-gold transition-colors px-3 py-2 rounded text-sm" href="/Complaint/Create">تقديم شكوى</a>
+                    <a class="block text-camp-gold hover:text-yellow-500 transition-colors px-3 py-2 rounded text-sm font-bold" href="/Admin/Login">دخول المشرفين</a>
+            </div>
+        </nav>
+    </header>
+    <div b-4669mldcdy class="container mx-auto">
+        <main b-4669mldcdy role="main" class="py-8">
+            
+<div class="min-h-screen bg-camp-dark-grey text-white font-cairo" dir="rtl">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-camp-gold mb-2">نموذج تسجيل العائلات</h1>
+            <p class="text-gray-400">يتم حفظ البيانات تلقائياً في المتصفح</p>
+        </header>
+
+        <div class="max-w-4xl mx-auto">
+            <!-- Messages -->
+
+            <!-- Stepper -->
+            <div class="flex justify-between mb-8">
+                <div class="flex flex-col items-center flex-1 cursor-pointer" onclick="tryGoToStep(1)">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors" id="step-indicator-1">
+                        1
+                    </div>
+                    <span class="text-xs mt-2" id="step-label-1">رب الأسرة</span>
+                </div>
+                <div class="flex flex-col items-center flex-1 cursor-pointer" onclick="tryGoToStep(2)">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors" id="step-indicator-2">
+                        2
+                    </div>
+                    <span class="text-xs mt-2" id="step-label-2">أفراد الأسرة</span>
+                </div>
+                <div class="flex flex-col items-center flex-1 cursor-pointer" onclick="tryGoToStep(3)">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors" id="step-indicator-3">
+                        3
+                    </div>
+                    <span class="text-xs mt-2" id="step-label-3">السكن</span>
+                </div>
+                <div class="flex flex-col items-center flex-1 cursor-pointer" onclick="tryGoToStep(4)">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors" id="step-indicator-4">
+                        4
+                    </div>
+                    <span class="text-xs mt-2" id="step-label-4">المراجعة</span>
+                </div>
+            </div>
+
+            <form id="registrationForm" method="post" class="space-y-6" enctype="multipart/form-data" novalidate action="/Registration/Submit">
+                <!-- ============ STEP 1: FAMILY HEAD ============ -->
+                <div class="step bg-camp-accent-grey p-6 rounded-lg border-r-4 border-camp-gold shadow-xl" id="step-1">
+                    <h2 class="text-2xl font-semibold text-camp-gold mb-6">بيانات رب الأسرة</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm mb-1">الاسم الأول</label>
+                            <input name="Head.FirstName" data-ls="Head.FirstName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">الاسم الثاني</label>
+                            <input name="Head.SecondName" data-ls="Head.SecondName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">الاسم الثالث</label>
+                            <input name="Head.ThirdName" data-ls="Head.ThirdName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">اسم العائلة</label>
+                            <input name="Head.LastName" data-ls="Head.LastName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm mb-1">رقم الهوية</label>
+                            <input name="Head.IdNumber" data-ls="Head.IdNumber" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required onblur="checkDuplicateId(this)" oninput="clearIdError(this); clearDuplicateWarning(this)" />
+                            <span class="id-error text-red-500 text-xs hidden">رقم الهوية يجب أن يتكون من 9 أرقام</span>
+                            <span class="dup-warning text-yellow-500 text-xs hidden"></span>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">القاطع</label>
+                            <select name="SectorId" data-ls="SectorId" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
+                                <option value="">اختر القاطع...</option>
+                                    <option value="8">&#x645;&#x62E;&#x64A;&#x645; &#x627;&#x644;&#x633;&#x644;&#x627;&#x645; &#x642;&#x627;&#x637;&#x639; A-&#x62C;&#x628;&#x631; &#x627;&#x644;&#x62F;&#x631;&#x628;&#x649;</option>
+                                    <option value="6">&#x645;&#x62E;&#x64A;&#x645; &#x627;&#x644;&#x633;&#x644;&#x627;&#x645; &#x642;&#x627;&#x637;&#x639; B-&#x627;&#x628;&#x648; &#x62C;&#x647;&#x627;&#x62F; &#x627;&#x644;&#x627;&#x62E;&#x631;&#x633;</option>
+                                    <option value="5">&#x645;&#x62E;&#x64A;&#x645; &#x627;&#x644;&#x633;&#x644;&#x627;&#x645; &#x642;&#x627;&#x637;&#x639; C-&#x623;&#x643;&#x631;&#x645; &#x639;&#x627;&#x628;&#x62F;&#x64A;&#x646;</option>
+                                    <option value="7">&#x645;&#x62E;&#x64A;&#x645; &#x627;&#x644;&#x633;&#x644;&#x627;&#x645; &#x642;&#x627;&#x637;&#x639; D-&#x627;&#x64A;&#x627;&#x62F; &#x641;&#x627;&#x64A;&#x642; &#x639;&#x628;&#x62F; &#x627;&#x644;&#x62D;&#x644;&#x64A;&#x645; &#x62C;&#x648;&#x62F;&#x629; </option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">تاريخ الميلاد</label>
+                            <input name="Head.DateOfBirth" data-ls="Head.DateOfBirth" type="date" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">الجنس</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="Head.Gender" data-ls="Head.Gender" value="ذكر" checked class="accent-camp-gold" onchange="saveToLocalStorage()" /> ذكر
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="Head.Gender" data-ls="Head.Gender" value="أنثى" class="accent-camp-gold" onchange="saveToLocalStorage()" /> أنثى
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">رقم الهاتف</label>
+                            <input name="PhoneNumber" data-ls="PhoneNumber" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearPhoneError(this)" />
+                            <span class="phone-error text-red-500 text-xs hidden">رقم الهاتف يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056</span>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">المحفظة</label>
+                            <input name="Wallet" data-ls="Wallet" pattern="^(059|056)\d{7}$" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required oninput="clearWalletError(this)" />
+                            <span class="wallet-error text-red-500 text-xs hidden">رقم المحفظة يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056</span>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">نوع المحفظة</label>
+                            <select name="WalletType" data-ls="WalletType" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                                <option value="">اختر نوع المحفظة...</option>
+                                <option value="&#x628;&#x646;&#x643;">بنك</option>
+                                <option value="&#x628;&#x627;&#x644; &#x628;&#x64A;">بال بي</option>
+                                <option value="&#x62C;&#x648;&#x627;&#x644; &#x628;&#x64A;">جوال بي</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">مكان السكن الأصلي</label>
+                            <select name="Head.OriginalGovernorate" data-ls="Head.OriginalGovernorate" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
+                                <option value="">اختر المنطقة...</option>
+                                <option value="&#x63A;&#x632;&#x629;">غزة</option>
+                                <option value="&#x62E;&#x627;&#x646;&#x64A;&#x648;&#x646;&#x64A;&#x633;">خانيونيس</option>
+                                <option value="&#x634;&#x645;&#x627;&#x644; &#x63A;&#x632;&#x629;">شمال غزة</option>
+                                <option value="&#x631;&#x641;&#x62D;">رفح</option>
+                                <option value="&#x62F;&#x64A;&#x631; &#x627;&#x644;&#x628;&#x644;&#x62D;">دير البلح</option>
+                                <option value="&#x627;&#x644;&#x646;&#x635;&#x64A;&#x631;&#x627;&#x62A;">النصيرات</option>
+                                <option value="&#x627;&#x644;&#x645;&#x63A;&#x627;&#x632;&#x64A;">المغازي</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">الحالة الاجتماعية</label>
+                            <select name="Head.MaritalStatus" data-ls="Head.MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
+                                <option value="">اختر الحالة...</option>
+                                <option value="&#x645;&#x62A;&#x632;&#x648;&#x62C;">متزوج</option>
+                                <option value="&#x623;&#x639;&#x632;&#x628;">أعزب</option>
+                                <option value="&#x623;&#x631;&#x645;&#x644;">أرمل</option>
+                                <option value="&#x645;&#x637;&#x644;&#x642;">مطلق</option>
+                                <option value="&#x645;&#x646;&#x641;&#x635;&#x644;">منفصل</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">الوظيفة</label>
+                            <input name="Head.EmploymentStatus" data-ls="Head.EmploymentStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">المستوى التعليمي</label>
+                            <select name="Head.EducationLevel" data-ls="Head.EducationLevel" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" required>
+                                <option value="">اختر...</option>
+                                <option value="&#x628;&#x62F;&#x648;&#x646;">بدون</option>
+                                <option value="&#x627;&#x628;&#x62A;&#x62F;&#x627;&#x626;&#x64A;">ابتدائي</option>
+                                <option value="&#x625;&#x639;&#x62F;&#x627;&#x62F;&#x64A;">إعدادي</option>
+                                <option value="&#x62B;&#x627;&#x646;&#x648;&#x64A;">ثانوي</option>
+                                <option value="&#x62C;&#x627;&#x645;&#x639;&#x64A;">جامعي</option>
+                                <option value="&#x62F;&#x631;&#x627;&#x633;&#x627;&#x62A; &#x639;&#x644;&#x64A;&#x627;">دراسات عليا</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" name="Head.IsHouseDestroyed" data-ls="Head.IsHouseDestroyed" value="true" class="accent-camp-gold" onchange="saveToLocalStorage()" />
+                            <label class="text-sm">المنزل مدمر</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" name="Head.IsPrisoner" data-ls="Head.IsPrisoner" value="true" class="accent-camp-gold" onchange="saveToLocalStorage()" />
+                            <label class="text-sm">أسير</label>
+                        </div>
+                    </div>
+
+                    <!-- Head ID Image -->
+                    <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700 mb-6">
+                        <label class="text-lg">صورة الهوية</label>
+                        <input type="file" id="headIdFile" accept="image/*" onchange="uploadFile(this, 'IDImage', 'headIdPath')" class="text-sm text-gray-400" />
+                        <input type="hidden" name="Head.HeadIdImagePath" id="headIdPath" data-ls="Head.HeadIdImagePath" />
+                        <span id="headIdFile-name" class="text-xs text-camp-gold hidden"></span>
+                    </div>
+
+                    <div class="mt-8 border-t border-gray-700 pt-6">
+                        <h3 class="text-xl font-semibold text-camp-gold mb-4">الحالة الصحية</h3>
+                        <div class="flex gap-6 mb-6">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="Head.HealthStatus" data-ls="Head.HealthStatus" value="&#x633;&#x644;&#x64A;&#x645;" checked class="accent-camp-gold" onchange="toggleHealthSection(this, 'head-health-details'); saveToLocalStorage()" /> &#x633;&#x644;&#x64A;&#x645;
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="Head.HealthStatus" data-ls="Head.HealthStatus" value="&#x645;&#x631;&#x64A;&#x636;"  class="accent-camp-gold" onchange="toggleHealthSection(this, 'head-health-details'); saveToLocalStorage()" /> &#x645;&#x631;&#x64A;&#x636;
+                                </label>
+                        </div>
+
+                        <div id="head-health-details" class="hidden space-y-6">
+                            <div class="p-4 bg-camp-dark-grey rounded border border-gray-700 mb-4">
+                                <label class="block text-sm mb-1">إرفاق تقارير طبية أو صور</label>
+                                <input type="file" id="headMedicalFile" accept="image/*,application/pdf" onchange="uploadFile(this, 'MedicalReport', 'headMedicalPath')" class="text-sm text-gray-400" />
+                                <input type="hidden" name="Head.MedicalImagePath" id="headMedicalPath" data-ls="Head.MedicalImagePath" />
+                                <span id="headMedicalFile-name" class="text-xs text-camp-gold hidden"></span>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2">الأمراض المزمنة</label>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.ChronicDiseases" data-ls="Head.ChronicDiseases" value="&#x623;&#x62E;&#x631;&#x649;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x623;&#x62E;&#x631;&#x649;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.ChronicDiseases" data-ls="Head.ChronicDiseases" value="&#x623;&#x645;&#x631;&#x627;&#x636; &#x627;&#x644;&#x642;&#x644;&#x628;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x623;&#x645;&#x631;&#x627;&#x636; &#x627;&#x644;&#x642;&#x644;&#x628;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.ChronicDiseases" data-ls="Head.ChronicDiseases" value="&#x623;&#x645;&#x631;&#x627;&#x636; &#x627;&#x644;&#x643;&#x644;&#x649; &#x627;&#x644;&#x645;&#x632;&#x645;&#x646;&#x629;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x623;&#x645;&#x631;&#x627;&#x636; &#x627;&#x644;&#x643;&#x644;&#x649; &#x627;&#x644;&#x645;&#x632;&#x645;&#x646;&#x629;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.ChronicDiseases" data-ls="Head.ChronicDiseases" value="&#x627;&#x644;&#x62A;&#x635;&#x644;&#x628; &#x627;&#x644;&#x644;&#x648;&#x64A;&#x62D;&#x64A;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x627;&#x644;&#x62A;&#x635;&#x644;&#x628; &#x627;&#x644;&#x644;&#x648;&#x64A;&#x62D;&#x64A;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.ChronicDiseases" data-ls="Head.ChronicDiseases" value="&#x627;&#x644;&#x631;&#x628;&#x648;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x627;&#x644;&#x631;&#x628;&#x648;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.ChronicDiseases" data-ls="Head.ChronicDiseases" value="&#x627;&#x644;&#x633;&#x631;&#x637;&#x627;&#x646;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x627;&#x644;&#x633;&#x631;&#x637;&#x627;&#x646;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.ChronicDiseases" data-ls="Head.ChronicDiseases" value="&#x627;&#x644;&#x633;&#x643;&#x631;&#x64A;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x627;&#x644;&#x633;&#x643;&#x631;&#x64A;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.ChronicDiseases" data-ls="Head.ChronicDiseases" value="&#x627;&#x644;&#x635;&#x631;&#x639;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x627;&#x644;&#x635;&#x631;&#x639;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.ChronicDiseases" data-ls="Head.ChronicDiseases" value="&#x62B;&#x644;&#x627;&#x633;&#x64A;&#x645;&#x64A;&#x627;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x62B;&#x644;&#x627;&#x633;&#x64A;&#x645;&#x64A;&#x627;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.ChronicDiseases" data-ls="Head.ChronicDiseases" value="&#x636;&#x63A;&#x637; &#x627;&#x644;&#x62F;&#x645; &#x627;&#x644;&#x645;&#x631;&#x62A;&#x641;&#x639;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x636;&#x63A;&#x637; &#x627;&#x644;&#x62F;&#x645; &#x627;&#x644;&#x645;&#x631;&#x62A;&#x641;&#x639;
+                                        </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-2">أنواع الإعاقة</label>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.DisabilityTypes" data-ls="Head.DisabilityTypes" value="&#x625;&#x639;&#x627;&#x642;&#x629; &#x630;&#x647;&#x646;&#x64A;&#x629;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x625;&#x639;&#x627;&#x642;&#x629; &#x630;&#x647;&#x646;&#x64A;&#x629;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.DisabilityTypes" data-ls="Head.DisabilityTypes" value="&#x627;&#x644;&#x62A;&#x648;&#x62D;&#x62F;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x627;&#x644;&#x62A;&#x648;&#x62D;&#x62F;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.DisabilityTypes" data-ls="Head.DisabilityTypes" value="&#x628;&#x62A;&#x631; &#x627;&#x644;&#x623;&#x637;&#x631;&#x627;&#x641;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x628;&#x62A;&#x631; &#x627;&#x644;&#x623;&#x637;&#x631;&#x627;&#x641;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.DisabilityTypes" data-ls="Head.DisabilityTypes" value="&#x634;&#x644;&#x644; &#x646;&#x635;&#x641;&#x64A; &#x623;&#x648; &#x643;&#x644;&#x64A;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x634;&#x644;&#x644; &#x646;&#x635;&#x641;&#x64A; &#x623;&#x648; &#x643;&#x644;&#x64A;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.DisabilityTypes" data-ls="Head.DisabilityTypes" value="&#x636;&#x639;&#x641; &#x623;&#x648; &#x641;&#x642;&#x62F;&#x627;&#x646; &#x627;&#x644;&#x628;&#x635;&#x631;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x636;&#x639;&#x641; &#x623;&#x648; &#x641;&#x642;&#x62F;&#x627;&#x646; &#x627;&#x644;&#x628;&#x635;&#x631;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.DisabilityTypes" data-ls="Head.DisabilityTypes" value="&#x636;&#x639;&#x641; &#x623;&#x648; &#x641;&#x642;&#x62F;&#x627;&#x646; &#x627;&#x644;&#x633;&#x645;&#x639;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x636;&#x639;&#x641; &#x623;&#x648; &#x641;&#x642;&#x62F;&#x627;&#x646; &#x627;&#x644;&#x633;&#x645;&#x639;
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="checkbox" name="Head.DisabilityTypes" data-ls="Head.DisabilityTypes" value="&#x645;&#x62A;&#x644;&#x627;&#x632;&#x645;&#x629; &#x62F;&#x627;&#x648;&#x646;" class="accent-camp-gold" onchange="saveToLocalStorage()" /> &#x645;&#x62A;&#x644;&#x627;&#x632;&#x645;&#x629; &#x62F;&#x627;&#x648;&#x646;
+                                        </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Injury Section (always visible) -->
+                        <div class="mt-6 border-t border-gray-700 pt-6">
+                            <div class="flex items-center gap-2 mb-4">
+                                <input type="checkbox" name="Head.HasInjury" data-ls="Head.HasInjury" value="true" class="accent-camp-gold" onchange="toggleInjurySection(this, 'head-injury-details'); saveToLocalStorage()" />
+                                <label class="text-lg">هل تعرض لإصابة؟</label>
+                            </div>
+                            <div id="head-injury-details" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm mb-1">تاريخ الإصابة</label>
+                                    <input type="date" name="Head.InjuryDate" data-ls="Head.InjuryDate" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">تفاصيل الإصابة</label>
+                                    <textarea name="Head.InjuryDetails" data-ls="Head.InjuryDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Female-specific fields -->
+                        <div class="flex items-center gap-2 mt-4">
+                            <input type="checkbox" name="Head.IsPregnant" data-ls="Head.IsPregnant" value="true" class="accent-camp-gold" onchange="toggleSectionCheckbox(this, 'head-pregnancy-details'); saveToLocalStorage()" />
+                            <label class="text-sm">حامل</label>
+                        </div>
+                        <div id="head-pregnancy-details" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm mb-1">شهر الحمل</label>
+                                <select name="Head.PregnancyMonth" data-ls="Head.PregnancyMonth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none">
+                                    <option value="">اختر الشهر...</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 mt-4">
+                            <input type="checkbox" name="Head.IsNursing" data-ls="Head.IsNursing" value="true" class="accent-camp-gold" onchange="toggleSectionCheckbox(this, 'head-nursing-details'); saveToLocalStorage()" />
+                            <label class="text-sm">مرضع</label>
+                        </div>
+                        <div id="head-nursing-details" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm mb-1">اسم الطفل</label>
+                                <input name="Head.NursingInfantName" data-ls="Head.NursingInfantName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-1">تاريخ ميلاد الطفل</label>
+                                <input type="date" name="Head.NursingInfantDOB" data-ls="Head.NursingInfantDOB" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-1">رقم هوية الطفل</label>
+                                <input name="Head.NursingInfantID" data-ls="Head.NursingInfantID" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ STEP 2: FAMILY MEMBERS ============ -->
+                <div class="step hidden bg-camp-accent-grey p-6 rounded-lg border-r-4 border-camp-gold shadow-xl" id="step-2">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold text-camp-gold">أفراد الأسرة</h2>
+                        <button type="button" onclick="addMember()" class="bg-camp-gold text-camp-dark-grey px-4 py-2 rounded font-bold hover:bg-yellow-600 transition-colors">
+                            + إضافة فرد
+                        </button>
+                    </div>
+
+                    <div id="members-container" class="space-y-6">
+                        <!-- Members rendered by JS -->
+                    </div>
+                    <p id="no-members-msg" class="text-gray-500 text-center py-8">لم يتم إضافة أفراد بعد. اضغط على "إضافة فرد" للبدء.</p>
+                </div>
+
+                <!-- ============ STEP 3: HOUSING & SPECIAL ============ -->
+                <div class="step hidden bg-camp-accent-grey p-6 rounded-lg border-r-4 border-camp-gold shadow-xl" id="step-3">
+                    <h2 class="text-2xl font-semibold text-camp-gold mb-6">السكن والحالات الخاصة</h2>
+                    <div class="space-y-6">
+                        <!-- Child Headed -->
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" name="IsChildHeaded" data-ls="IsChildHeaded" value="true" class="accent-camp-gold" onchange="toggleSectionCheckbox(this, 'child-headed-details'); saveToLocalStorage()" />
+                            <label class="text-lg">رب الأسرة طفل (أقل من 18 سنة)</label>
+                        </div>
+                        <div id="child-headed-details" class="hidden p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <label class="block text-sm mb-1">تفاصيل</label>
+                            <textarea name="ChildHeadedDetails" data-ls="ChildHeadedDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2"></textarea>
+                        </div>
+
+                        <!-- Female Headed -->
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" name="IsFemaleHeaded" data-ls="IsFemaleHeaded" value="true" class="accent-camp-gold" onchange="toggleSectionCheckbox(this, 'female-headed-details'); saveToLocalStorage()" />
+                            <label class="text-lg">ربة الأسرة امرأة (أرملة / مطلقة / زوجها غائب)</label>
+                        </div>
+                        <div id="female-headed-details" class="hidden p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <label class="block text-sm mb-1">تفاصيل</label>
+                            <textarea name="FemaleHeadedDetails" data-ls="FemaleHeadedDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2"></textarea>
+                        </div>
+
+                        <!-- Husband Abroad -->
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" name="IsHusbandAbroad" data-ls="IsHusbandAbroad" value="true" class="accent-camp-gold" onchange="saveToLocalStorage()" />
+                            <label class="text-lg">الزوج خارج البلاد</label>
+                        </div>
+
+                        <!-- Outside Person -->
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" name="SupportsOutsidePerson" data-ls="SupportsOutsidePerson" value="true" class="accent-camp-gold" onchange="toggleSectionCheckbox(this, 'outside-person-details'); saveToLocalStorage()" />
+                            <label class="text-lg">هناك شخص خارج الأسرة مشمول في الكفالة</label>
+                        </div>
+                        <div id="outside-person-details" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <div>
+                                <label class="block text-sm mb-1">الاسم</label>
+                                <input name="OutsidePersonName" data-ls="OutsidePersonName" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-1">صلة القرابة</label>
+                                <input name="OutsidePersonRelation" data-ls="OutsidePersonRelation" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                            </div>
+                        </div>
+
+                        <!-- Tent -->
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <label class="text-lg">هل تسكن العائلة في خيمة؟</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="LivesInTent" data-ls="LivesInTent" value="true" class="accent-camp-gold" onchange="toggleSection(this, 'tent-details'); saveToLocalStorage()" /> نعم
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="LivesInTent" data-ls="LivesInTent" value="false" class="accent-camp-gold" onchange="toggleSection(this, 'tent-details'); saveToLocalStorage()" /> لا
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="tent-details" class="hidden p-4 bg-camp-dark-grey rounded border border-gray-700 space-y-4">
+                            <label class="block text-sm mb-1">نوع الخيمة</label>
+                            <select name="TentType" data-ls="TentType" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                <option value="">اختر النوع...</option>
+                                <option value="&#x62A;&#x631;&#x643;&#x64A;&#x628; &#x62E;&#x634;&#x628; &#x648;&#x634;&#x648;&#x627;&#x62F;&#x631;">تركيب خشب وشوادر</option>
+                                <option value="&#x62D;&#x62F;&#x64A;&#x62F; &#x648;&#x634;&#x648;&#x627;&#x62F;&#x631;">حديد وشوادر</option>
+                                <option value="&#x642;&#x628;&#x629;">قبة</option>
+                                <option value="&#x625;&#x645;&#x627;&#x631;&#x627;&#x62A;&#x64A;&#x629;">إماراتية</option>
+                                <option value="&#x642;&#x637;&#x631;&#x64A;&#x629;">قطرية</option>
+                                <option value="&#x62E;&#x64A;&#x645;&#x629; &#x635;&#x64A;&#x646;&#x64A;&#x629;">خيمة صينية</option>
+                                <option value="&#x62E;&#x64A;&#x645;&#x629; &#x642;&#x645;&#x627;&#x634; &#x648;&#x62E;&#x634;&#x628;">خيمة قماش وخشب</option>
+                                <option value="&#x623;&#x62E;&#x631;&#x649;">أخرى</option>
+                            </select>
+                            <input name="OtherTentType" data-ls="OtherTentType" placeholder="يرجى تحديد النوع الآخر" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                        </div>
+
+                        <!-- Diapers -->
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" name="NeedsDiapers" data-ls="NeedsDiapers" value="true" class="accent-camp-gold" onchange="toggleSectionCheckbox(this, 'diaper-details'); saveToLocalStorage()" />
+                            <label class="text-lg">هل تحتاج العائلة حفائظ لكبار السن؟</label>
+                        </div>
+                        <div id="diaper-details" class="hidden p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <label class="block text-sm mb-1">تفاصيل (لمن تحتاج الحفائظ؟)</label>
+                            <textarea name="DiaperDetails" data-ls="DiaperDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2"></textarea>
+                        </div>
+
+                        <!-- Multiple families in tent -->
+                        <div class="flex items-center gap-4 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" name="HasMultipleFamiliesInTent" data-ls="HasMultipleFamiliesInTent" value="true" class="accent-camp-gold" onchange="toggleSectionCheckbox(this, 'multiple-families-details'); saveToLocalStorage()" />
+                            <label class="text-lg">هل يوجد أكثر من عائلة تسكن في نفس الخيمة؟</label>
+                        </div>
+                        <div id="multiple-families-details" class="hidden p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <label class="block text-sm mb-1">كم عدد العائلات الإضافية؟</label>
+                            <select name="AdditionalFamiliesCount" data-ls="AdditionalFamiliesCount" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                <option value="">اختر...</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">أكثر من 5</option>
+                            </select>
+                        </div>
+
+                        <!-- Bathroom Section -->
+                        <div class="p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <h3 class="text-lg font-semibold text-camp-gold mb-3">الحمام</h3>
+                            <div class="flex items-center gap-4">
+                                <label class="text-lg">هل يوجد حمام؟</label>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="HasBathroom" data-ls="HasBathroom" value="true" class="accent-camp-gold" onchange="toggleSection(this, 'bathroom-details'); saveToLocalStorage()" /> نعم
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="HasBathroom" data-ls="HasBathroom" value="false" class="accent-camp-gold" onchange="toggleSection(this, 'bathroom-details'); saveToLocalStorage()" /> لا
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="bathroom-details" class="hidden space-y-4 p-4 bg-camp-dark-grey rounded border border-gray-700 mt-4">
+                                <div>
+                                    <label class="block text-sm mb-1">نوع الحمام</label>
+                                    <div class="flex gap-4">
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="BathroomType" data-ls="BathroomType" value="Private" class="accent-camp-gold" onchange="saveToLocalStorage()" /> خاص
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="BathroomType" data-ls="BathroomType" value="Shared" class="accent-camp-gold" onchange="saveToLocalStorage()" /> مشترك
+                                        </label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-1">حالة الحمام</label>
+                                    <select name="Head.BathroomStatus" data-ls="Head.BathroomStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                        <option value="">اختر...</option>
+                                        <option value="&#x62C;&#x64A;&#x62F;">جيد</option>
+                                        <option value="&#x645;&#x62A;&#x648;&#x633;&#x637;">متوسط</option>
+                                        <option value="&#x633;&#x64A;&#x621;">سيء</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Refugee Desires (رتب احتياجاتك) -->
+                        <div class="p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <h3 class="text-lg font-semibold text-camp-gold mb-4">الرغبات (رتب احتياجاتك حسب الأهمية)</h3>
+                            <div id="desires-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <!-- Filled by JS -->
+                            </div>
+                            <input type="hidden" name="DesireIds" id="desireIdsInput" value="" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ STEP 4: REVIEW + CONFIRM ============ -->
+                <div class="step hidden bg-camp-accent-grey p-6 rounded-lg border-r-4 border-camp-gold shadow-xl" id="step-4">
+                    <h2 class="text-2xl font-semibold text-camp-gold mb-6">مراجعة البيانات وتأكيد التسجيل</h2>
+                    <div id="review-content" class="space-y-6">
+                        <!-- Filled by JS -->
+                    </div>
+
+                    <!-- Status Notes -->
+                    <div class="mt-6 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                        <label class="block text-sm mb-2 text-camp-gold font-semibold">ملاحظات حول الحالة</label>
+                        <textarea name="StatusNotes" data-ls="StatusNotes" class="w-full p-3 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="3" placeholder="أي ملاحظات إضافية عن حالة العائلة..."></textarea>
+                    </div>
+
+                    <div class="mt-8 border-t border-gray-700 pt-6 space-y-6">
+                        <h3 class="text-xl font-semibold text-camp-gold mb-4">إنشاء كلمة مرور للتعديل لاحقاً</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm mb-1">كلمة المرور</label>
+                                <div class="relative">
+                                    <input type="password" id="regPassword" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none pr-3 pl-10" required />
+                                    <button type="button" onclick="togglePassword('regPassword', this)" class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-camp-gold transition-colors p-1">
+                                        <svg class="w-5 h-5 eye-open" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        <svg class="w-5 h-5 eye-closed hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-1">تأكيد كلمة المرور</label>
+                                <div class="relative">
+                                    <input type="password" id="regConfirmPassword" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 focus:border-camp-gold outline-none pr-3 pl-10" required />
+                                    <button type="button" onclick="togglePassword('regConfirmPassword', this)" class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-camp-gold transition-colors p-1">
+                                        <svg class="w-5 h-5 eye-open" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        <svg class="w-5 h-5 eye-closed hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="passwordError" class="text-red-500 text-sm hidden">كلمة المرور غير متطابقة</div>
+
+                        <div class="flex items-start gap-3 p-4 bg-camp-dark-grey rounded border border-gray-700">
+                            <input type="checkbox" id="acceptResponsibility" class="accent-camp-gold mt-1" />
+                            <label for="acceptResponsibility" class="text-sm text-gray-300 leading-relaxed">
+                                أتعهد بأن جميع البيانات المقدمة صحيحة ودقيقة وأتحمل المسؤولية الكاملة عن صحة المعلومات.
+                                كما أتعهد بإبلاغ إدارة المخيم في حال حدوث أي تغيير في بيانات الأسرة.
+                            </label>
+                        </div>
+                        <div id="responsibilityError" class="text-red-500 text-sm hidden">يجب الموافقة على تعهد المسؤولية</div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="flex justify-between pt-6">
+                    <button type="button" id="prevBtn" onclick="prevStep()" class="px-6 py-2 rounded border border-camp-gold text-camp-gold hover:bg-camp-gold hover:text-camp-dark-grey transition-colors hidden">
+                        السابق
+                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="clearAllFields()" class="px-4 py-2 rounded border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors text-sm">
+                            ✕ مسح الكل
+                        </button>
+                        <button type="button" id="nextBtn" onclick="nextStep()" class="px-8 py-2 rounded bg-camp-gold text-camp-dark-grey font-bold hover:bg-yellow-600 transition-colors">
+                            التالي
+                        </button>
+                        <button type="submit" id="submitBtn" onclick="return submitForm()" class="px-8 py-2 rounded bg-green-600 text-white font-bold hover:bg-green-700 transition-colors hidden">
+                            تأكيد وإرسال
+                        </button>
+                    </div>
+                </div>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8KVfKkkYjJZOoQRoWvo4XonQEoT4b4eCqj5DFJKsJyF65q7VyypzcmmMpbJcimS1nIf8Fn3SmDqAbbGaJxRLkYYh79gGbufvc9hkSXSTzcRPfiRLjyyLSC7aKwmT06je572u44UFnylFUqHrwa1X5Es" /></form>
+        </div>
+    </div>
+
+    <style>
+        .field-error { border-color: #ef4444 !important; }
+        .field-error:focus { border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3); }
+        .id-error { display: block; margin-top: 4px; }
+        .id-error.hidden { display: none; }
+        .phone-error { display: block; margin-top: 4px; }
+        .phone-error.hidden { display: none; }
+        .wallet-error { display: block; margin-top: 4px; }
+        .wallet-error.hidden { display: none; }
+    </style>
+
+    <script>
+        // ========== LOOKUP DATA FROM DB ==========
+        const HEALTH_STATUSES = ["\u0633\u0644\u064A\u0645","\u0645\u0631\u064A\u0636"];
+        const CHRONIC_DISEASES = ["\u0623\u062E\u0631\u0649","\u0623\u0645\u0631\u0627\u0636 \u0627\u0644\u0642\u0644\u0628","\u0623\u0645\u0631\u0627\u0636 \u0627\u0644\u0643\u0644\u0649 \u0627\u0644\u0645\u0632\u0645\u0646\u0629","\u0627\u0644\u062A\u0635\u0644\u0628 \u0627\u0644\u0644\u0648\u064A\u062D\u064A","\u0627\u0644\u0631\u0628\u0648","\u0627\u0644\u0633\u0631\u0637\u0627\u0646","\u0627\u0644\u0633\u0643\u0631\u064A","\u0627\u0644\u0635\u0631\u0639","\u062B\u0644\u0627\u0633\u064A\u0645\u064A\u0627","\u0636\u063A\u0637 \u0627\u0644\u062F\u0645 \u0627\u0644\u0645\u0631\u062A\u0641\u0639"];
+        const DISABILITY_TYPES = ["\u0625\u0639\u0627\u0642\u0629 \u0630\u0647\u0646\u064A\u0629","\u0627\u0644\u062A\u0648\u062D\u062F","\u0628\u062A\u0631 \u0627\u0644\u0623\u0637\u0631\u0627\u0641","\u0634\u0644\u0644 \u0646\u0635\u0641\u064A \u0623\u0648 \u0643\u0644\u064A","\u0636\u0639\u0641 \u0623\u0648 \u0641\u0642\u062F\u0627\u0646 \u0627\u0644\u0628\u0635\u0631","\u0636\u0639\u0641 \u0623\u0648 \u0641\u0642\u062F\u0627\u0646 \u0627\u0644\u0633\u0645\u0639","\u0645\u062A\u0644\u0627\u0632\u0645\u0629 \u062F\u0627\u0648\u0646"];
+        const DESIRES = [{"id":1,"name":"\u062E\u064A\u0645"},{"id":2,"name":"\u0627\u063A\u0637\u064A\u0629"},{"id":3,"name":"\u0641\u0631\u0634\u0627\u062A"},{"id":4,"name":"\u0627\u062F\u0648\u0627\u062A \u0645\u0637\u0628\u062E"},{"id":5,"name":"\u0634\u0648\u0627\u062F\u0631"},{"id":6,"name":"\u0645\u0644\u0627\u0628\u0633"},{"id":7,"name":"\u0637\u0631\u062F \u0635\u062D\u064A"},{"id":8,"name":"\u0637\u0631\u062F \u063A\u0630\u0627\u0626\u064A"}];
+
+        // ========== LOCALSTORAGE ==========
+        const STORAGE_KEY = 'campRegistration';
+
+        // ========== VALIDATION HELPERS (early definition for on* handlers in HTML) ==========
+
+        function validatePalestinianId(id) {
+            if (!/^\d{9}$/.test(id)) return false;
+            var weights = [1, 2, 1, 2, 1, 2, 1, 2];
+            var sum = 0;
+            for (var i = 0; i < 8; i++) {
+                var product = parseInt(id[i]) * weights[i];
+                sum += product >= 10 ? Math.floor(product / 10) + (product % 10) : product;
+            }
+            var checkDigit = (10 - (sum % 10)) % 10;
+            return checkDigit === parseInt(id[8]);
+        }
+
+        function validateIdField(el) {
+            const val = el.value.trim();
+            const errorSpan = el.parentElement.querySelector('.id-error');
+            if (!errorSpan) return true;
+            if (val && !validatePalestinianId(val)) {
+                errorSpan.classList.remove('hidden');
+                el.classList.add('field-error');
+                return false;
+            }
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+            return true;
+        }
+
+        function clearIdError(el) {
+            const errorSpan = el.parentElement.querySelector('.id-error');
+            if (!errorSpan) return;
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+        }
+
+        function validateMotherIdField(el) {
+            const val = el.value.trim();
+            const errorSpan = el.parentElement.querySelector('.mother-id-error');
+            if (!errorSpan) return true;
+            if (!val) {
+                errorSpan.textContent = 'رقم هوية الأم مطلوب';
+                errorSpan.classList.remove('hidden');
+                el.classList.add('field-error');
+                return false;
+            }
+            if (!validatePalestinianId(val)) {
+                errorSpan.textContent = 'رقم هوية الأم يجب أن يتكون من 9 أرقام صحيحة';
+                errorSpan.classList.remove('hidden');
+                el.classList.add('field-error');
+                return false;
+            }
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+            return true;
+        }
+
+        function clearMotherIdError(el) {
+            const errorSpan = el.parentElement.querySelector('.mother-id-error');
+            if (!errorSpan) return;
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+        }
+
+        function clearDuplicateWarning(el) {
+            const warnSpan = el.parentElement.querySelector('.dup-warning');
+            if (warnSpan) {
+                warnSpan.classList.add('hidden');
+                warnSpan.innerHTML = '';
+            }
+        }
+
+        function clearPhoneError(el) {
+            const errorSpan = el.parentElement.querySelector('.phone-error');
+            if (!errorSpan) return;
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+        }
+
+        function clearWalletError(el) {
+            const errorSpan = el.parentElement.querySelector('.wallet-error');
+            if (!errorSpan) return;
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+        }
+
+        function validatePhoneField(el) {
+            const val = el.value.trim();
+            const errorSpan = el.parentElement.querySelector('.phone-error');
+            if (!errorSpan) return true;
+            if (val && !/^(\+972|05|00972)\d{8,9}$/.test(val)) {
+                errorSpan.classList.remove('hidden');
+                el.classList.add('field-error');
+                return false;
+            }
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+            return true;
+        }
+
+        function validateWalletField(el) {
+            const val = el.value.trim();
+            const errorSpan = el.parentElement.querySelector('.wallet-error');
+            if (!errorSpan) return true;
+            if (val && !/^\d{8,15}$/.test(val)) {
+                errorSpan.classList.remove('hidden');
+                el.classList.add('field-error');
+                return false;
+            }
+            errorSpan.classList.add('hidden');
+            el.classList.remove('field-error');
+            return true;
+        }
+
+        function checkDuplicateId(el) {
+            const val = el.value.trim();
+            const warningSpan = el.parentElement.querySelector('.dup-warning');
+            if (!val || val.length !== 9 || !warningSpan) return;
+            fetch(`/Registration/CheckId?id=${encodeURIComponent(val)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.exists) {
+                        warningSpan.textContent = '⚠ هذا الرقم مسجل مسبقاً. تسجيل الدخول لتعديل بياناتك';
+                        warningSpan.classList.remove('hidden');
+                    } else {
+                        warningSpan.classList.add('hidden');
+                        warningSpan.innerHTML = '';
+                    }
+                })
+                .catch(() => {});
+        }
+
+        function saveToLocalStorage() {
+            // Collect all form data into the hidden members container first
+            collectMembersToHidden();
+
+            const form = document.getElementById('registrationForm');
+            const data = {};
+
+            // Collect regular inputs/selects/textareas with data-ls attribute
+            form.querySelectorAll('[data-ls]').forEach(el => {
+                if (el.type === 'radio') {
+                    if (el.checked) {
+                        data[el.getAttribute('data-ls')] = el.value;
+                    }
+                } else if (el.type === 'checkbox') {
+                    if (el.name.endsWith('ChronicDiseases') || el.name.endsWith('DisabilityTypes')) {
+                        const key = el.getAttribute('data-ls');
+                        if (!data[key]) data[key] = [];
+                        if (el.checked) data[key].push(el.value);
+                    } else {
+                        data[el.getAttribute('data-ls')] = el.checked;
+                    }
+                } else {
+                    if (el.getAttribute('data-ls') === 'Sector') {
+                        data['Sector'] = el.options[el.selectedIndex]?.text || '';
+                    } else {
+                        data[el.getAttribute('data-ls')] = el.value;
+                    }
+                }
+            });
+
+            // Collect members from member cards
+            const memberCards = document.querySelectorAll('.member-card');
+            const members = [];
+            memberCards.forEach((card, idx) => {
+                const m = {};
+                card.querySelectorAll('[name]').forEach(el => {
+                    const name = el.getAttribute('name');
+                    const key = name.replace(`Members[${idx}].`, '');
+                    if (el.type === 'radio') {
+                        if (el.checked) m[key] = el.value;
+                    } else if (el.type === 'checkbox' && !el.name.includes('ChronicDiseases') && !el.name.includes('DisabilityTypes')) {
+                        m[key] = el.checked;
+                    } else if (el.type === 'checkbox' && (el.name.includes('ChronicDiseases') || el.name.includes('DisabilityTypes'))) {
+                        const arrKey = key;
+                        if (!m[arrKey]) m[arrKey] = [];
+                        if (el.checked) m[arrKey].push(el.value);
+                    } else {
+                        m[key] = el.value;
+                    }
+                });
+                members.push(m);
+            });
+            data['Members'] = members;
+
+            // Save desire IDs from the hidden input
+            const desireInput = document.getElementById('desireIdsInput');
+            if (desireInput && desireInput.value) {
+                data['DesireIds'] = desireInput.value;
+            }
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+
+            let data;
+            try { data = JSON.parse(saved); } catch { return; }
+
+            // Restore regular fields
+            Object.keys(data).forEach(key => {
+                if (key === 'Members') return;
+                const el = document.querySelector(`[data-ls="${key}"]`);
+                if (!el) return;
+
+                const val = data[key];
+                if (el.type === 'radio') {
+                    const radio = document.querySelector(`[data-ls="${key}"][value="${val}"]`);
+                    if (radio) radio.checked = true;
+                    if (key.includes('HealthStatus')) triggerEvent(radio, 'change');
+                    if (key.includes('LivesInTent')) triggerEvent(radio, 'change');
+                    if (key.includes('HasBathroom')) triggerEvent(radio, 'change');
+                    if (key === 'BathroomType' && radio) triggerEvent(radio, 'change');
+                } else if (el.type === 'checkbox') {
+                    if (Array.isArray(val)) {
+                        val.forEach(v => {
+                            const cb = document.querySelector(`[data-ls="${key}"][value="${v}"]`);
+                            if (cb) cb.checked = true;
+                        });
+                    } else {
+                        el.checked = val === true || val === 'true';
+                        if (key.includes('HasInjury')) triggerEvent(el, 'change');
+                        if (key.includes('IsPregnant')) triggerEvent(el, 'change');
+                        if (key.includes('IsNursing')) triggerEvent(el, 'change');
+                        if (key.includes('IsChildHeaded')) triggerEvent(el, 'change');
+                        if (key.includes('IsFemaleHeaded')) triggerEvent(el, 'change');
+                        if (key.includes('SupportsOutsidePerson')) triggerEvent(el, 'change');
+                        if (key.includes('IsHouseDestroyed')) triggerEvent(el, 'change');
+                    }
+                } else {
+                    el.value = val || '';
+                }
+            });
+
+            // Restore members
+            if (data.Members && Array.isArray(data.Members)) {
+                data.Members.forEach((m, i) => {
+                    addMemberWithData(m);
+                });
+            }
+
+            // Restore desires
+            if (data.DesireIds) {
+                const desireInput = document.getElementById('desireIdsInput');
+                if (desireInput) desireInput.value = data.DesireIds;
+            }
+
+            // Ensure bathroom details section is visible after restore
+            const hasBathroomYes = document.querySelector('[data-ls="HasBathroom"][value="true"]');
+            if (hasBathroomYes?.checked) {
+                const bathroomDetails = document.getElementById('bathroom-details');
+                if (bathroomDetails) bathroomDetails.classList.remove('hidden');
+            }
+
+            // Step indicator
+            restoreStepUI();
+        }
+
+        function triggerEvent(el, eventName) {
+            if (el) {
+                const event = new Event(eventName, { bubbles: true });
+                el.dispatchEvent(event);
+            }
+        }
+
+        // ========== STEP NAVIGATION ==========
+        let currentStep = 1;
+
+        function goToStep(step) {
+            if (step < 1 || step > 4) return;
+            currentStep = step;
+
+            document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+
+            for (let i = 1; i <= 4; i++) {
+                const indicator = document.getElementById(`step-indicator-${i}`);
+                const label = document.getElementById(`step-label-${i}`);
+                if (i === step) {
+                    indicator.className = 'w-10 h-10 rounded-full flex items-center justify-center border-2 border-camp-gold bg-camp-gold text-camp-dark-grey transition-colors';
+                    label.className = 'text-xs mt-2 text-camp-gold';
+                } else if (i < step) {
+                    indicator.className = 'w-10 h-10 rounded-full flex items-center justify-center border-2 border-green-500 bg-green-500 text-white transition-colors';
+                    label.className = 'text-xs mt-2 text-green-500';
+                } else {
+                    indicator.className = 'w-10 h-10 rounded-full flex items-center justify-center border-2 border-gray-600 text-gray-500 transition-colors';
+                    label.className = 'text-xs mt-2 text-gray-500';
+                }
+            }
+
+            document.getElementById('prevBtn').classList.toggle('hidden', step === 1);
+            document.getElementById('nextBtn').classList.toggle('hidden', step === 4);
+            document.getElementById('submitBtn').classList.toggle('hidden', step !== 4);
+
+            if (step === 3) renderDesires();
+            if (step === 4) renderReview();
+        }
+
+        // ========== DESIRES (DYNAMIC RANKING) ==========
+        function renderDesires() {
+            const container = document.getElementById('desires-container');
+            if (!container) return;
+
+            // Clear container to allow re-rendering
+            container.innerHTML = '';
+
+            console.log('Rendering desires with data:', DESIRES);
+
+            const selected = getSavedDesireIds();
+            const RANK_COUNT = DESIRES.length;
+
+            if (!DESIRES || DESIRES.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center col-span-full">لا توجد رغبات متاحة حالياً</p>';
+                return;
+            }
+
+            for (let i = 1; i <= RANK_COUNT; i++) {
+                const order = i;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex items-center gap-3 p-2 bg-camp-dark-grey/50 rounded border border-gray-700';
+                wrapper.id = `desire-wrapper-${order}`;
+
+                const label = document.createElement('label');
+                label.className = 'text-sm text-gray-300 min-w-fit';
+                label.textContent = `الرغبة ${order}:`;
+                wrapper.appendChild(label);
+
+                const select = document.createElement('select');
+                select.className = 'w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none text-white desire-select';
+                select.setAttribute('data-order', order);
+                select.name = `Desires[${i-1}]`;
+
+                const blank = document.createElement('option');
+                blank.value = '';
+                blank.textContent = 'اختر الرغبة...';
+                select.appendChild(blank);
+
+                DESIRES.forEach(d2 => {
+                    const id = d2.Id !== undefined ? d2.Id : d2.id;
+                    const name = d2.Name !== undefined ? d2.Name : d2.name;
+
+                    const opt = document.createElement('option');
+                    opt.value = id;
+                    opt.textContent = name;
+                    select.appendChild(opt);
+                });
+
+                // Restore saved selection
+                if (selected.length >= i && selected[i-1]) {
+                    select.value = selected[i-1];
+                }
+
+                select.addEventListener('change', function () {
+                    updateDesireOptions();
+                    saveDesireIds();
+                });
+
+                wrapper.appendChild(select);
+                container.appendChild(wrapper);
+            }
+
+            updateDesireOptions();
+        }
+
+        function updateDesireOptions() {
+            const selects = document.querySelectorAll('.desire-select');
+
+            selects.forEach((sel, index) => {
+                const curOrder = parseInt(sel.getAttribute('data-order'));
+
+                // First, check if the current value is already selected in an earlier rank
+                // If so, reset this select to blank to prevent duplicates
+                if (sel.value !== '') {
+                    const duplicateInEarlier = Array.from(selects).some(s => {
+                        const sOrder = parseInt(s.getAttribute('data-order'));
+                        return sOrder < curOrder && s.value === sel.value;
+                    });
+                    if (duplicateInEarlier) {
+                        sel.value = '';
+                    }
+                }
+
+                // Then, update all options based on earlier selections
+                Array.from(sel.options).forEach(opt => {
+                    if (opt.value === '') return;
+
+                    const isSelectedInEarlier = Array.from(selects).some(s => {
+                        const sOrder = parseInt(s.getAttribute('data-order'));
+                        return sOrder < curOrder && s.value === opt.value;
+                    });
+
+                    opt.disabled = isSelectedInEarlier;
+                    opt.hidden = isSelectedInEarlier;
+                });
+            });
+        }
+
+        function getSavedDesireIds() {
+            const input = document.getElementById('desireIdsInput');
+            if (input && input.value) {
+                return input.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0);
+            }
+            return [];
+        }
+
+        function saveDesireIds() {
+            const selects = document.querySelectorAll('.desire-select');
+            const ids = [];
+            selects.forEach(sel => {
+                if (sel.value) ids.push(sel.value);
+            });
+            const input = document.getElementById('desireIdsInput');
+            if (input) input.value = ids.join(',');
+            saveToLocalStorage();
+        }
+
+        function nextStep() {
+            tryGoToStep(currentStep + 1);
+        }
+
+        function prevStep() {
+            saveToLocalStorage();
+            goToStep(currentStep - 1);
+        }
+
+        function tryGoToStep(step) {
+            if (step === currentStep) return;
+            if (step > currentStep) {
+                for (let s = currentStep; s < step; s++) {
+                    if (s === 1 && !validateStep1()) { goToStep(1); return false; }
+                    if (s === 2 && !validateStep2()) { goToStep(2); return false; }
+                    if (s === 3 && !validateStep3()) { goToStep(3); return false; }
+                }
+            }
+            saveToLocalStorage();
+            goToStep(step);
+            return true;
+        }
+
+        function restoreStepUI() {
+            // Default to step 1 on fresh load
+            goToStep(1);
+        }
+
+        // ========== VALIDATION ==========
+
+        function validateStep1() {
+            const fieldLabels = {
+                'Head.FirstName': 'الاسم الأول',
+                'Head.SecondName': 'الاسم الثاني',
+                'Head.ThirdName': 'الاسم الثالث',
+                'Head.LastName': 'اسم العائلة',
+                'Head.IdNumber': 'رقم الهوية',
+                'SectorId': 'القاطع',
+                'Head.DateOfBirth': 'تاريخ الميلاد',
+                'PhoneNumber': 'رقم الهاتف',
+                'Wallet': 'المحفظة',
+                'WalletType': 'نوع المحفظة',
+                'Head.OriginalGovernorate': 'مكان السكن الأصلي',
+                'Head.MaritalStatus': 'الحالة الاجتماعية',
+                'Head.EmploymentStatus': 'الوظيفة',
+                'Head.EducationLevel': 'المستوى التعليمي'
+            };
+            let valid = true;
+            let missingFields = [];
+            for (const [key, label] of Object.entries(fieldLabels)) {
+                const el = document.querySelector(`[data-ls="${key}"]`);
+                if (!el || !el.value.trim()) {
+                    highlightError(el);
+                    missingFields.push(label);
+                    valid = false;
+                } else {
+                    clearHighlight(el);
+                }
+            }
+            // Validate Gender radio
+            const genderChecked = document.querySelector('[name="Head.Gender"]:checked');
+            if (!genderChecked) {
+                const genderRadios = document.querySelectorAll('[name="Head.Gender"]');
+                genderRadios.forEach(r => highlightError(r.parentElement));
+                missingFields.push('الجنس');
+                valid = false;
+            } else {
+                document.querySelectorAll('[name="Head.Gender"]').forEach(r => clearHighlight(r.parentElement));
+            }
+            // Validate HealthStatus radio
+            const healthChecked = document.querySelector('[name="Head.HealthStatus"]:checked');
+            if (!healthChecked) {
+                const healthRadios = document.querySelectorAll('[name="Head.HealthStatus"]');
+                healthRadios.forEach(r => highlightError(r.parentElement));
+                missingFields.push('الحالة الصحية');
+                valid = false;
+            } else {
+                document.querySelectorAll('[name="Head.HealthStatus"]').forEach(r => clearHighlight(r.parentElement));
+            }
+            // Validate ID format
+            const idEl = document.querySelector('[data-ls="Head.IdNumber"]');
+            if (idEl && idEl.value && !validateIdField(idEl)) {
+                valid = false;
+            }
+            // Validate phone format
+            const phoneEl = document.querySelector('[data-ls="PhoneNumber"]');
+            if (phoneEl && phoneEl.value && !validatePhoneField(phoneEl)) {
+                missingFields.push('رقم الهاتف (صيغة غير صحيحة)');
+                valid = false;
+            }
+            // Validate wallet format
+            const walletEl = document.querySelector('[data-ls="Wallet"]');
+            if (walletEl && walletEl.value && !validateWalletField(walletEl)) {
+                missingFields.push('المحفظة (صيغة غير صحيحة)');
+                valid = false;
+            }
+            // Validate: if sick, require chronic disease or disability
+            const healthRadios = document.querySelectorAll('[name="Head.HealthStatus"]');
+            let isSick = false;
+            healthRadios.forEach(r => { if (r.checked && r.value !== 'سليم') isSick = true; });
+            if (isSick) {
+                const diseases = document.querySelectorAll('[name="Head.ChronicDiseases"]:checked');
+                const disabilities = document.querySelectorAll('[name="Head.DisabilityTypes"]:checked');
+                if (diseases.length === 0 && disabilities.length === 0) {
+                    alert('الحالة الصحية مريض، يرجى اختيار مرض مزمن أو نوع إعاقة على الأقل');
+                    valid = false;
+                }
+            }
+            // Validate: سليم cannot have diseases
+            if (!isSick) {
+                const diseases = document.querySelectorAll('[name="Head.ChronicDiseases"]:checked');
+                const disabilities = document.querySelectorAll('[name="Head.DisabilityTypes"]:checked');
+                if (diseases.length > 0 || disabilities.length > 0) {
+                    alert('لا يمكن أن تكون الحالة الصحية سليماً مع وجود أمراض مزمنة أو إعاقات');
+                    valid = false;
+                }
+            }
+            if (!valid && missingFields.length > 0) {
+                alert('الحقول التالية مطلوبة:\n- ' + missingFields.join('\n- '));
+            }
+            return valid;
+        }
+
+        function getMemberDisplayName(card) {
+            const parts = ['FirstName', 'SecondName', 'ThirdName', 'LastName']
+                .map(f => card.querySelector(`[name$=".${f}"]`)?.value?.trim() || '')
+                .filter(Boolean);
+            return parts.length ? parts.join(' ') : '';
+        }
+
+        function validateStep2() {
+            const cards = document.querySelectorAll('.member-card');
+            if (cards.length === 0) return true;
+            let valid = true;
+            const memberLabels = ['الاسم الأول', 'رقم الهوية', 'صلة القرابة', 'الجنس', 'تاريخ الميلاد', 'رقم هوية الأم'];
+            const memberKeys = ['.FirstName', '.IdNumber', '.RelationshipToHead', '.Gender', '.DateOfBirth', '.MotherIdNumber'];
+            cards.forEach((card, idx) => {
+                let memberMissing = [];
+                memberKeys.forEach((key, ki) => {
+                    const el = card.querySelector(`[name$="${key}"]`);
+                    if (!el || !el.value.trim()) {
+                        highlightError(el);
+                        memberMissing.push(memberLabels[ki]);
+                        valid = false;
+                    } else {
+                        clearHighlight(el);
+                    }
+                });
+                // Validate member ID format
+                const idEl = card.querySelector('[name$=".IdNumber"]');
+                if (idEl && idEl.value && !validateIdField(idEl)) {
+                    valid = false;
+                }
+                // Validate MotherIdNumber format
+                const motherIdEl = card.querySelector('[name$=".MotherIdNumber"]');
+                if (motherIdEl && motherIdEl.value && !validateMotherIdField(motherIdEl)) {
+                    valid = false;
+                }
+                // Validate: if sick, require disease/disability
+                const healthRadios = card.querySelectorAll('[name$=".HealthStatus"]');
+                let isSick = false;
+                healthRadios.forEach(r => { if (r.checked && r.value !== 'سليم') isSick = true; });
+                if (isSick) {
+                    const diseases = card.querySelectorAll('[name$=".ChronicDiseases"]:checked');
+                    const disabilities = card.querySelectorAll('[name$=".DisabilityTypes"]:checked');
+                    if (diseases.length === 0 && disabilities.length === 0) {
+                        alert(`الفرد رقم ${idx + 1}: الحالة الصحية مريض، يرجى اختيار مرض مزمن أو نوع إعاقة على الأقل`);
+                        valid = false;
+                    }
+                }
+                // Validate: سليم cannot have diseases
+                if (!isSick) {
+                    const diseases = card.querySelectorAll('[name$=".ChronicDiseases"]:checked');
+                    const disabilities = card.querySelectorAll('[name$=".DisabilityTypes"]:checked');
+                    if (diseases.length > 0 || disabilities.length > 0) {
+                        alert(`الفرد رقم ${idx + 1}: لا يمكن أن تكون الحالة الصحية سليماً مع وجود أمراض مزمنة أو إعاقات`);
+                        valid = false;
+                    }
+                }
+                if (memberMissing.length > 0) {
+                    alert(`الفرد رقم ${idx + 1}: الحقول التالية مطلوبة:\n- ` + memberMissing.join('\n- '));
+                }
+                const maritalEl = card.querySelector('[name$=".MaritalStatus"]');
+                if (maritalEl && !maritalEl.value.trim()) {
+                    const name = getMemberDisplayName(card) || `رقم ${idx + 1}`;
+                    highlightError(maritalEl);
+                    alert(`يرجى اختيار الحالة الاجتماعية للفرد: ${name}`);
+                    valid = false;
+                } else if (maritalEl) {
+                    clearHighlight(maritalEl);
+                }
+            });
+
+            // Validate: no duplicate ID numbers among members and head
+            const allIdEls = [document.querySelector('[name="Head.IdNumber"]'), ...Array.from(cards).map(c => c.querySelector('[name$=".IdNumber"]'))];
+            const idValues = allIdEls.map(el => el?.value?.trim()).filter(v => v);
+            if (new Set(idValues).size !== idValues.length) {
+                alert('يوجد تكرار في أرقام الهوية. يجب أن يكون لكل شخص رقم هوية فريد.');
+                valid = false;
+            }
+
+            // Validate: if married, require a wife member
+            const maritalRadios = document.querySelectorAll('[name="Head.MaritalStatus"]');
+            let isMarried = false;
+            maritalRadios.forEach(r => { if (r.checked && r.value === 'متزوج') isMarried = true; });
+            if (isMarried) {
+                const hasWife = Array.from(cards).some(card => {
+                    const rel = card.querySelector('[name$=".RelationshipToHead"]');
+                    return rel && rel.value === 'زوجة';
+                });
+                if (!hasWife) {
+                    alert('بما أن الحالة الاجتماعية متزوج، يجب إضافة فرد بصفة زوجة');
+                    valid = false;
+                }
+            }
+
+            return valid;
+        }
+
+        function highlightError(el) {
+            if (!el) return;
+            el.classList.add('field-error');
+        }
+
+        function clearHighlight(el) {
+            if (!el) return;
+            el.classList.remove('field-error');
+        }
+
+        function validateStep3() {
+            let valid = true;
+
+            // Validate desires (all must be selected)
+            const selects = document.querySelectorAll('.desire-select');
+            let allSelected = true;
+            selects.forEach(sel => {
+                if (!sel.value) allSelected = false;
+            });
+            if (!allSelected) {
+                alert('يرجى ترتيب جميع الرغبات (اختيار قيمة لكل رغبة)');
+                valid = false;
+            }
+
+            // Validate LivesInTent radio — user must explicitly choose
+            const livesInTentTrue = document.querySelector('[name="LivesInTent"][value="true"]:checked');
+            const livesInTentFalse = document.querySelector('[name="LivesInTent"][value="false"]:checked');
+            if (!livesInTentTrue && !livesInTentFalse) {
+                document.querySelectorAll('[name="LivesInTent"]').forEach(r => highlightError(r.parentElement));
+                alert('يرجى اختيار هل تسكن العائلة في خيمة (نعم/لا)');
+                valid = false;
+            } else {
+                document.querySelectorAll('[name="LivesInTent"]').forEach(r => clearHighlight(r.parentElement));
+                if (livesInTentTrue) {
+                    const tentType = document.querySelector('[name="TentType"]');
+                    if (!tentType || !tentType.value) {
+                        highlightError(tentType);
+                        alert('يرجى اختيار نوع الخيمة');
+                        valid = false;
+                    } else {
+                        clearHighlight(tentType);
+                    }
+                }
+            }
+
+            // Validate HasBathroom radio — user must explicitly choose
+            const hasBathroomTrue = document.querySelector('[name="HasBathroom"][value="true"]:checked');
+            const hasBathroomFalse = document.querySelector('[name="HasBathroom"][value="false"]:checked');
+            if (!hasBathroomTrue && !hasBathroomFalse) {
+                document.querySelectorAll('[name="HasBathroom"]').forEach(r => highlightError(r.parentElement));
+                alert('يرجى اختيار هل يوجد حمام (نعم/لا)');
+                valid = false;
+            } else {
+                document.querySelectorAll('[name="HasBathroom"]').forEach(r => clearHighlight(r.parentElement));
+                if (hasBathroomTrue) {
+                    const bathroomTypeChecked = document.querySelector('[name="BathroomType"]:checked');
+                    if (!bathroomTypeChecked) {
+                        document.querySelectorAll('[name="BathroomType"]').forEach(r => highlightError(r.parentElement));
+                        alert('يرجى اختيار نوع الحمام');
+                        valid = false;
+                    } else {
+                        document.querySelectorAll('[name="BathroomType"]').forEach(r => clearHighlight(r.parentElement));
+                    }
+                    const bathStatus = document.querySelector('[data-ls="Head.BathroomStatus"]');
+                    if (!bathStatus || !bathStatus.value) {
+                        highlightError(bathStatus);
+                        alert('يرجى اختيار حالة الحمام');
+                        valid = false;
+                    } else {
+                        clearHighlight(bathStatus);
+                    }
+                }
+            }
+
+            return valid;
+        }
+
+        // ========== REVIEW ==========
+        function renderReview() {
+            const container = document.getElementById('review-content');
+            const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            let html = '';
+
+            // Head summary
+            html += `<div class="bg-camp-dark-grey p-4 rounded border border-gray-700">
+                <h3 class="text-lg font-semibold text-camp-gold mb-3">رب الأسرة</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                    <div><span class="text-gray-400">الاسم:</span> ${data['Head.FirstName'] || ''} ${data['Head.SecondName'] || ''} ${data['Head.ThirdName'] || ''} ${data['Head.LastName'] || ''}</div>
+                    <div><span class="text-gray-400">رقم الهوية:</span> ${data['Head.IdNumber'] || ''}</div>
+                    <div><span class="text-gray-400">رقم الهاتف:</span> ${data['PhoneNumber'] || ''}</div>
+                    <div><span class="text-gray-400">المحفظة:</span> ${data['Wallet'] || '-'}</div>
+                    <div><span class="text-gray-400">نوع المحفظة:</span> ${data['WalletType'] || '-'}</div>
+                    <div><span class="text-gray-400">القاطع:</span> ${data['Sector'] || ''}</div>
+                    <div><span class="text-gray-400">تاريخ الميلاد:</span> ${data['Head.DateOfBirth'] || ''}</div>
+                    <div><span class="text-gray-400">الجنس:</span> ${data['Head.Gender'] || ''}</div>
+                    <div><span class="text-gray-400">الحالة الاجتماعية:</span> ${data['Head.MaritalStatus'] || ''}</div>
+                    <div><span class="text-gray-400">الحالة الصحية:</span> ${data['Head.HealthStatus'] || ''}</div>
+                    <div><span class="text-gray-400">المنزل مدمر:</span> ${data['Head.IsHouseDestroyed'] ? 'نعم' : 'لا'}</div>
+                    <div><span class="text-gray-400">أسير:</span> ${data['Head.IsPrisoner'] ? 'نعم' : 'لا'}</div>
+                </div>
+            </div>`;
+
+            // Members
+            if (data.Members && data.Members.length > 0) {
+                html += `<div class="bg-camp-dark-grey p-4 rounded border border-gray-700">
+                    <h3 class="text-lg font-semibold text-camp-gold mb-3">أفراد الأسرة (${data.Members.length})</h3>`;
+                data.Members.forEach((m, i) => {
+                    html += `<div class="border-b border-gray-700 py-2 text-sm">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <div><span class="text-gray-400">الاسم:</span> ${m.FirstName || ''} ${m.LastName || ''}</div>
+                            <div><span class="text-gray-400">رقم الهوية:</span> ${m.IdNumber || ''}</div>
+                            <div><span class="text-gray-400">صلة القرابة:</span> ${m.RelationshipToHead || ''}</div>
+                            <div><span class="text-gray-400">أسير:</span> ${m.IsPrisoner === true || m.IsPrisoner === 'true' ? 'نعم' : 'لا'}</div>
+                            <div><span class="text-gray-400">الحالة الصحية:</span> ${m.HealthStatus || ''}</div>
+                        </div>
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+
+            // Housing
+            html += `<div class="bg-camp-dark-grey p-4 rounded border border-gray-700">
+                <h3 class="text-lg font-semibold text-camp-gold mb-3">السكن والحالات الخاصة</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                    <div><span class="text-gray-400">رب أسرة طفل:</span> ${data['IsChildHeaded'] ? 'نعم' : 'لا'}</div>
+                    <div><span class="text-gray-400">ربة أسرة امرأة:</span> ${data['IsFemaleHeaded'] ? 'نعم' : 'لا'}</div>
+                    <div><span class="text-gray-400">الزوج خارج البلاد:</span> ${data['IsHusbandAbroad'] ? 'نعم' : 'لا'}</div>
+                    <div><span class="text-gray-400">شخص خارجي:</span> ${data['SupportsOutsidePerson'] ? 'نعم' : 'لا'}</div>
+                    <div><span class="text-gray-400">يسكن في خيمة:</span> ${data['LivesInTent'] === 'true' ? 'نعم' : 'لا'}</div>
+                    <div><span class="text-gray-400">نوع الخيمة:</span> ${data['TentType'] || '-'}</div>
+                    <div><span class="text-gray-400">حفائظ:</span> ${data['NeedsDiapers'] ? 'نعم' : 'لا'}</div>
+                    <div><span class="text-gray-400">أسر بنفس الخيمة:</span> ${data['HasMultipleFamiliesInTent'] ? 'نعم' : 'لا'}</div>
+                    <div class="col-span-full mt-2 pt-2 border-t border-gray-600">
+                        <span class="text-gray-400">الرغبات (حسب الأهمية):</span> ${
+                            (function() {
+                                const ids = data['DesireIds'];
+                                if (!ids) return 'لم يتم الاختيار';
+                                const idArr = ids.split(',').filter(Boolean);
+                                if (idArr.length === 0) return 'لم يتم الاختيار';
+                                const desireMap = {};
+                                DESIRES.forEach(d => desireMap[d.Id] = d.Name);
+                                const labels = ['الأولى', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة', 'السادسة', 'السابعة', 'الثامنة', 'التاسعة', 'العاشرة'];
+                                return idArr.map((id, i) => `${labels[i] || (i+1)}: ${desireMap[parseInt(id)] || '?'}`).join(' ، ');
+                            })()
+                        }
+                    </div>
+                </div>
+            </div>`;
+
+            // Bathroom
+            html += `<div class="bg-camp-dark-grey p-4 rounded border border-gray-700">
+                <h3 class="text-lg font-semibold text-camp-gold mb-3">الحمام</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                    <div><span class="text-gray-400">يوجد حمام:</span> ${data['HasBathroom'] === 'true' ? 'نعم' : 'لا'}</div>
+                    ${data['HasBathroom'] === 'true' ? `<div><span class="text-gray-400">نوع الحمام:</span> ${data['BathroomType'] === 'Private' ? 'خاص' : data['BathroomType'] === 'Shared' ? 'مشترك' : data['BathroomType'] || '-'}</div>
+                    <div><span class="text-gray-400">حالة الحمام:</span> ${data['Head.BathroomStatus'] || '-'}</div>` : ''}
+                </div>
+            </div>`;
+
+            // Status Notes
+            if (data['StatusNotes']) {
+                html += `<div class="bg-camp-dark-grey p-4 rounded border border-gray-700">
+                    <h3 class="text-lg font-semibold text-camp-gold mb-3">ملاحظات حول الحالة</h3>
+                    <p class="text-sm text-white whitespace-pre-wrap">${data['StatusNotes']}</p>
+                </div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // ========== MEMBERS ==========
+        let memberIndex = 0;
+
+        function addMemberWithData(data) {
+            const container = document.getElementById('members-container');
+            const idx = memberIndex++;
+            const card = document.createElement('div');
+            card.className = 'member-card bg-camp-dark-grey p-4 rounded border border-gray-700 relative mb-4';
+            card.innerHTML = `
+                <button type="button" onclick="removeMember(this)" class="absolute top-2 left-2 text-red-500 hover:text-red-700 text-xl">✕</button>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+                    <div>
+                        <label class="block text-xs mb-1">الاسم الأول</label>
+                        <input name="Members[${idx}].FirstName" value="${data?.FirstName || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1">الاسم الثاني</label>
+                        <input name="Members[${idx}].SecondName" value="${data?.SecondName || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1">الاسم الثالث</label>
+                        <input name="Members[${idx}].ThirdName" value="${data?.ThirdName || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1">اسم العائلة</label>
+                        <input name="Members[${idx}].LastName" value="${data?.LastName || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1">رقم الهوية</label>
+                        <input name="Members[${idx}].IdNumber" value="${data?.IdNumber || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onblur="checkDuplicateId(this)" oninput="clearIdError(this); clearDuplicateWarning(this)" />
+                        <span class="id-error text-red-500 text-xs hidden">رقم الهوية يجب أن يتكون من 9 أرقام</span>
+                        <span class="dup-warning text-yellow-500 text-xs hidden"></span>
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1">تاريخ الميلاد</label>
+                        <input type="date" name="Members[${idx}].DateOfBirth" value="${data?.DateOfBirth || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1">الجنس</label>
+                        <select name="Members[${idx}].Gender" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                            <option value="ذكر" ${data?.Gender === 'ذكر' ? 'selected' : ''}>ذكر</option>
+                            <option value="أنثى" ${data?.Gender === 'أنثى' ? 'selected' : ''}>أنثى</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1">رقم هوية الأم</label>
+                        <input name="Members[${idx}].MotherIdNumber" value="${data?.MotherIdNumber || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" onblur="validateMotherIdField(this)" oninput="clearMotherIdError(this)" />
+                        <span class="mother-id-error text-red-500 text-xs hidden">رقم هوية الأم يجب أن يتكون من 9 أرقام صحيحة</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1">صلة القرابة</label>
+                <select name="Members[${idx}].RelationshipToHead" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                    <option value="">اختر...</option>
+                    ${['زوج','زوجة','ابن','ابنة','أم','أب','أخ','أخت','جدة/جد','حفيد/حفيدة','أخ غير شقيق','أخت غير شقيقة','Other'].map(r => '<option value="'+r+'" '+(data?.RelationshipToHead === r ? 'selected' : '')+'>'+r+'</option>').join('')}
+                </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1">الحالة الاجتماعية <span class="text-red-500">*</span></label>
+                        <select name="Members[${idx}].MaritalStatus" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                            <option value="">اختر...</option>
+                            <option value="متزوج" ${data?.MaritalStatus === 'متزوج' ? 'selected' : ''}>متزوج</option>
+                            <option value="أعزب" ${data?.MaritalStatus === 'أعزب' ? 'selected' : ''}>أعزب</option>
+                            <option value="أرمل" ${data?.MaritalStatus === 'أرمل' ? 'selected' : ''}>أرمل</option>
+                            <option value="مطلق" ${data?.MaritalStatus === 'مطلق' ? 'selected' : ''}>مطلق</option>
+                            <option value="منفصل" ${data?.MaritalStatus === 'منفصل' ? 'selected' : ''}>منفصل</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs mb-1">المستوى التعليمي</label>
+                        <select name="Members[${idx}].EducationLevel" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                            <option value="">اختر...</option>
+                            <option value="بدون" ${data?.EducationLevel === 'بدون' ? 'selected' : ''}>بدون</option>
+                            <option value="ابتدائي" ${data?.EducationLevel === 'ابتدائي' ? 'selected' : ''}>ابتدائي</option>
+                            <option value="إعدادي" ${data?.EducationLevel === 'إعدادي' ? 'selected' : ''}>إعدادي</option>
+                            <option value="ثانوي" ${data?.EducationLevel === 'ثانوي' ? 'selected' : ''}>ثانوي</option>
+                            <option value="جامعي" ${data?.EducationLevel === 'جامعي' ? 'selected' : ''}>جامعي</option>
+                            <option value="دراسات عليا" ${data?.EducationLevel === 'دراسات عليا' ? 'selected' : ''}>دراسات عليا</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" name="Members[${idx}].IsPrisoner" value="true" class="accent-camp-gold" ${data?.IsPrisoner === true || data?.IsPrisoner === 'true' ? 'checked' : ''} />
+                        <label class="text-xs">أسير</label>
+                    </div>
+                </div>
+
+                <!-- Pregnancy / Nursing (always visible, outside health section) -->
+                <div class="border-t border-gray-700 pt-4 mt-2">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" name="Members[${idx}].IsPregnant" value="true" class="accent-camp-gold" ${data?.IsPregnant === true || data?.IsPregnant === 'true' ? 'checked' : ''} onchange="toggleMemberSection(${idx}, 'pregnancy')" />
+                            <label class="text-sm">حامل</label>
+                        </div>
+                        <div id="member-pregnancy-${idx}" class="${data?.IsPregnant === true || data?.IsPregnant === 'true' ? '' : 'hidden'} md:col-span-2">
+                            <label class="block text-xs mb-1">شهر الحمل</label>
+                            <select name="Members[${idx}].PregnancyMonth" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none">
+                                <option value="">اختر الشهر...</option>
+                                ${Array.from({length: 9}, (_, i) => i + 1).map(m =>
+                                    `<option value="${m}" ${data?.PregnancyMonth == m ? 'selected' : ''}>${m}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" name="Members[${idx}].IsNursing" value="true" class="accent-camp-gold" ${data?.IsNursing === true || data?.IsNursing === 'true' ? 'checked' : ''} onchange="toggleMemberSection(${idx}, 'nursing')" />
+                            <label class="text-sm">مرضع</label>
+                        </div>
+                        <div id="member-nursing-${idx}" class="${data?.IsNursing === true || data?.IsNursing === 'true' ? '' : 'hidden'} md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs mb-1">اسم الطفل</label>
+                                <input name="Members[${idx}].NursingInfantName" value="${data?.NursingInfantName || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-xs mb-1">تاريخ ميلاد الطفل</label>
+                                <input type="date" name="Members[${idx}].NursingInfantDOB" value="${data?.NursingInfantDOB || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-xs mb-1">رقم هوية الطفل</label>
+                                <input name="Members[${idx}].NursingInfantID" value="${data?.NursingInfantID || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health section -->
+                <div class="border-t border-gray-700 pt-4 mt-2">
+                    <h4 class="text-md font-semibold text-camp-gold mb-3">الحالة الصحية</h4>
+                    <div class="flex gap-4 mb-4">
+                        ${HEALTH_STATUSES.map((hs, hi) =>
+                            `<label class="flex items-center gap-2 cursor-pointer text-xs">
+                                <input type="radio" name="Members[${idx}].HealthStatus" value="${hs}" class="accent-camp-gold" onchange="toggleMemberHealth(${idx})" ${(!data?.HealthStatus && hi === 0) || data?.HealthStatus === hs ? 'checked' : ''} /> ${hs}
+                            </label>`
+                        ).join('')}
+                    </div>
+
+                    <div id="member-health-${idx}" class="${data?.HealthStatus === 'مريض' ? '' : 'hidden'} space-y-4">
+                        <div class="p-3 bg-camp-dark-grey rounded border border-gray-700">
+                            <label class="block text-xs mb-1">إرفاق تقارير طبية أو صور</label>
+                            <input type="file" id="memberMedicalFile_${idx}" accept="image/*,application/pdf" onchange="uploadFile(this, 'MedicalReport', 'memberMedicalPath_${idx}')" class="text-sm text-gray-400 w-full" />
+                            <input type="hidden" name="Members[${idx}].MedicalImagePath" id="memberMedicalPath_${idx}" />
+                            <span id="memberMedicalPath_${idx}-name" class="text-xs text-camp-gold hidden"></span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs mb-1">الأمراض المزمنة</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    ${CHRONIC_DISEASES.map(d =>
+                                        `<label class="flex items-center gap-1 text-xs">
+                                            <input type="checkbox" name="Members[${idx}].ChronicDiseases" value="${d}" class="accent-camp-gold" ${(data?.ChronicDiseases || []).includes(d) ? 'checked' : ''} /> ${d}
+                                        </label>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs mb-1">أنواع الإعاقة</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    ${DISABILITY_TYPES.map(d =>
+                                        `<label class="flex items-center gap-1 text-xs">
+                                            <input type="checkbox" name="Members[${idx}].DisabilityTypes" value="${d}" class="accent-camp-gold" ${(data?.DisabilityTypes || []).includes(d) ? 'checked' : ''} /> ${d}
+                                        </label>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Injury Section (always visible for member) -->
+                    <div class="border-t border-gray-700 pt-4 mt-4">
+                        <div class="flex items-center gap-2 mb-4">
+                            <input type="checkbox" name="Members[${idx}].HasInjury" value="true" class="accent-camp-gold" ${data?.HasInjury === true || data?.HasInjury === 'true' ? 'checked' : ''} onchange="toggleMemberInjury(${idx})" />
+                            <label class="text-lg">هل تعرض لإصابة؟</label>
+                        </div>
+                        <div id="member-injury-${idx}" class="${data?.HasInjury === true || data?.HasInjury === 'true' ? '' : 'hidden'} grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs mb-1">تاريخ الإصابة</label>
+                                <input type="date" name="Members[${idx}].InjuryDate" value="${data?.InjuryDate || ''}" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-xs mb-1">تفاصيل الإصابة</label>
+                                <textarea name="Members[${idx}].InjuryDetails" class="w-full p-2 rounded bg-camp-dark-grey border border-gray-600 outline-none" rows="2">${data?.InjuryDetails || ''}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add onchange save handlers to all inputs in the card
+            card.querySelectorAll('input, select').forEach(el => {
+                el.addEventListener('change', saveToLocalStorage);
+                el.addEventListener('input', saveToLocalStorage);
+            });
+
+            container.appendChild(card);
+            document.getElementById('no-members-msg')?.classList.add('hidden');
+            saveToLocalStorage();
+        }
+
+        function addMember() {
+            addMemberWithData(null);
+        }
+
+        function removeMember(btn) {
+            btn.closest('.member-card').remove();
+            if (document.querySelectorAll('.member-card').length === 0) {
+                document.getElementById('no-members-msg')?.classList.remove('hidden');
+            }
+            saveToLocalStorage();
+        }
+
+        function toggleMemberHealth(idx) {
+            const radios = document.querySelectorAll(`[name="Members[${idx}].HealthStatus"]`);
+            let show = false;
+            radios.forEach((r, i) => { if (r.checked && i > 0) show = true; });
+            const section = document.getElementById(`member-health-${idx}`);
+            if (section) {
+                section.classList.toggle('hidden', !show);
+                if (!show) {
+                    section.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+                }
+            }
+        }
+
+        function toggleMemberInjury(idx) {
+            const section = document.getElementById(`member-injury-${idx}`);
+            if (section) section.classList.toggle('hidden');
+        }
+
+        function toggleMemberSection(idx, type) {
+            const section = document.getElementById(`member-${type}-${idx}`);
+            if (section) section.classList.toggle('hidden');
+        }
+
+        function collectMembersToHidden() {
+            // This function exists to ensure member data is captured by saveToLocalStorage
+            // Member inputs are already part of the form, so they are captured naturally
+        }
+
+        // ========== FILE UPLOAD ==========
+        async function uploadFile(input, fileType, hiddenId) {
+            if (!input.files || !input.files[0]) return;
+
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+
+            // Show file name with compression indicator
+            const fileNameSpan = document.getElementById(hiddenId + '-name');
+            if (fileNameSpan) {
+                fileNameSpan.textContent = '⏳ ' + input.files[0].name + ' (جاري الضغط...)';
+                fileNameSpan.classList.remove('hidden');
+            }
+
+            try {
+                const response = await fetch('/Registration/UploadFile?personId=-1&fileType=' + fileType, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                document.getElementById(hiddenId).value = result.path;
+                if (fileNameSpan) {
+                    fileNameSpan.textContent = input.files[0].name + ' ✅ (تم الضغط)';
+                }
+                saveToLocalStorage();
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                if (fileNameSpan) {
+                    fileNameSpan.textContent = input.files[0].name + ' ❌ فشل الرفع';
+                }
+                alert('حدث خطأ أثناء رفع الملف');
+            }
+        }
+
+        // ========== TOGGLE FUNCTIONS ==========
+        function toggleHealthSection(el, sectionId) {
+            const section = document.getElementById(sectionId);
+            const radios = document.querySelectorAll(`[name="${el.name}"]`);
+            let isFirst = true;
+            radios.forEach((r, i) => { if (r === el && i === 0) isFirst = true; if (r === el && i > 0) isFirst = false; });
+            if (section) {
+                section.classList.toggle('hidden', isFirst);
+                if (isFirst) {
+                    section.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+                }
+            }
+        }
+
+        function toggleInjurySection(el, sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) section.classList.toggle('hidden', !el.checked);
+        }
+
+        function toggleSection(el, sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) section.classList.toggle('hidden', el.value === 'false');
+        }
+
+        function toggleSectionCheckbox(el, sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) section.classList.toggle('hidden', !el.checked);
+        }
+
+        // ========== CLEAR ALL ==========
+        function clearAllFields() {
+            if (!confirm('هل تريد مسح جميع الحقول؟ سيتم فقدان البيانات المدخلة.')) return;
+            const form = document.getElementById('registrationForm');
+            form.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]):not([type="file"]), textarea').forEach(el => el.value = '');
+            form.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+            form.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+            form.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
+            document.getElementById('members-container').innerHTML = '';
+            memberIndex = 0;
+            document.getElementById('regPassword').value = '';
+            document.getElementById('regConfirmPassword').value = '';
+            document.getElementById('acceptResponsibility').checked = false;
+            currentStep = 1;
+            goToStep(1);
+        }
+
+        // ========== SUBMIT ==========
+        function submitForm() {
+            // Validate password
+            const password = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('regConfirmPassword').value;
+            const acceptResp = document.getElementById('acceptResponsibility').checked;
+
+            let valid = true;
+
+            if (!password || password.length < 4) {
+                document.getElementById('passwordError').textContent = 'كلمة المرور يجب أن تكون 4 أحرف على الأقل';
+                document.getElementById('passwordError').classList.remove('hidden');
+                valid = false;
+            } else if (password !== confirm) {
+                document.getElementById('passwordError').textContent = 'كلمة المرور غير متطابقة';
+                document.getElementById('passwordError').classList.remove('hidden');
+                valid = false;
+            } else {
+                document.getElementById('passwordError').classList.add('hidden');
+            }
+
+            if (!acceptResp) {
+                document.getElementById('responsibilityError').classList.remove('hidden');
+                valid = false;
+            } else {
+                document.getElementById('responsibilityError').classList.add('hidden');
+            }
+
+            if (!valid) return false;
+
+            // Validate all IDs before submit
+            if (!validateStep1() || !validateStep2() || !validateStep3()) return false;
+
+            saveToLocalStorage();
+
+            const form = document.getElementById('registrationForm');
+
+            // Add password fields as hidden inputs
+            let pw = form.querySelector('input[type="hidden"][name="Password"]');
+            if (!pw) {
+                pw = document.createElement('input');
+                pw.type = 'hidden';
+                pw.name = 'Password';
+                form.appendChild(pw);
+            }
+            pw.value = password;
+
+            // Snapshot all visible input/select/textarea values into hidden inputs
+            // to ensure they survive any browser quirks with steps inside display:none.
+            form.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea').forEach(el => {
+                if (el.name) {
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = el.name;
+                    hidden.value = el.value;
+                    form.appendChild(hidden);
+                }
+            });
+
+            // Capture housing radio values before disabling
+            const livesInTentValue = document.querySelector('[name="LivesInTent"]:checked')?.value || 'false';
+            const hasBathroomValue = document.querySelector('[name="HasBathroom"]:checked')?.value || 'false';
+            const bathroomTypeValue = document.querySelector('[name="BathroomType"]:checked')?.value || '';
+
+            // Disable ALL checkboxes + radios so only hidden inputs submit values
+            form.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
+            form.querySelectorAll('input[type="radio"]').forEach(r => r.disabled = true);
+
+            // Head radio values (Gender, HealthStatus)
+            ['Head.Gender', 'Head.HealthStatus'].forEach(field => {
+                const checked = document.querySelector(`[name="${field}"]:checked`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = field;
+                hidden.value = checked?.value || '';
+                form.appendChild(hidden);
+            });
+
+            // Members radio values (HealthStatus)
+            document.querySelectorAll('.member-card').forEach((card, idx) => {
+                const checked = card.querySelector(`[name="Members[${idx}].HealthStatus"]:checked`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = `Members[${idx}].HealthStatus`;
+                hidden.value = checked?.value || '';
+                form.appendChild(hidden);
+            });
+
+            // Registration radio values (LivesInTent, HasBathroom, BathroomType)
+            [
+                ['LivesInTent', livesInTentValue],
+                ['HasBathroom', hasBathroomValue],
+                ['BathroomType', bathroomTypeValue]
+            ].forEach(([name, value]) => {
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = name;
+                hidden.value = value;
+                form.appendChild(hidden);
+            });
+
+            // Head multi-value: ChronicDiseases, DisabilityTypes
+            [['Head.ChronicDiseases'], ['Head.DisabilityTypes']].forEach(([name]) => {
+                const checked = Array.from(form.querySelectorAll(`[name="${name}"]:checked`)).map(cb => cb.value);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = name;
+                hidden.value = checked.join('، ');
+                form.appendChild(hidden);
+            });
+
+            // Members multi-value + bools
+            document.querySelectorAll('.member-card').forEach((card, idx) => {
+                ['ChronicDiseases', 'DisabilityTypes'].forEach(field => {
+                    const checked = Array.from(card.querySelectorAll(`[name="Members[${idx}].${field}"]:checked`)).map(cb => cb.value);
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = `Members[${idx}].${field}`;
+                    hidden.value = checked.join('، ');
+                    form.appendChild(hidden);
+                });
+                ['HasInjury', 'IsPregnant', 'IsNursing', 'IsPrisoner'].forEach(field => {
+                    const cb = card.querySelector(`[name="Members[${idx}].${field}"]`);
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = `Members[${idx}].${field}`;
+                    hidden.value = cb?.checked ? 'true' : 'false';
+                    form.appendChild(hidden);
+                });
+            });
+
+            // Head bools
+            ['Head.IsHouseDestroyed', 'Head.IsPrisoner', 'Head.HasInjury', 'Head.IsPregnant', 'Head.IsNursing'].forEach(field => {
+                const cb = form.querySelector(`[name="${field}"]`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = field;
+                hidden.value = cb?.checked ? 'true' : 'false';
+                form.appendChild(hidden);
+            });
+
+            // Registration-level bools
+            ['NeedsDiapers', 'HasMultipleFamiliesInTent', 'IsChildHeaded', 'IsFemaleHeaded', 'SupportsOutsidePerson', 'IsHusbandAbroad'].forEach(field => {
+                const cb = form.querySelector(`[name="${field}"]`);
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = field;
+                hidden.value = cb?.checked ? 'true' : 'false';
+                form.appendChild(hidden);
+            });
+
+            // Sync desires from dropdowns to hidden input before submission
+            saveDesireIds();
+
+            // Convert single comma-separated DesireIds input to indexed inputs for model binding
+            const desireInput = document.getElementById('desireIdsInput');
+            if (desireInput && desireInput.value) {
+                const ids = desireInput.value.split(',').filter(Boolean);
+                desireInput.name = '_DesireIds_raw';
+                ids.forEach((id, i) => {
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = `DesireIds[${i}]`;
+                    hidden.value = id.trim();
+                    form.appendChild(hidden);
+                });
+            }
+
+            // Block if any duplicate ID warnings exist
+            const dupWarnings = document.querySelectorAll('.dup-warning:not(.hidden)');
+            if (dupWarnings.length > 0) {
+                dupWarnings[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+
+            return true;
+        }
+
+        // ========== TOGGLE PASSWORD VISIBILITY ==========
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const openIcon = btn.querySelector('.eye-open');
+            const closedIcon = btn.querySelector('.eye-closed');
+            if (input.type === 'password') {
+                input.type = 'text';
+                openIcon.classList.add('hidden');
+                closedIcon.classList.remove('hidden');
+            } else {
+                input.type = 'password';
+                openIcon.classList.remove('hidden');
+                closedIcon.classList.add('hidden');
+            }
+        }
+
+        // ========== INIT ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-save on any input change (debounced)
+            let saveTimer;
+            document.addEventListener('input', function() {
+                clearTimeout(saveTimer);
+                saveTimer = setTimeout(saveToLocalStorage, 500);
+            });
+            document.addEventListener('change', function() {
+                clearTimeout(saveTimer);
+                saveTimer = setTimeout(saveToLocalStorage, 200);
+            });
+
+            loadFromLocalStorage();
+        });
+    </script>
+</div>
+
+        </main>
+    </div>
+    <footer b-4669mldcdy class="border-t border-gray-800 text-center py-6 text-gray-500 text-sm">
+        <div b-4669mldcdy class="container mx-auto">
+            &copy; 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة
+        </div>
+    </footer>
+    <script>
+        async function updateNotificationBadge() {
+            try {
+                const res = await fetch('/Admin/GetNotificationCount');
+                const count = await res.json();
+                const badge = document.getElementById('notificationBadge');
+                if (badge) {
+                    if (count > 0) {
+                        badge.textContent = count > 99 ? '99+' : count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+            } catch {}
+        }
+        function toggleMenu() {
+            var menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNotificationBadge();
+            setInterval(updateNotificationBadge, 30000);
+        });
+    </script>
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/js/site.js?v=hRQyftXiu1lLX2P9Ly9xa4gHJgLeR1uGN5qegUobtGo"></script>
+    
+
+    <style>
+        /* ===== THEME VARIABLES ===== */
+        [data-theme] {
+            --bg-primary: #1A1A1A;
+            --bg-secondary: #2D2D2D;
+            --text-primary: #FFFFFF;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --border-color: #374151;
+            --border-light: #4B5563;
+        }
+        [data-theme="light"] {
+            --bg-primary: #F3F4F6;
+            --bg-secondary: #FFFFFF;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #6B7280;
+            --border-color: #D1D5DB;
+            --border-light: #E5E7EB;
+        }
+        /* Background overrides */
+        [data-theme] .bg-camp-dark-grey { background-color: var(--bg-primary); }
+        [data-theme] .bg-camp-accent-grey { background-color: var(--bg-secondary); }
+        [data-theme] .bg-gray-800 { background-color: var(--bg-primary); }
+        /* Text overrides */
+        [data-theme] .text-white { color: var(--text-primary); }
+        [data-theme] .text-gray-300 { color: var(--text-secondary); }
+        [data-theme] .text-gray-400 { color: var(--text-muted); }
+        [data-theme] .text-gray-500 { color: var(--text-muted); }
+        [data-theme="dark"] .text-gray-600 { color: var(--text-muted); }
+        /* Black/dark text — readable on dark backgrounds */
+        [data-theme="dark"] .text-black,
+        [data-theme="dark"] .text-camp-dark-grey { color: #E5E7EB; }
+        /* But keep dark text on gold buttons (contrast on gold is fine) */
+        [data-theme="dark"] .bg-camp-gold.text-black,
+        [data-theme="dark"] .bg-camp-gold.text-camp-dark-grey { color: #1A1A1A; }
+        /* Border overrides */
+        [data-theme] .border-gray-600 { border-color: var(--border-light); }
+        [data-theme] .border-gray-700 { border-color: var(--border-color); }
+        [data-theme] .border-gray-800 { border-color: var(--border-color); }
+        /* Hover states */
+        [data-theme] .hover\:bg-gray-700:hover { background-color: var(--border-color); }
+        [data-theme] .hover\:bg-gray-800\/50:hover,
+        [data-theme] .hover\:bg-camp-dark-grey\/50:hover { background-color: color-mix(in srgb, var(--bg-primary) 50%, transparent); }
+        [data-theme] .hover\:text-white:hover { color: var(--text-primary); }
+        /* Semi-transparent backgrounds */
+        [data-theme] .bg-gray-800\/50,
+        [data-theme] .bg-camp-dark-grey\/50 { background-color: color-mix(in srgb, var(--bg-primary) 50%, transparent); }
+        /* Darken gold text in light mode for readability */
+        [data-theme="light"] .text-camp-gold { color: #9A7B0C; }
+        /* Keep colored button text white in light mode */
+        [data-theme="light"] .bg-green-600.text-white,
+        [data-theme="light"] .bg-green-700.text-white,
+        [data-theme="light"] .bg-red-700.text-white,
+        [data-theme="light"] .bg-red-500.text-white,
+        [data-theme="light"] .bg-black\/50.text-white,
+        [data-theme="light"] .hover\:text-white:hover { color: #fff; }
+        /* Safe area for mobile */
+        [data-theme] .bg-black\/50 { background-color: rgba(0,0,0,0.5); }
+        /* Select / input / textarea background for light mode */
+        [data-theme="light"] select.bg-camp-dark-grey,
+        [data-theme="light"] input.bg-camp-dark-grey,
+        [data-theme="light"] textarea.bg-camp-dark-grey { background-color: #fff; }
+        /* Input background for gray-700 used in admin forms */
+        [data-theme="light"] .bg-gray-700 { background-color: #F3F4F6; }
+        /* Input border text color on focus */
+        [data-theme="light"] .focus\:border-camp-gold:focus { border-color: #D4AF37; }
+
+        /* Smooth transition when toggling theme */
+        html { transition: background-color 0.3s, color 0.3s; }
+    </style>
+
+    <script>
+        function toggleTheme() {
+            var current = document.documentElement.getAttribute('data-theme');
+            var next = current === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        }
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            var icon = document.getElementById('themeIcon');
+            var mobileIcon = document.getElementById('mobileThemeIcon');
+            if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            if (mobileIcon) mobileIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+        (function initTheme() {
+            var saved = localStorage.getItem('theme') || 'dark';
+            setTheme(saved);
+        })();
+    </script>
+</body>
+</html>

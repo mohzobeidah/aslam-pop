@@ -222,6 +222,43 @@ public class NominationController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAllNominations(int projectId)
+    {
+        if (!IsAuthenticated()) return RedirectToAction("Login", "Admin");
+        if (!IsSuperAdmin())
+        {
+            TempData["Error"] = "ليس لديك صلاحية";
+            return RedirectToAction("Index", new { projectId });
+        }
+
+        var nominations = await _context.Nominations
+            .Include(n => n.Person)
+            .Include(n => n.Project)
+            .Where(n => n.ProjectId == projectId && !n.IsDeleted)
+            .ToListAsync();
+
+        var count = nominations.Count;
+        var projectName = nominations.FirstOrDefault()?.Project?.Name;
+        var adminName = await _context.Admins.Where(a => a.Id == GetCurrentAdminId()).Select(a => a.Name).FirstOrDefaultAsync();
+
+        foreach (var nom in nominations)
+        {
+            nom.IsDeleted = true;
+        }
+
+        await _context.SaveChangesAsync();
+
+        await _audit.LogAsync(GetCurrentAdminId(), "DeleteAllNominations", "Nominations",
+            $"المشروع:{projectName},عدد:{count}",
+            new { المشروع = projectName, العدد = count, تاريخ_الحذف = DateTime.UtcNow, المسؤول = adminName },
+            null);
+
+        TempData["Success"] = $"تم حذف {count} ترشيح بنجاح";
+        return RedirectToAction("Index", new { projectId });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ImportExcel(int projectId, IFormFile excelFile)
     {
         if (!IsAuthenticated()) return RedirectToAction("Login", "Admin");
@@ -262,6 +299,8 @@ public class NominationController : Controller
 
             if (result.Errors.Count > 0)
                 TempData["ImportErrors"] = string.Join(" | ", result.Errors.Take(20));
+            if (result.Warnings.Count > 0)
+                TempData["ImportWarnings"] = string.Join(" | ", result.Warnings.Take(20));
         }
         catch (Exception ex)
         {

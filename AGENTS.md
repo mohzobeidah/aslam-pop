@@ -28,7 +28,8 @@ Camp family registration system implemented as an **ASP.NET Core MVC** applicati
 - **Attachment**: File metadata (`MedicalReport` or `IDImage`), stores relative paths.
 - **Admin**: Login with `AdminRole` (`Admin`=super, `Mandoob`=sector-limited), session-based auth, SHA256 password hashing.
 - **Sector**: Camp sector with name, camp, coordinates, area, tent/bathroom counts.
-- **Project/Nomination**: Campaign system for aid distribution with approval workflow, soft delete, rowversion concurrency.
+- **Project**: Aid campaign with Name, StartDate, EndDate, RequiredCount, Status (Draft/Active/Closed), soft delete, rowversion concurrency. Created with per-sector quotas (`ProjectSectorQuota`).
+- **Nomination**: Links a Person to a Project via Sector with quota enforcement, soft delete, rowversion concurrency.
 - **AuditLog**: Immutable audit trail with JSON old/new values and automatic source tracking (Web/Mobile).
 - **Notification**: Per-admin notification system with bell icon polling.
 
@@ -193,8 +194,26 @@ Camp family registration system implemented as an **ASP.NET Core MVC** applicati
 - **Server-side** (`RegistrationValidationService.ValidateRegistration`): Rejects submission if HealthStatus = "سليم" with ChronicDiseases or DisabilityTypes present.
 - Rationale: A person cannot be "سليم" (healthy) and have diseases at the same time.
 
+### Nomination System
+- **Nomination**: Links a `Person` to a `Project` via `Sector`. Soft-delete with `IsDeleted` flag.
+- **Single Add** (`NominationController.AddRow`): Searches for any person (head or family member), adds nomination with sector lookup (head via `FamilyRegistration.Sector`, member via `FamilyMember→Registration→Sector`).
+- **Bulk Add** (`NominationController.AddMultipleRows`): Selects multiple family heads from a full list with checkbox selection, sector filter, and search filter.
+- **Excel Import** (`NominationController.ImportExcel`):
+  - Uploads `.xlsx` with `NationalId` and `Notes` columns.
+  - Accepts both **heads of family** (رب أسرة) and **family members** (أفراد عائلة).
+  - For non-heads, adds a **warning** (`BulkImportResult.Warnings`) displayed as a blue info banner; sector is looked up via `FamilyMembers` join table.
+  - Previously-skipped persons (already nominated, quota exceeded, not found, no sector) still produce **errors** displayed as a yellow banner.
+  - Template download available via `DownloadImportTemplate`.
+- **Delete Single** (`NominationController.DeleteRow`): Soft-deletes a single nomination row with audit log.
+- **Delete All** (`NominationController.DeleteAllNominations`): Super-admin only — soft-deletes **all** nominations for a project with confirmation dialog. Logs count and project name to audit.
+  - **UI**: Red "حذف الكل" button appears above the table when `IsAdmin == true` and rows exist.
+- **Export Excel** (`NominationController.ExportExcel`): Downloads nomination list as `.xlsx` with family details (wives, housing, damage type). Logs to audit.
+- **Model**: `Nomination` entity with `ProjectId`, `PersonId`, `SectorId`, `DelegateId`, `Status` (Draft/Submitted/Approved/Rejected/Cancelled), `IsDeleted`, `RowVersion`.
+- **Service**: `INominationService` / `NominationService` — handles all business logic, quota enforcement, person search.
+- **Quota enforcement**: `ProjectSectorQuota` table limits nominations per sector per project. Quota check applies in single add, bulk add, and Excel import.
+
 ### Nomination Audit Logging — Names not Numbers
-- All nomination audit log entries (`AddNomination`, `AddMultipleNominations`, `DeleteNomination`, `ImportNominationsExcel`) must log **names** (project name, person name, sector name, admin name) instead of numeric IDs
+- All nomination audit log entries (`AddNomination`, `AddMultipleNominations`, `DeleteNomination`, `ImportNominationsExcel`, `DeleteAllNominations`) must log **names** (project name, person name, sector name, admin name) instead of numeric IDs
 - Logs use Arabic property names for `NewValues` (e.g. `المشروع`, `الشخص`, `القطاع`, `المسؤول`)
 - Each entry fetches the related entity name from DB before logging, never logs raw `projectId`, `personId`, `sectorId` alone
 - `RecordId` includes human-readable description like `المشروع:{projectName},الشخص:{personName}`

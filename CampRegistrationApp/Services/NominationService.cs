@@ -35,6 +35,7 @@ public class BulkImportResult
     public int SkippedCount { get; set; }
     public int NotFoundCount { get; set; }
     public List<string> Errors { get; set; } = new();
+    public List<string> Warnings { get; set; } = new();
 }
 
 public class NominationService : INominationService
@@ -371,16 +372,6 @@ public class NominationService : INominationService
                 continue;
             }
 
-            var isHead = await _context.FamilyRegistrations
-                .AnyAsync(fr => fr.FamilyHeadId == person.Id && !fr.IsDeleted);
-
-            if (!isHead)
-            {
-                result.SkippedCount++;
-                result.Errors.Add($"{person.FullName} ({nationalId}) ليس رب أسرة");
-                continue;
-            }
-
             var existing = await _context.Nominations
                 .AnyAsync(n => n.ProjectId == projectId && n.PersonId == person.Id && !n.IsDeleted);
             if (existing)
@@ -390,13 +381,34 @@ public class NominationService : INominationService
                 continue;
             }
 
-            var sectorName = await _context.FamilyRegistrations
-                .Where(fr => fr.FamilyHeadId == person.Id)
-                .Select(fr => fr.Sector.Name)
-                .FirstOrDefaultAsync();
+            var isHead = await _context.FamilyRegistrations
+                .AnyAsync(fr => fr.FamilyHeadId == person.Id && !fr.IsDeleted);
+
+            string? sectorName;
+            if (isHead)
+            {
+                sectorName = await _context.FamilyRegistrations
+                    .Where(fr => fr.FamilyHeadId == person.Id)
+                    .Select(fr => fr.Sector.Name)
+                    .FirstOrDefaultAsync();
+            }
+            else
+            {
+                sectorName = await _context.FamilyMembers
+                    .Where(fm => fm.PersonId == person.Id)
+                    .Select(fm => fm.Registration.Sector.Name)
+                    .FirstOrDefaultAsync();
+
+                if (!string.IsNullOrEmpty(sectorName))
+                {
+                    result.Warnings.Add($"{person.FullName} ({nationalId}) تمت إضافته كفرد أسرة (ليس رب أسرة)");
+                }
+            }
+
             if (string.IsNullOrEmpty(sectorName))
             {
                 result.SkippedCount++;
+                result.Errors.Add($"{person.FullName} ({nationalId}) لم يتم العثور على قطاع للشخص");
                 continue;
             }
 
