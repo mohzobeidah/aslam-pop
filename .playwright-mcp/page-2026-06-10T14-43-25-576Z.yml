@@ -1,0 +1,43 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "دخول المشرفين" [ref=e11] [cursor=pointer]:
+            - /url: /Admin/Login
+  - main [ref=e13]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]: 🔑
+        - heading "تسجيل الدخول" [level=1] [ref=e18]
+        - paragraph [ref=e19]: أدخل رقم الهوية وكلمة المرور لتعديل بيانات العائلة
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e22]: رقم هوية رب الأسرة
+          - textbox "9 أرقام" [ref=e23]:
+            - /placeholder: أدخل رقم الهوية (9 أرقام)
+        - generic [ref=e24]:
+          - generic [ref=e25]: كلمة المرور
+          - generic [ref=e26]:
+            - textbox "أدخل كلمة المرور" [ref=e27]
+            - button [ref=e28] [cursor=pointer]:
+              - img [ref=e29]
+        - generic:
+          - generic:
+            - list
+        - button "دخول للتعديل" [ref=e32] [cursor=pointer]
+      - paragraph [ref=e34]:
+        - text: لا تملك حساباً؟
+        - link "تسجيل عائلة جديدة" [ref=e35] [cursor=pointer]:
+          - /url: /Registration
+  - contentinfo [ref=e36]:
+    - generic [ref=e37]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

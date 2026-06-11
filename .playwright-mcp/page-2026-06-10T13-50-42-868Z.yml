@@ -1,0 +1,109 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "الشكاوى" [ref=e11] [cursor=pointer]:
+            - /url: /Complaint
+          - link "المشاريع" [ref=e12] [cursor=pointer]:
+            - /url: /Project
+          - link "المساعدات" [ref=e13] [cursor=pointer]:
+            - /url: /Assistance
+          - link "لوحة التحكم" [ref=e14] [cursor=pointer]:
+            - /url: /Admin/Dashboard
+          - link "التقارير" [ref=e15] [cursor=pointer]:
+            - /url: /Report
+          - link "سجل التدقيق" [ref=e16] [cursor=pointer]:
+            - /url: /Admin/AuditLogs
+          - link "تغيير كلمة المرور" [ref=e17] [cursor=pointer]:
+            - /url: /Admin/ChangePassword
+          - link "🔔" [ref=e18] [cursor=pointer]:
+            - /url: /Admin/Notifications
+          - link "تسجيل خروج" [ref=e19] [cursor=pointer]:
+            - /url: /Admin/Logout
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - heading "الموافقة على التسجيلات" [level=1] [ref=e23]
+      - generic [ref=e24]:
+        - link "⬇ تصدير Excel" [ref=e25] [cursor=pointer]:
+          - /url: /Admin/ExportRefugeesToExcel
+        - link "العودة للوحة التحكم" [ref=e26] [cursor=pointer]:
+          - /url: /Admin/Dashboard
+    - generic [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]: الحالة
+        - combobox [ref=e31]:
+          - option "قيد الانتظار" [selected]
+          - option "تمت الموافقة"
+          - option "مرفوض"
+      - generic [ref=e32]:
+        - generic [ref=e33]: القاطع
+        - combobox [ref=e34]:
+          - option "جميع القواطع" [selected]
+          - option "مخيم السلام قاطع A-جبر الدربى"
+          - option "مخيم السلام قاطع B-ابو جهاد الاخرس"
+          - option "مخيم السلام قاطع C-أكرم عابدين"
+          - option "مخيم السلام قاطع D-اياد فايق عبد الحليم جودة"
+      - button "تصفية" [ref=e35] [cursor=pointer]
+    - table [ref=e37]:
+      - rowgroup [ref=e38]:
+        - row "معرف التسجيل رب الأسرة رقم الهوية القاطع عدد الأفراد تاريخ التسجيل الحالة إجراءات" [ref=e39]:
+          - columnheader "معرف التسجيل" [ref=e40]
+          - columnheader "رب الأسرة" [ref=e41]
+          - columnheader "رقم الهوية" [ref=e42]
+          - columnheader "القاطع" [ref=e43]
+          - columnheader "عدد الأفراد" [ref=e44]
+          - columnheader "تاريخ التسجيل" [ref=e45]
+          - columnheader "الحالة" [ref=e46]
+          - columnheader "إجراءات" [ref=e47]
+      - rowgroup [ref=e48]:
+        - row "NPNSX6MP سعاد هاشم 914365440 مخيم السلام قاطع D-اياد فايق عبد الحليم جودة 0 2026-06-05 قيد الانتظار تعديل موافقة رفض" [ref=e49]:
+          - cell "NPNSX6MP" [ref=e50]
+          - cell "سعاد هاشم" [ref=e51]
+          - cell "914365440" [ref=e52]
+          - cell "مخيم السلام قاطع D-اياد فايق عبد الحليم جودة" [ref=e53]
+          - cell "0" [ref=e54]
+          - cell "2026-06-05" [ref=e55]
+          - cell "قيد الانتظار" [ref=e56]
+          - cell "تعديل موافقة رفض" [ref=e57]:
+            - link "تعديل" [ref=e58] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/792
+            - button "موافقة" [ref=e60] [cursor=pointer]
+            - button "رفض" [ref=e61] [cursor=pointer]
+        - row "33QLKXVV كاملة الأخرس 901951236 مخيم السلام قاطع D-اياد فايق عبد الحليم جودة 0 2026-06-05 قيد الانتظار تعديل موافقة رفض" [ref=e62]:
+          - cell "33QLKXVV" [ref=e63]
+          - cell "كاملة الأخرس" [ref=e64]
+          - cell "901951236" [ref=e65]
+          - cell "مخيم السلام قاطع D-اياد فايق عبد الحليم جودة" [ref=e66]
+          - cell "0" [ref=e67]
+          - cell "2026-06-05" [ref=e68]
+          - cell "قيد الانتظار" [ref=e69]
+          - cell "تعديل موافقة رفض" [ref=e70]:
+            - link "تعديل" [ref=e71] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/791
+            - button "موافقة" [ref=e73] [cursor=pointer]
+            - button "رفض" [ref=e74] [cursor=pointer]
+        - row "G6SLT3D9 تغريد عوض 906754700 مخيم السلام قاطع C-أكرم عابدين 4 2026-05-23 قيد الانتظار تعديل موافقة رفض" [ref=e75]:
+          - cell "G6SLT3D9" [ref=e76]
+          - cell "تغريد عوض" [ref=e77]
+          - cell "906754700" [ref=e78]
+          - cell "مخيم السلام قاطع C-أكرم عابدين" [ref=e79]
+          - cell "4" [ref=e80]
+          - cell "2026-05-23" [ref=e81]
+          - cell "قيد الانتظار" [ref=e82]
+          - cell "تعديل موافقة رفض" [ref=e83]:
+            - link "تعديل" [ref=e84] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/780
+            - button "موافقة" [ref=e86] [cursor=pointer]
+            - button "رفض" [ref=e87] [cursor=pointer]
+  - contentinfo [ref=e88]:
+    - generic [ref=e89]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

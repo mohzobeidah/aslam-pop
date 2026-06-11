@@ -1,0 +1,182 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "الشكاوى" [ref=e11] [cursor=pointer]:
+            - /url: /Complaint
+          - link "المشاريع" [ref=e12] [cursor=pointer]:
+            - /url: /Project
+          - link "المساعدات" [ref=e13] [cursor=pointer]:
+            - /url: /Assistance
+          - link "لوحة التحكم" [ref=e14] [cursor=pointer]:
+            - /url: /Admin/Dashboard
+          - link "التقارير" [ref=e15] [cursor=pointer]:
+            - /url: /Report
+          - link "سجل التدقيق" [ref=e16] [cursor=pointer]:
+            - /url: /Admin/AuditLogs
+          - link "تغيير كلمة المرور" [ref=e17] [cursor=pointer]:
+            - /url: /Admin/ChangePassword
+          - link "🔔" [ref=e18] [cursor=pointer]:
+            - /url: /Admin/Notifications
+          - link "تسجيل خروج" [ref=e19] [cursor=pointer]:
+            - /url: /Admin/Logout
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - link "← النازحين" [ref=e23] [cursor=pointer]:
+        - /url: /Admin/Refugees
+      - heading "محمد محمد خليل ابو زبيدة" [level=1] [ref=e24]
+      - paragraph [ref=e25]: "رقم القيد: ZUA9W4KN"
+    - generic [ref=e26]: تم تعديل البيانات بنجاح
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - heading "بيانات رب الأسرة" [level=2] [ref=e29]
+        - generic [ref=e30]:
+          - generic [ref=e31]: "الاسم: محمد محمد خليل ابو زبيدة"
+          - generic [ref=e32]: "رقم الهوية: 800843799"
+          - generic [ref=e33]: "القاطع: مخيم السلام قاطع A-جبر الدربى"
+          - generic [ref=e34]: "تاريخ الميلاد: 1984/03/07"
+          - generic [ref=e35]: "الجنس: ذكر"
+          - generic [ref=e36]: "الهاتف: 0567050248"
+          - generic [ref=e37]: "المحفظة: 0592050248"
+          - generic [ref=e38]: "نوع المحفظة: بال بي"
+          - generic [ref=e39]: "الحالة الاجتماعية: متزوج"
+          - generic [ref=e40]: "الوظيفة: بدون"
+          - generic [ref=e41]: "المستوى التعليمي: جامعي"
+          - generic [ref=e42]: "مكان السكن الأصلي: رفح"
+          - generic [ref=e43]: "المنزل مدمر: نعم"
+          - generic [ref=e44]: "أسير: لا"
+      - generic [ref=e45]:
+        - heading "الحالة الصحية" [level=2] [ref=e46]
+        - generic [ref=e47]:
+          - generic [ref=e48]: "الحالة الصحية: مريض"
+          - generic [ref=e49]: "الأمراض المزمنة: أخرى"
+          - generic [ref=e50]: "أنواع الإعاقة:"
+          - generic [ref=e51]: "إصابة: لا"
+      - generic [ref=e52]:
+        - heading "المرفقات" [level=2] [ref=e53]
+        - generic [ref=e55]: لا توجد مرفقات
+      - generic [ref=e56]:
+        - heading "السكن والحالات الخاصة" [level=2] [ref=e57]
+        - generic [ref=e58]:
+          - generic [ref=e59]: "رب أسرة طفل: لا"
+          - generic [ref=e60]: "ربة أسرة امرأة: لا"
+          - generic [ref=e61]: "الزوج خارج البلاد: لا"
+          - generic [ref=e62]: "شخص خارجي: لا"
+          - generic [ref=e63]: "يسكن في خيمة: نعم"
+          - generic [ref=e64]: "نوع الخيمة: تركيب خشب وشوادر"
+          - generic [ref=e65]: "حمام: نعم"
+          - generic [ref=e66]: "نوع الحمام: خاص"
+          - generic [ref=e67]: "حالة الحمام: سيء"
+          - generic [ref=e68]: "حفائظ: لا"
+          - generic [ref=e69]: "أسر بنفس الخيمة: لا"
+      - generic [ref=e70]:
+        - heading "الرغبات (حسب الأهمية)" [level=2] [ref=e71]
+        - generic [ref=e72]:
+          - generic [ref=e73]: "الرغبة الأولى: خيم"
+          - generic [ref=e74]: "الرغبة الثانية: شوادر"
+          - generic [ref=e75]: "الرغبة الثالثة: ادوات مطبخ"
+          - generic [ref=e76]: "الرغبة الرابعة: فرشات"
+          - generic [ref=e77]: "الرغبة الخامسة: طرد غذائي"
+          - generic [ref=e78]: "الرغبة السادسة: اغطية"
+          - generic [ref=e79]: "الرغبة السابعة: طرد صحي"
+          - generic [ref=e80]: "الرغبة الثامنة: ملابس"
+      - generic [ref=e81]:
+        - heading "حالة التسجيل" [level=2] [ref=e82]
+        - generic [ref=e83]:
+          - generic [ref=e84]: "الحالة: مقبول"
+          - generic [ref=e85]: "تاريخ التسجيل: 2026/05/21 13:51"
+        - generic [ref=e86]:
+          - link "تعديل البيانات" [ref=e87] [cursor=pointer]:
+            - /url: /Admin/AdminEditRegistration/63
+          - button "إعادة تعيين كلمة المرور" [ref=e88] [cursor=pointer]
+          - button "إزالة — انتقل خارج المخيم" [ref=e90] [cursor=pointer]
+    - generic [ref=e91]:
+      - heading "أفراد الأسرة (7)" [level=2] [ref=e92]
+      - table [ref=e94]:
+        - rowgroup [ref=e95]:
+          - row "الاسم رقم الهوية صلة القرابة الجنس تاريخ الميلاد الحالة الصحية إجراءات" [ref=e96]:
+            - columnheader "الاسم" [ref=e97]
+            - columnheader "رقم الهوية" [ref=e98]
+            - columnheader "صلة القرابة" [ref=e99]
+            - columnheader "الجنس" [ref=e100]
+            - columnheader "تاريخ الميلاد" [ref=e101]
+            - columnheader "الحالة الصحية" [ref=e102]
+            - columnheader "إجراءات" [ref=e103]
+        - rowgroup [ref=e104]:
+          - row "رغد محمد محمد ابو زبيدة 426089637 ابنة أنثى 2008/06/04 سليم عرض التفاصيل" [ref=e105]:
+            - cell "رغد محمد محمد ابو زبيدة" [ref=e106]
+            - cell "426089637" [ref=e107]
+            - cell "ابنة" [ref=e108]
+            - cell "أنثى" [ref=e109]
+            - cell "2008/06/04" [ref=e110]
+            - cell "سليم" [ref=e111]
+            - cell "عرض التفاصيل" [ref=e112]:
+              - button "عرض التفاصيل" [ref=e113] [cursor=pointer]
+          - row "فراس محمد محمد ابو زبيدة 431669803 ابن ذكر 2011/05/15 سليم عرض التفاصيل" [ref=e114]:
+            - cell "فراس محمد محمد ابو زبيدة" [ref=e115]
+            - cell "431669803" [ref=e116]
+            - cell "ابن" [ref=e117]
+            - cell "ذكر" [ref=e118]
+            - cell "2011/05/15" [ref=e119]
+            - cell "سليم" [ref=e120]
+            - cell "عرض التفاصيل" [ref=e121]:
+              - button "عرض التفاصيل" [ref=e122] [cursor=pointer]
+          - row "رهف محمد محمد ابو زبيدة 433753043 ابنة أنثى 2013/03/25 مريض عرض التفاصيل" [ref=e123]:
+            - cell "رهف محمد محمد ابو زبيدة" [ref=e124]
+            - cell "433753043" [ref=e125]
+            - cell "ابنة" [ref=e126]
+            - cell "أنثى" [ref=e127]
+            - cell "2013/03/25" [ref=e128]
+            - cell "مريض" [ref=e129]
+            - cell "عرض التفاصيل" [ref=e130]:
+              - button "عرض التفاصيل" [ref=e131] [cursor=pointer]
+          - row "سيف الدين محمد محمد ابو زبيدة 440720225 ابن ذكر 2019/01/23 سليم عرض التفاصيل" [ref=e132]:
+            - cell "سيف الدين محمد محمد ابو زبيدة" [ref=e133]
+            - cell "440720225" [ref=e134]
+            - cell "ابن" [ref=e135]
+            - cell "ذكر" [ref=e136]
+            - cell "2019/01/23" [ref=e137]
+            - cell "سليم" [ref=e138]
+            - cell "عرض التفاصيل" [ref=e139]:
+              - button "عرض التفاصيل" [ref=e140] [cursor=pointer]
+          - row "نور محمد محمد ابو زبيدة 443162029 ابنة أنثى 2021/04/22 سليم عرض التفاصيل" [ref=e141]:
+            - cell "نور محمد محمد ابو زبيدة" [ref=e142]
+            - cell "443162029" [ref=e143]
+            - cell "ابنة" [ref=e144]
+            - cell "أنثى" [ref=e145]
+            - cell "2021/04/22" [ref=e146]
+            - cell "سليم" [ref=e147]
+            - cell "عرض التفاصيل" [ref=e148]:
+              - button "عرض التفاصيل" [ref=e149] [cursor=pointer]
+          - row "سوزان أحمد عبد الرحيم ابو زبيده 802325415 زوجة أنثى 1989/08/05 سليم عرض التفاصيل" [ref=e150]:
+            - cell "سوزان أحمد عبد الرحيم ابو زبيده" [ref=e151]
+            - cell "802325415" [ref=e152]
+            - cell "زوجة" [ref=e153]
+            - cell "أنثى" [ref=e154]
+            - cell "1989/08/05" [ref=e155]
+            - cell "سليم" [ref=e156]
+            - cell "عرض التفاصيل" [ref=e157]:
+              - button "عرض التفاصيل" [ref=e158] [cursor=pointer]
+          - row "سارة محمد خليل ابو زبيدة 811223346 ابنة أنثى 2015/08/20 سليم عرض التفاصيل" [ref=e159]:
+            - cell "سارة محمد خليل ابو زبيدة" [ref=e160]
+            - cell "811223346" [ref=e161]
+            - cell "ابنة" [ref=e162]
+            - cell "أنثى" [ref=e163]
+            - cell "2015/08/20" [ref=e164]
+            - cell "سليم" [ref=e165]
+            - cell "عرض التفاصيل" [ref=e166]:
+              - button "عرض التفاصيل" [ref=e167] [cursor=pointer]
+    - link "← العودة إلى قائمة النازحين" [ref=e169] [cursor=pointer]:
+      - /url: /Admin/Refugees
+  - contentinfo [ref=e170]:
+    - generic [ref=e171]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

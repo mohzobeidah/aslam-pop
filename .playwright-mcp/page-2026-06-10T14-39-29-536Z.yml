@@ -1,0 +1,328 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "الشكاوى" [ref=e11] [cursor=pointer]:
+            - /url: /Complaint
+          - link "المشاريع" [ref=e12] [cursor=pointer]:
+            - /url: /Project
+          - link "المساعدات" [ref=e13] [cursor=pointer]:
+            - /url: /Assistance
+          - link "لوحة التحكم" [ref=e14] [cursor=pointer]:
+            - /url: /Admin/Dashboard
+          - link "التقارير" [ref=e15] [cursor=pointer]:
+            - /url: /Report
+          - link "سجل التدقيق" [ref=e16] [cursor=pointer]:
+            - /url: /Admin/AuditLogs
+          - link "تغيير كلمة المرور" [ref=e17] [cursor=pointer]:
+            - /url: /Admin/ChangePassword
+          - link "🔔" [ref=e18] [cursor=pointer]:
+            - /url: /Admin/Notifications
+          - link "تسجيل خروج" [ref=e19] [cursor=pointer]:
+            - /url: /Admin/Logout
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "لوحة التحكم" [level=1] [ref=e24]
+        - paragraph [ref=e25]: مرحباً، المدير العام مدير
+      - generic [ref=e26]:
+        - link "النازحين" [ref=e27] [cursor=pointer]:
+          - /url: /Admin/Refugees
+        - link "الموافقة على التسجيلات" [ref=e28] [cursor=pointer]:
+          - /url: /Admin/Registrations
+        - link "الشكاوى" [ref=e29] [cursor=pointer]:
+          - /url: /Complaint
+        - link "المشاريع" [ref=e30] [cursor=pointer]:
+          - /url: /Project
+        - link "إدارة المسؤولين" [ref=e31] [cursor=pointer]:
+          - /url: /Admin
+        - link "إدارة القواطع" [ref=e32] [cursor=pointer]:
+          - /url: /Admin/Sectors
+        - link "سجل التدقيق" [ref=e33] [cursor=pointer]:
+          - /url: /Admin/AuditLogs
+        - button "تسجيل خروج" [ref=e35] [cursor=pointer]
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]: "773"
+        - generic [ref=e39]: إجمالي التسجيلات
+      - generic [ref=e40]:
+        - generic [ref=e41]: "9"
+        - generic [ref=e42]: إجمالي المسؤولين
+      - generic [ref=e43]:
+        - generic [ref=e44]: "4"
+        - generic [ref=e45]: عدد القواطع
+    - generic [ref=e46]:
+      - generic [ref=e47]:
+        - heading "عدد الأسر النازحة حسب القاطع" [level=2] [ref=e48]
+        - generic [ref=e49]: "769"
+      - generic [ref=e50]:
+        - generic [ref=e51]:
+          - generic [ref=e52]: مخيم السلام قاطع B-ابو جهاد الاخرس
+          - generic [ref=e53]: 214 أسرة
+        - generic [ref=e54]:
+          - generic [ref=e55]: مخيم السلام قاطع C-أكرم عابدين
+          - generic [ref=e56]: 212 أسرة
+        - generic [ref=e57]:
+          - generic [ref=e58]: مخيم السلام قاطع D-اياد فايق عبد الحليم جودة
+          - generic [ref=e59]: 209 أسرة
+        - generic [ref=e60]:
+          - generic [ref=e61]: مخيم السلام قاطع A-جبر الدربى
+          - generic [ref=e62]: 134 أسرة
+    - heading "إجمالي التسجيلات حسب القاطع" [level=2] [ref=e64]
+    - heading "إحصائيات تفصيلية حسب القاطع" [level=2] [ref=e67]
+    - table [ref=e69]:
+      - rowgroup [ref=e70]:
+        - row "معلومات القاطع إحصائيات الأسرة تصنيف الأفراد أقل من 5 سنوات رضع (0-2) أطفال (2-5) تحت 18 سنة بالغين (18-60) كبار (>60) الصحة" [ref=e71]:
+          - columnheader "معلومات القاطع" [ref=e72]
+          - columnheader "إحصائيات الأسرة" [ref=e73]
+          - columnheader "تصنيف الأفراد" [ref=e74]
+          - columnheader "أقل من 5 سنوات" [ref=e75]
+          - columnheader "رضع (0-2)" [ref=e76]
+          - columnheader "أطفال (2-5)" [ref=e77]
+          - columnheader "تحت 18 سنة" [ref=e78]
+          - columnheader "بالغين (18-60)" [ref=e79]
+          - columnheader "كبار (>60)" [ref=e80]
+          - columnheader "الصحة" [ref=e81]
+        - row "القاطع المخيم المنطقة الإحداثيات خيم مصنعة خيم يدوية حمامات مسجلين معتمد عدد الأفراد عدد الأسر تقودها امرأة يقودها طفل رب أسرة زوجات ذكور إناث رب أسرة زوجة ابن ابنة ذكور إناث المجموع ذكور إناث المجموع ذكور إناث المجموع ذكور إناث المجموع ذكور إناث المجموع ذكور إناث المجموع ذكور إناث ذوي إعاقة ذكور إناث أمراض مزمنة" [ref=e82]:
+          - columnheader "القاطع" [ref=e83]
+          - columnheader "المخيم" [ref=e84]
+          - columnheader "المنطقة" [ref=e85]
+          - columnheader "الإحداثيات" [ref=e86]
+          - columnheader "خيم مصنعة" [ref=e87]
+          - columnheader "خيم يدوية" [ref=e88]
+          - columnheader "حمامات" [ref=e89]
+          - columnheader "مسجلين" [ref=e90]
+          - columnheader "معتمد" [ref=e91]
+          - columnheader "عدد الأفراد" [ref=e92]
+          - columnheader "عدد الأسر" [ref=e93]
+          - columnheader "تقودها امرأة" [ref=e94]
+          - columnheader "يقودها طفل" [ref=e95]
+          - columnheader "رب أسرة" [ref=e96]
+          - columnheader "زوجات" [ref=e97]
+          - columnheader "ذكور" [ref=e98]
+          - columnheader "إناث" [ref=e99]
+          - columnheader "رب أسرة" [ref=e100]
+          - columnheader "زوجة" [ref=e101]
+          - columnheader "ابن" [ref=e102]
+          - columnheader "ابنة" [ref=e103]
+          - columnheader "ذكور" [ref=e104]
+          - columnheader "إناث" [ref=e105]
+          - columnheader "المجموع" [ref=e106]
+          - columnheader "ذكور" [ref=e107]
+          - columnheader "إناث" [ref=e108]
+          - columnheader "المجموع" [ref=e109]
+          - columnheader "ذكور" [ref=e110]
+          - columnheader "إناث" [ref=e111]
+          - columnheader "المجموع" [ref=e112]
+          - columnheader "ذكور" [ref=e113]
+          - columnheader "إناث" [ref=e114]
+          - columnheader "المجموع" [ref=e115]
+          - columnheader "ذكور" [ref=e116]
+          - columnheader "إناث" [ref=e117]
+          - columnheader "المجموع" [ref=e118]
+          - columnheader "ذكور" [ref=e119]
+          - columnheader "إناث" [ref=e120]
+          - columnheader "المجموع" [ref=e121]
+          - columnheader "ذكور" [ref=e122]
+          - columnheader "إناث" [ref=e123]
+          - columnheader "ذوي إعاقة" [ref=e124]
+          - columnheader "ذكور" [ref=e125]
+          - columnheader "إناث" [ref=e126]
+          - columnheader "أمراض مزمنة" [ref=e127]
+      - rowgroup [ref=e128]:
+        - row "مخيم السلام قاطع B-ابو جهاد الاخرس مخيم السلام قاطع B 15000 31.34810473057643, 34.27236136935196 110 90 200 214 214 1028 214 17 7 214 183 487 541 214 183 304 327 487 541 89 38 51 24 9 15 91 44 47 432 199 233 535 256 279 61 32 29 33 21 12 85" [ref=e129]:
+          - cell "مخيم السلام قاطع B-ابو جهاد الاخرس" [ref=e130]
+          - cell "مخيم السلام قاطع B" [ref=e131]
+          - cell "15000" [ref=e132]
+          - cell "31.34810473057643, 34.27236136935196" [ref=e133]
+          - cell "110" [ref=e134]
+          - cell "90" [ref=e135]
+          - cell "200" [ref=e136]
+          - cell "214" [ref=e137]
+          - cell "214" [ref=e138]
+          - cell "1028" [ref=e139]
+          - cell "214" [ref=e140]
+          - cell "17" [ref=e141]
+          - cell "7" [ref=e142]
+          - cell "214" [ref=e143]
+          - cell "183" [ref=e144]
+          - cell "487" [ref=e145]
+          - cell "541" [ref=e146]
+          - cell "214" [ref=e147]
+          - cell "183" [ref=e148]
+          - cell "304" [ref=e149]
+          - cell "327" [ref=e150]
+          - cell "487" [ref=e151]
+          - cell "541" [ref=e152]
+          - cell "89" [ref=e153]
+          - cell "38" [ref=e154]
+          - cell "51" [ref=e155]
+          - cell "24" [ref=e156]
+          - cell "9" [ref=e157]
+          - cell "15" [ref=e158]
+          - cell "91" [ref=e159]
+          - cell "44" [ref=e160]
+          - cell "47" [ref=e161]
+          - cell "432" [ref=e162]
+          - cell "199" [ref=e163]
+          - cell "233" [ref=e164]
+          - cell "535" [ref=e165]
+          - cell "256" [ref=e166]
+          - cell "279" [ref=e167]
+          - cell "61" [ref=e168]
+          - cell "32" [ref=e169]
+          - cell "29" [ref=e170]
+          - cell "33" [ref=e171]
+          - cell "21" [ref=e172]
+          - cell "12" [ref=e173]
+          - cell "85" [ref=e174]
+        - row "مخيم السلام قاطع C-أكرم عابدين مخيم السلام قاطع C 12500 31.348164660246415, 34.27171704955173 104 90 185 213 212 982 213 1 7 213 186 466 516 213 186 293 290 466 516 79 37 42 14 6 8 86 41 45 413 203 210 511 239 272 58 24 34 663 253 410 21" [ref=e175]:
+          - cell "مخيم السلام قاطع C-أكرم عابدين" [ref=e176]
+          - cell "مخيم السلام قاطع C" [ref=e177]
+          - cell "12500" [ref=e178]
+          - cell "31.348164660246415, 34.27171704955173" [ref=e179]
+          - cell "104" [ref=e180]
+          - cell "90" [ref=e181]
+          - cell "185" [ref=e182]
+          - cell "213" [ref=e183]
+          - cell "212" [ref=e184]
+          - cell "982" [ref=e185]
+          - cell "213" [ref=e186]
+          - cell "1" [ref=e187]
+          - cell "7" [ref=e188]
+          - cell "213" [ref=e189]
+          - cell "186" [ref=e190]
+          - cell "466" [ref=e191]
+          - cell "516" [ref=e192]
+          - cell "213" [ref=e193]
+          - cell "186" [ref=e194]
+          - cell "293" [ref=e195]
+          - cell "290" [ref=e196]
+          - cell "466" [ref=e197]
+          - cell "516" [ref=e198]
+          - cell "79" [ref=e199]
+          - cell "37" [ref=e200]
+          - cell "42" [ref=e201]
+          - cell "14" [ref=e202]
+          - cell "6" [ref=e203]
+          - cell "8" [ref=e204]
+          - cell "86" [ref=e205]
+          - cell "41" [ref=e206]
+          - cell "45" [ref=e207]
+          - cell "413" [ref=e208]
+          - cell "203" [ref=e209]
+          - cell "210" [ref=e210]
+          - cell "511" [ref=e211]
+          - cell "239" [ref=e212]
+          - cell "272" [ref=e213]
+          - cell "58" [ref=e214]
+          - cell "24" [ref=e215]
+          - cell "34" [ref=e216]
+          - cell "663" [ref=e217]
+          - cell "253" [ref=e218]
+          - cell "410" [ref=e219]
+          - cell "21" [ref=e220]
+        - row "مخيم السلام قاطع D-اياد فايق عبد الحليم جودة مخيم السلام قاطع D 12000 31.348328104606857, 34.270702724321666 120 80 190 212 209 976 212 14 1 212 180 469 507 212 180 288 296 469 507 93 48 45 24 11 13 83 43 40 383 189 194 538 254 284 55 26 29 29 14 15 95" [ref=e221]:
+          - cell "مخيم السلام قاطع D-اياد فايق عبد الحليم جودة" [ref=e222]
+          - cell "مخيم السلام قاطع D" [ref=e223]
+          - cell "12000" [ref=e224]
+          - cell "31.348328104606857, 34.270702724321666" [ref=e225]
+          - cell "120" [ref=e226]
+          - cell "80" [ref=e227]
+          - cell "190" [ref=e228]
+          - cell "212" [ref=e229]
+          - cell "209" [ref=e230]
+          - cell "976" [ref=e231]
+          - cell "212" [ref=e232]
+          - cell "14" [ref=e233]
+          - cell "1" [ref=e234]
+          - cell "212" [ref=e235]
+          - cell "180" [ref=e236]
+          - cell "469" [ref=e237]
+          - cell "507" [ref=e238]
+          - cell "212" [ref=e239]
+          - cell "180" [ref=e240]
+          - cell "288" [ref=e241]
+          - cell "296" [ref=e242]
+          - cell "469" [ref=e243]
+          - cell "507" [ref=e244]
+          - cell "93" [ref=e245]
+          - cell "48" [ref=e246]
+          - cell "45" [ref=e247]
+          - cell "24" [ref=e248]
+          - cell "11" [ref=e249]
+          - cell "13" [ref=e250]
+          - cell "83" [ref=e251]
+          - cell "43" [ref=e252]
+          - cell "40" [ref=e253]
+          - cell "383" [ref=e254]
+          - cell "189" [ref=e255]
+          - cell "194" [ref=e256]
+          - cell "538" [ref=e257]
+          - cell "254" [ref=e258]
+          - cell "284" [ref=e259]
+          - cell "55" [ref=e260]
+          - cell "26" [ref=e261]
+          - cell "29" [ref=e262]
+          - cell "29" [ref=e263]
+          - cell "14" [ref=e264]
+          - cell "15" [ref=e265]
+          - cell "95" [ref=e266]
+        - row "مخيم السلام قاطع A-جبر الدربى مخيم السلام قاطع A 10000 31.347423708916786, 34.27328000352259 55 45 50 134 134 630 134 1 1 134 104 320 310 134 104 213 179 320 310 49 33 16 12 7 5 60 39 21 287 158 129 313 152 161 30 10 20 17 8 9 48" [ref=e267]:
+          - cell "مخيم السلام قاطع A-جبر الدربى" [ref=e268]
+          - cell "مخيم السلام قاطع A" [ref=e269]
+          - cell "10000" [ref=e270]
+          - cell "31.347423708916786, 34.27328000352259" [ref=e271]
+          - cell "55" [ref=e272]
+          - cell "45" [ref=e273]
+          - cell "50" [ref=e274]
+          - cell "134" [ref=e275]
+          - cell "134" [ref=e276]
+          - cell "630" [ref=e277]
+          - cell "134" [ref=e278]
+          - cell "1" [ref=e279]
+          - cell "1" [ref=e280]
+          - cell "134" [ref=e281]
+          - cell "104" [ref=e282]
+          - cell "320" [ref=e283]
+          - cell "310" [ref=e284]
+          - cell "134" [ref=e285]
+          - cell "104" [ref=e286]
+          - cell "213" [ref=e287]
+          - cell "179" [ref=e288]
+          - cell "320" [ref=e289]
+          - cell "310" [ref=e290]
+          - cell "49" [ref=e291]
+          - cell "33" [ref=e292]
+          - cell "16" [ref=e293]
+          - cell "12" [ref=e294]
+          - cell "7" [ref=e295]
+          - cell "5" [ref=e296]
+          - cell "60" [ref=e297]
+          - cell "39" [ref=e298]
+          - cell "21" [ref=e299]
+          - cell "287" [ref=e300]
+          - cell "158" [ref=e301]
+          - cell "129" [ref=e302]
+          - cell "313" [ref=e303]
+          - cell "152" [ref=e304]
+          - cell "161" [ref=e305]
+          - cell "30" [ref=e306]
+          - cell "10" [ref=e307]
+          - cell "20" [ref=e308]
+          - cell "17" [ref=e309]
+          - cell "8" [ref=e310]
+          - cell "9" [ref=e311]
+          - cell "48" [ref=e312]
+  - contentinfo [ref=e313]:
+    - generic [ref=e314]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

@@ -1,0 +1,157 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "دخول المشرفين" [ref=e11] [cursor=pointer]:
+            - /url: /Admin/Login
+  - main [ref=e13]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - heading "نموذج تسجيل العائلات" [level=1] [ref=e17]
+        - paragraph [ref=e18]: يتم حفظ البيانات تلقائياً في المتصفح
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21] [cursor=pointer]:
+            - generic [ref=e22]: "1"
+            - generic [ref=e23]: رب الأسرة
+          - generic [ref=e24] [cursor=pointer]:
+            - generic [ref=e25]: "2"
+            - generic [ref=e26]: أفراد الأسرة
+          - generic [ref=e27] [cursor=pointer]:
+            - generic [ref=e28]: "3"
+            - generic [ref=e29]: السكن
+          - generic [ref=e30] [cursor=pointer]:
+            - generic [ref=e31]: "4"
+            - generic [ref=e32]: المراجعة
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - heading "بيانات رب الأسرة" [level=2] [ref=e35]
+            - generic [ref=e36]:
+              - generic [ref=e37]:
+                - generic [ref=e38]: الاسم الأول
+                - textbox [ref=e39]
+              - generic [ref=e40]:
+                - generic [ref=e41]: الاسم الثاني
+                - textbox [ref=e42]
+              - generic [ref=e43]:
+                - generic [ref=e44]: الاسم الثالث
+                - textbox [ref=e45]
+              - generic [ref=e46]:
+                - generic [ref=e47]: اسم العائلة
+                - textbox [ref=e48]
+            - generic [ref=e49]:
+              - generic [ref=e50]:
+                - generic [ref=e51]: رقم الهوية
+                - textbox [ref=e52]
+              - generic [ref=e53]:
+                - generic [ref=e54]: القاطع
+                - combobox [ref=e55]:
+                  - option "اختر القاطع..." [selected]
+                  - option "A"
+                  - option "B"
+                  - option "C"
+                  - option "D"
+                  - option "أكرم عابدينققققققققققق"
+                  - option "ابو جهاد الاخرس"
+                  - option "ابو حمزة عيد"
+                  - option "جبر الدربى"
+              - generic [ref=e56]:
+                - generic [ref=e57]: تاريخ الميلاد
+                - textbox [ref=e58]
+              - generic [ref=e59]:
+                - generic [ref=e60]: الجنس
+                - generic [ref=e61]:
+                  - generic [ref=e62] [cursor=pointer]:
+                    - radio "ذكر" [checked] [ref=e63]
+                    - text: ذكر
+                  - generic [ref=e64] [cursor=pointer]:
+                    - radio "أنثى" [ref=e65]
+                    - text: أنثى
+              - generic [ref=e66]:
+                - generic [ref=e67]: رقم الهاتف
+                - textbox [ref=e68]
+              - generic [ref=e69]:
+                - generic [ref=e70]: المحفظة
+                - textbox [ref=e71]
+              - generic [ref=e72]:
+                - generic [ref=e73]: نوع المحفظة
+                - combobox [ref=e74]:
+                  - option "اختر نوع المحفظة..." [selected]
+                  - option "بنك"
+                  - option "بال بي"
+                  - option "جوال بي"
+              - generic [ref=e75]:
+                - generic [ref=e76]: مكان السكن الأصلي
+                - combobox [ref=e77]:
+                  - option "اختر المنطقة..." [selected]
+                  - option "غزة"
+                  - option "خانيونيس"
+                  - option "شمال غزة"
+                  - option "رفح"
+                  - option "دير البلح"
+                  - option "النصيرات"
+                  - option "المغازي"
+              - generic [ref=e78]:
+                - generic [ref=e79]: الحالة الاجتماعية
+                - combobox [ref=e80]:
+                  - option "اختر الحالة..." [selected]
+                  - option "متزوج"
+                  - option "أعزب"
+                  - option "أرمل"
+                  - option "مطلق"
+                  - option "منفصل"
+              - generic [ref=e81]:
+                - generic [ref=e82]: الوظيفة
+                - textbox [ref=e83]
+              - generic [ref=e84]:
+                - generic [ref=e85]: المستوى التعليمي
+                - combobox [ref=e86]:
+                  - option "اختر..." [selected]
+                  - option "بدون"
+                  - option "ابتدائي"
+                  - option "إعدادي"
+                  - option "ثانوي"
+                  - option "جامعي"
+                  - option "دراسات عليا"
+              - generic [ref=e87]:
+                - checkbox [ref=e88]
+                - generic [ref=e89]: المنزل مدمر
+              - generic [ref=e90]:
+                - checkbox [ref=e91]
+                - generic [ref=e92]: أسير
+            - generic [ref=e93]:
+              - generic [ref=e94]: صورة الهوية
+              - button "Choose File" [ref=e95]
+            - generic [ref=e96]:
+              - heading "الحالة الصحية" [level=3] [ref=e97]
+              - generic [ref=e98]:
+                - generic [ref=e99] [cursor=pointer]:
+                  - radio "سليم" [checked] [ref=e100]
+                  - text: سليم
+                - generic [ref=e101] [cursor=pointer]:
+                  - radio "مريض" [ref=e102]
+                  - text: مريض
+              - generic [ref=e104]:
+                - checkbox [ref=e105]
+                - generic [ref=e106]: هل تعرض لإصابة؟
+              - generic [ref=e107]:
+                - checkbox [ref=e108]
+                - generic [ref=e109]: حامل
+              - generic [ref=e110]:
+                - checkbox [ref=e111]
+                - generic [ref=e112]: مرضع
+          - generic [ref=e114]:
+            - button "✕ مسح الكل" [ref=e115] [cursor=pointer]
+            - button "التالي" [ref=e116] [cursor=pointer]
+  - contentinfo [ref=e117]:
+    - generic [ref=e118]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

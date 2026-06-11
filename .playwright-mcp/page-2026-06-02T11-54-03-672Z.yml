@@ -1,0 +1,695 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "الشكاوى" [ref=e11] [cursor=pointer]:
+            - /url: /Complaint
+          - link "المشاريع" [ref=e12] [cursor=pointer]:
+            - /url: /Project
+          - link "المساعدات" [ref=e13] [cursor=pointer]:
+            - /url: /Assistance
+          - link "لوحة التحكم" [ref=e14] [cursor=pointer]:
+            - /url: /Admin/Dashboard
+          - link "سجل التدقيق" [ref=e15] [cursor=pointer]:
+            - /url: /Admin/AuditLogs
+          - link "🔔" [ref=e16] [cursor=pointer]:
+            - /url: /Admin/Notifications
+          - link "تسجيل خروج" [ref=e17] [cursor=pointer]:
+            - /url: /Admin/Logout
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - heading "الموافقة على التسجيلات" [level=1] [ref=e21]
+      - generic [ref=e22]:
+        - link "⬇ تصدير Excel" [ref=e23] [cursor=pointer]:
+          - /url: /Admin/ExportRefugeesToExcel
+        - link "العودة للوحة التحكم" [ref=e24] [cursor=pointer]:
+          - /url: /Admin/Dashboard
+    - generic [ref=e25]: تم الموافقة على التسجيل بنجاح
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e29]: الحالة
+        - combobox [ref=e30]:
+          - option "قيد الانتظار" [selected]
+          - option "تمت الموافقة"
+          - option "مرفوض"
+      - generic [ref=e31]:
+        - generic [ref=e32]: القاطع
+        - combobox [ref=e33]:
+          - option "جميع القواطع" [selected]
+          - option "A"
+          - option "B"
+          - option "C"
+          - option "D"
+          - option "أكرم عابدينققققققققققق"
+          - option "ابو جهاد الاخرس"
+          - option "ابو حمزة عيد"
+          - option "جبر الدربى"
+      - button "تصفية" [ref=e34] [cursor=pointer]
+    - table [ref=e36]:
+      - rowgroup [ref=e37]:
+        - row "معرف التسجيل رب الأسرة رقم الهوية القاطع عدد الأفراد تاريخ التسجيل الحالة إجراءات" [ref=e38]:
+          - columnheader "معرف التسجيل" [ref=e39]
+          - columnheader "رب الأسرة" [ref=e40]
+          - columnheader "رقم الهوية" [ref=e41]
+          - columnheader "القاطع" [ref=e42]
+          - columnheader "عدد الأفراد" [ref=e43]
+          - columnheader "تاريخ التسجيل" [ref=e44]
+          - columnheader "الحالة" [ref=e45]
+          - columnheader "إجراءات" [ref=e46]
+      - rowgroup [ref=e47]:
+        - row "JEWHRDX9 خالد عباس 900716792 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e48]:
+          - cell "JEWHRDX9" [ref=e49]
+          - cell "خالد عباس" [ref=e50]
+          - cell "900716792" [ref=e51]
+          - cell "A" [ref=e52]
+          - cell "0" [ref=e53]
+          - cell "2026-05-25" [ref=e54]
+          - cell "قيد الانتظار" [ref=e55]
+          - cell "تعديل موافقة رفض" [ref=e56]:
+            - link "تعديل" [ref=e57] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/828
+            - button "موافقة" [ref=e59] [cursor=pointer]
+            - button "رفض" [ref=e61] [cursor=pointer]
+        - row "AV8AVCHE أحمد حسن 900716782 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e62]:
+          - cell "AV8AVCHE" [ref=e63]
+          - cell "أحمد حسن" [ref=e64]
+          - cell "900716782" [ref=e65]
+          - cell "A" [ref=e66]
+          - cell "0" [ref=e67]
+          - cell "2026-05-25" [ref=e68]
+          - cell "قيد الانتظار" [ref=e69]
+          - cell "تعديل موافقة رفض" [ref=e70]:
+            - link "تعديل" [ref=e71] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/827
+            - button "موافقة" [ref=e73] [cursor=pointer]
+            - button "رفض" [ref=e75] [cursor=pointer]
+        - row "4876P4MT خالد عباس 900716661 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e76]:
+          - cell "4876P4MT" [ref=e77]
+          - cell "خالد عباس" [ref=e78]
+          - cell "900716661" [ref=e79]
+          - cell "A" [ref=e80]
+          - cell "0" [ref=e81]
+          - cell "2026-05-25" [ref=e82]
+          - cell "قيد الانتظار" [ref=e83]
+          - cell "تعديل موافقة رفض" [ref=e84]:
+            - link "تعديل" [ref=e85] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/826
+            - button "موافقة" [ref=e87] [cursor=pointer]
+            - button "رفض" [ref=e89] [cursor=pointer]
+        - row "K5MCGCKH أحمد حسن 900716651 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e90]:
+          - cell "K5MCGCKH" [ref=e91]
+          - cell "أحمد حسن" [ref=e92]
+          - cell "900716651" [ref=e93]
+          - cell "A" [ref=e94]
+          - cell "0" [ref=e95]
+          - cell "2026-05-25" [ref=e96]
+          - cell "قيد الانتظار" [ref=e97]
+          - cell "تعديل موافقة رفض" [ref=e98]:
+            - link "تعديل" [ref=e99] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/825
+            - button "موافقة" [ref=e101] [cursor=pointer]
+            - button "رفض" [ref=e103] [cursor=pointer]
+        - row "7WB8P4Q8 خالد عباس 900716598 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e104]:
+          - cell "7WB8P4Q8" [ref=e105]
+          - cell "خالد عباس" [ref=e106]
+          - cell "900716598" [ref=e107]
+          - cell "A" [ref=e108]
+          - cell "0" [ref=e109]
+          - cell "2026-05-25" [ref=e110]
+          - cell "قيد الانتظار" [ref=e111]
+          - cell "تعديل موافقة رفض" [ref=e112]:
+            - link "تعديل" [ref=e113] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/824
+            - button "موافقة" [ref=e115] [cursor=pointer]
+            - button "رفض" [ref=e117] [cursor=pointer]
+        - row "L4SAMD9E أحمد حسن 900716588 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e118]:
+          - cell "L4SAMD9E" [ref=e119]
+          - cell "أحمد حسن" [ref=e120]
+          - cell "900716588" [ref=e121]
+          - cell "A" [ref=e122]
+          - cell "0" [ref=e123]
+          - cell "2026-05-25" [ref=e124]
+          - cell "قيد الانتظار" [ref=e125]
+          - cell "تعديل موافقة رفض" [ref=e126]:
+            - link "تعديل" [ref=e127] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/823
+            - button "موافقة" [ref=e129] [cursor=pointer]
+            - button "رفض" [ref=e131] [cursor=pointer]
+        - row "ZBXMQ3WX خالد عباس 900716571 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e132]:
+          - cell "ZBXMQ3WX" [ref=e133]
+          - cell "خالد عباس" [ref=e134]
+          - cell "900716571" [ref=e135]
+          - cell "A" [ref=e136]
+          - cell "0" [ref=e137]
+          - cell "2026-05-25" [ref=e138]
+          - cell "قيد الانتظار" [ref=e139]
+          - cell "تعديل موافقة رفض" [ref=e140]:
+            - link "تعديل" [ref=e141] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/822
+            - button "موافقة" [ref=e143] [cursor=pointer]
+            - button "رفض" [ref=e145] [cursor=pointer]
+        - row "HW5ZBHQ4 أحمد حسن 900716561 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e146]:
+          - cell "HW5ZBHQ4" [ref=e147]
+          - cell "أحمد حسن" [ref=e148]
+          - cell "900716561" [ref=e149]
+          - cell "A" [ref=e150]
+          - cell "0" [ref=e151]
+          - cell "2026-05-25" [ref=e152]
+          - cell "قيد الانتظار" [ref=e153]
+          - cell "تعديل موافقة رفض" [ref=e154]:
+            - link "تعديل" [ref=e155] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/821
+            - button "موافقة" [ref=e157] [cursor=pointer]
+            - button "رفض" [ref=e159] [cursor=pointer]
+        - row "VTJG9HYW خالد عباس 900716501 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e160]:
+          - cell "VTJG9HYW" [ref=e161]
+          - cell "خالد عباس" [ref=e162]
+          - cell "900716501" [ref=e163]
+          - cell "A" [ref=e164]
+          - cell "0" [ref=e165]
+          - cell "2026-05-25" [ref=e166]
+          - cell "قيد الانتظار" [ref=e167]
+          - cell "تعديل موافقة رفض" [ref=e168]:
+            - link "تعديل" [ref=e169] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/820
+            - button "موافقة" [ref=e171] [cursor=pointer]
+            - button "رفض" [ref=e173] [cursor=pointer]
+        - row "PSRQDESW أحمد حسن 900716491 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e174]:
+          - cell "PSRQDESW" [ref=e175]
+          - cell "أحمد حسن" [ref=e176]
+          - cell "900716491" [ref=e177]
+          - cell "A" [ref=e178]
+          - cell "0" [ref=e179]
+          - cell "2026-05-25" [ref=e180]
+          - cell "قيد الانتظار" [ref=e181]
+          - cell "تعديل موافقة رفض" [ref=e182]:
+            - link "تعديل" [ref=e183] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/819
+            - button "موافقة" [ref=e185] [cursor=pointer]
+            - button "رفض" [ref=e187] [cursor=pointer]
+        - row "YHRTHW5G خالد عباس 900716414 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e188]:
+          - cell "YHRTHW5G" [ref=e189]
+          - cell "خالد عباس" [ref=e190]
+          - cell "900716414" [ref=e191]
+          - cell "A" [ref=e192]
+          - cell "0" [ref=e193]
+          - cell "2026-05-25" [ref=e194]
+          - cell "قيد الانتظار" [ref=e195]
+          - cell "تعديل موافقة رفض" [ref=e196]:
+            - link "تعديل" [ref=e197] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/818
+            - button "موافقة" [ref=e199] [cursor=pointer]
+            - button "رفض" [ref=e201] [cursor=pointer]
+        - row "RMEDSQCA أحمد حسن 900716404 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e202]:
+          - cell "RMEDSQCA" [ref=e203]
+          - cell "أحمد حسن" [ref=e204]
+          - cell "900716404" [ref=e205]
+          - cell "A" [ref=e206]
+          - cell "0" [ref=e207]
+          - cell "2026-05-25" [ref=e208]
+          - cell "قيد الانتظار" [ref=e209]
+          - cell "تعديل موافقة رفض" [ref=e210]:
+            - link "تعديل" [ref=e211] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/817
+            - button "موافقة" [ref=e213] [cursor=pointer]
+            - button "رفض" [ref=e215] [cursor=pointer]
+        - row "BA8L3LT7 خالد عباس 900716190 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e216]:
+          - cell "BA8L3LT7" [ref=e217]
+          - cell "خالد عباس" [ref=e218]
+          - cell "900716190" [ref=e219]
+          - cell "A" [ref=e220]
+          - cell "0" [ref=e221]
+          - cell "2026-05-25" [ref=e222]
+          - cell "قيد الانتظار" [ref=e223]
+          - cell "تعديل موافقة رفض" [ref=e224]:
+            - link "تعديل" [ref=e225] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/816
+            - button "موافقة" [ref=e227] [cursor=pointer]
+            - button "رفض" [ref=e229] [cursor=pointer]
+        - row "E2GURBYJ أحمد حسن 900716180 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e230]:
+          - cell "E2GURBYJ" [ref=e231]
+          - cell "أحمد حسن" [ref=e232]
+          - cell "900716180" [ref=e233]
+          - cell "A" [ref=e234]
+          - cell "0" [ref=e235]
+          - cell "2026-05-25" [ref=e236]
+          - cell "قيد الانتظار" [ref=e237]
+          - cell "تعديل موافقة رفض" [ref=e238]:
+            - link "تعديل" [ref=e239] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/815
+            - button "موافقة" [ref=e241] [cursor=pointer]
+            - button "رفض" [ref=e243] [cursor=pointer]
+        - row "H5HADNWU أ ح م د ح س ن 900716073 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e244]:
+          - cell "H5HADNWU" [ref=e245]
+          - cell "أ ح م د ح س ن" [ref=e246]
+          - cell "900716073" [ref=e247]
+          - cell "A" [ref=e248]
+          - cell "0" [ref=e249]
+          - cell "2026-05-25" [ref=e250]
+          - cell "قيد الانتظار" [ref=e251]
+          - cell "تعديل موافقة رفض" [ref=e252]:
+            - link "تعديل" [ref=e253] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/814
+            - button "موافقة" [ref=e255] [cursor=pointer]
+            - button "رفض" [ref=e257] [cursor=pointer]
+        - row "TE3TGLNY خ ا ل د ع ب ا س 900716038 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e258]:
+          - cell "TE3TGLNY" [ref=e259]
+          - cell "خ ا ل د ع ب ا س" [ref=e260]
+          - cell "900716038" [ref=e261]
+          - cell "A" [ref=e262]
+          - cell "0" [ref=e263]
+          - cell "2026-05-25" [ref=e264]
+          - cell "قيد الانتظار" [ref=e265]
+          - cell "تعديل موافقة رفض" [ref=e266]:
+            - link "تعديل" [ref=e267] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/813
+            - button "موافقة" [ref=e269] [cursor=pointer]
+            - button "رفض" [ref=e271] [cursor=pointer]
+        - row "YL836WCH أ ح م د ح س ن 900716028 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e272]:
+          - cell "YL836WCH" [ref=e273]
+          - cell "أ ح م د ح س ن" [ref=e274]
+          - cell "900716028" [ref=e275]
+          - cell "A" [ref=e276]
+          - cell "0" [ref=e277]
+          - cell "2026-05-25" [ref=e278]
+          - cell "قيد الانتظار" [ref=e279]
+          - cell "تعديل موافقة رفض" [ref=e280]:
+            - link "تعديل" [ref=e281] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/812
+            - button "موافقة" [ref=e283] [cursor=pointer]
+            - button "رفض" [ref=e285] [cursor=pointer]
+        - row "DEMYQPSH خ ا ل د ع ب ا س 900715964 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e286]:
+          - cell "DEMYQPSH" [ref=e287]
+          - cell "خ ا ل د ع ب ا س" [ref=e288]
+          - cell "900715964" [ref=e289]
+          - cell "A" [ref=e290]
+          - cell "0" [ref=e291]
+          - cell "2026-05-25" [ref=e292]
+          - cell "قيد الانتظار" [ref=e293]
+          - cell "تعديل موافقة رفض" [ref=e294]:
+            - link "تعديل" [ref=e295] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/811
+            - button "موافقة" [ref=e297] [cursor=pointer]
+            - button "رفض" [ref=e299] [cursor=pointer]
+        - row "KQL83E88 أ ح م د ح س ن 900715954 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e300]:
+          - cell "KQL83E88" [ref=e301]
+          - cell "أ ح م د ح س ن" [ref=e302]
+          - cell "900715954" [ref=e303]
+          - cell "A" [ref=e304]
+          - cell "0" [ref=e305]
+          - cell "2026-05-25" [ref=e306]
+          - cell "قيد الانتظار" [ref=e307]
+          - cell "تعديل موافقة رفض" [ref=e308]:
+            - link "تعديل" [ref=e309] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/810
+            - button "موافقة" [ref=e311] [cursor=pointer]
+            - button "رفض" [ref=e313] [cursor=pointer]
+        - row "NXTQU55R خ ا ل د ع ب ا س 900715609 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e314]:
+          - cell "NXTQU55R" [ref=e315]
+          - cell "خ ا ل د ع ب ا س" [ref=e316]
+          - cell "900715609" [ref=e317]
+          - cell "A" [ref=e318]
+          - cell "0" [ref=e319]
+          - cell "2026-05-25" [ref=e320]
+          - cell "قيد الانتظار" [ref=e321]
+          - cell "تعديل موافقة رفض" [ref=e322]:
+            - link "تعديل" [ref=e323] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/809
+            - button "موافقة" [ref=e325] [cursor=pointer]
+            - button "رفض" [ref=e327] [cursor=pointer]
+        - row "AMW6K8FV أ ح م د ح س ن 900715599 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e328]:
+          - cell "AMW6K8FV" [ref=e329]
+          - cell "أ ح م د ح س ن" [ref=e330]
+          - cell "900715599" [ref=e331]
+          - cell "A" [ref=e332]
+          - cell "0" [ref=e333]
+          - cell "2026-05-25" [ref=e334]
+          - cell "قيد الانتظار" [ref=e335]
+          - cell "تعديل موافقة رفض" [ref=e336]:
+            - link "تعديل" [ref=e337] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/808
+            - button "موافقة" [ref=e339] [cursor=pointer]
+            - button "رفض" [ref=e341] [cursor=pointer]
+        - row "P7T7C25Q خ ا ل د ع ب ا س 900715541 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e342]:
+          - cell "P7T7C25Q" [ref=e343]
+          - cell "خ ا ل د ع ب ا س" [ref=e344]
+          - cell "900715541" [ref=e345]
+          - cell "A" [ref=e346]
+          - cell "0" [ref=e347]
+          - cell "2026-05-25" [ref=e348]
+          - cell "قيد الانتظار" [ref=e349]
+          - cell "تعديل موافقة رفض" [ref=e350]:
+            - link "تعديل" [ref=e351] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/807
+            - button "موافقة" [ref=e353] [cursor=pointer]
+            - button "رفض" [ref=e355] [cursor=pointer]
+        - row "GGU3MP6M أ ح م د ح س ن 900715531 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e356]:
+          - cell "GGU3MP6M" [ref=e357]
+          - cell "أ ح م د ح س ن" [ref=e358]
+          - cell "900715531" [ref=e359]
+          - cell "A" [ref=e360]
+          - cell "0" [ref=e361]
+          - cell "2026-05-25" [ref=e362]
+          - cell "قيد الانتظار" [ref=e363]
+          - cell "تعديل موافقة رفض" [ref=e364]:
+            - link "تعديل" [ref=e365] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/806
+            - button "موافقة" [ref=e367] [cursor=pointer]
+            - button "رفض" [ref=e369] [cursor=pointer]
+        - row "7QQVZETC خالد عباس 900715233 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e370]:
+          - cell "7QQVZETC" [ref=e371]
+          - cell "خالد عباس" [ref=e372]
+          - cell "900715233" [ref=e373]
+          - cell "A" [ref=e374]
+          - cell "0" [ref=e375]
+          - cell "2026-05-25" [ref=e376]
+          - cell "قيد الانتظار" [ref=e377]
+          - cell "تعديل موافقة رفض" [ref=e378]:
+            - link "تعديل" [ref=e379] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/805
+            - button "موافقة" [ref=e381] [cursor=pointer]
+            - button "رفض" [ref=e383] [cursor=pointer]
+        - row "AR6SAUAC أحمد حسن 900715223 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e384]:
+          - cell "AR6SAUAC" [ref=e385]
+          - cell "أحمد حسن" [ref=e386]
+          - cell "900715223" [ref=e387]
+          - cell "A" [ref=e388]
+          - cell "0" [ref=e389]
+          - cell "2026-05-25" [ref=e390]
+          - cell "قيد الانتظار" [ref=e391]
+          - cell "تعديل موافقة رفض" [ref=e392]:
+            - link "تعديل" [ref=e393] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/804
+            - button "موافقة" [ref=e395] [cursor=pointer]
+            - button "رفض" [ref=e397] [cursor=pointer]
+        - row "TXAR4SMC وليد الرفاعي 900709945 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e398]:
+          - cell "TXAR4SMC" [ref=e399]
+          - cell "وليد الرفاعي" [ref=e400]
+          - cell "900709945" [ref=e401]
+          - cell "A" [ref=e402]
+          - cell "0" [ref=e403]
+          - cell "2026-05-25" [ref=e404]
+          - cell "قيد الانتظار" [ref=e405]
+          - cell "تعديل موافقة رفض" [ref=e406]:
+            - link "تعديل" [ref=e407] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/803
+            - button "موافقة" [ref=e409] [cursor=pointer]
+            - button "رفض" [ref=e411] [cursor=pointer]
+        - row "PJDPXZTR كريم السالم 900709925 A 1 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e412]:
+          - cell "PJDPXZTR" [ref=e413]
+          - cell "كريم السالم" [ref=e414]
+          - cell "900709925" [ref=e415]
+          - cell "A" [ref=e416]
+          - cell "1" [ref=e417]
+          - cell "2026-05-25" [ref=e418]
+          - cell "قيد الانتظار" [ref=e419]
+          - cell "تعديل موافقة رفض" [ref=e420]:
+            - link "تعديل" [ref=e421] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/802
+            - button "موافقة" [ref=e423] [cursor=pointer]
+            - button "رفض" [ref=e425] [cursor=pointer]
+        - row "YFAHL2YJ أحمد حسن 900709875 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e426]:
+          - cell "YFAHL2YJ" [ref=e427]
+          - cell "أحمد حسن" [ref=e428]
+          - cell "900709875" [ref=e429]
+          - cell "A" [ref=e430]
+          - cell "0" [ref=e431]
+          - cell "2026-05-25" [ref=e432]
+          - cell "قيد الانتظار" [ref=e433]
+          - cell "تعديل موافقة رفض" [ref=e434]:
+            - link "تعديل" [ref=e435] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/801
+            - button "موافقة" [ref=e437] [cursor=pointer]
+            - button "رفض" [ref=e439] [cursor=pointer]
+        - row "CLAZSEUS وليد الرفاعي 900709912 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e440]:
+          - cell "CLAZSEUS" [ref=e441]
+          - cell "وليد الرفاعي" [ref=e442]
+          - cell "900709912" [ref=e443]
+          - cell "A" [ref=e444]
+          - cell "0" [ref=e445]
+          - cell "2026-05-25" [ref=e446]
+          - cell "قيد الانتظار" [ref=e447]
+          - cell "تعديل موافقة رفض" [ref=e448]:
+            - link "تعديل" [ref=e449] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/800
+            - button "موافقة" [ref=e451] [cursor=pointer]
+            - button "رفض" [ref=e453] [cursor=pointer]
+        - row "GG9EDGW7 أحمد حسن 900709852 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e454]:
+          - cell "GG9EDGW7" [ref=e455]
+          - cell "أحمد حسن" [ref=e456]
+          - cell "900709852" [ref=e457]
+          - cell "A" [ref=e458]
+          - cell "0" [ref=e459]
+          - cell "2026-05-25" [ref=e460]
+          - cell "قيد الانتظار" [ref=e461]
+          - cell "تعديل موافقة رفض" [ref=e462]:
+            - link "تعديل" [ref=e463] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/799
+            - button "موافقة" [ref=e465] [cursor=pointer]
+            - button "رفض" [ref=e467] [cursor=pointer]
+        - row "PGNCEGMA أحمد حسن 999999001 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e468]:
+          - cell "PGNCEGMA" [ref=e469]
+          - cell "أحمد حسن" [ref=e470]
+          - cell "999999001" [ref=e471]
+          - cell "A" [ref=e472]
+          - cell "0" [ref=e473]
+          - cell "2026-05-25" [ref=e474]
+          - cell "قيد الانتظار" [ref=e475]
+          - cell "تعديل موافقة رفض" [ref=e476]:
+            - link "تعديل" [ref=e477] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/798
+            - button "موافقة" [ref=e479] [cursor=pointer]
+            - button "رفض" [ref=e481] [cursor=pointer]
+        - row "V3R8HS6J Test Test 100000800 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e482]:
+          - cell "V3R8HS6J" [ref=e483]
+          - cell "Test Test" [ref=e484]
+          - cell "100000800" [ref=e485]
+          - cell "A" [ref=e486]
+          - cell "0" [ref=e487]
+          - cell "2026-05-25" [ref=e488]
+          - cell "قيد الانتظار" [ref=e489]
+          - cell "تعديل موافقة رفض" [ref=e490]:
+            - link "تعديل" [ref=e491] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/797
+            - button "موافقة" [ref=e493] [cursor=pointer]
+            - button "رفض" [ref=e495] [cursor=pointer]
+        - row "5UTU9ZZ9 Test Test 100000700 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e496]:
+          - cell "5UTU9ZZ9" [ref=e497]
+          - cell "Test Test" [ref=e498]
+          - cell "100000700" [ref=e499]
+          - cell "A" [ref=e500]
+          - cell "0" [ref=e501]
+          - cell "2026-05-25" [ref=e502]
+          - cell "قيد الانتظار" [ref=e503]
+          - cell "تعديل موافقة رفض" [ref=e504]:
+            - link "تعديل" [ref=e505] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/796
+            - button "موافقة" [ref=e507] [cursor=pointer]
+            - button "رفض" [ref=e509] [cursor=pointer]
+        - row "TTUMT3N5 Test Test 100000600 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e510]:
+          - cell "TTUMT3N5" [ref=e511]
+          - cell "Test Test" [ref=e512]
+          - cell "100000600" [ref=e513]
+          - cell "A" [ref=e514]
+          - cell "0" [ref=e515]
+          - cell "2026-05-25" [ref=e516]
+          - cell "قيد الانتظار" [ref=e517]
+          - cell "تعديل موافقة رفض" [ref=e518]:
+            - link "تعديل" [ref=e519] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/795
+            - button "موافقة" [ref=e521] [cursor=pointer]
+            - button "رفض" [ref=e523] [cursor=pointer]
+        - row "9H47LAG6 Test Test 100000400 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e524]:
+          - cell "9H47LAG6" [ref=e525]
+          - cell "Test Test" [ref=e526]
+          - cell "100000400" [ref=e527]
+          - cell "A" [ref=e528]
+          - cell "0" [ref=e529]
+          - cell "2026-05-25" [ref=e530]
+          - cell "قيد الانتظار" [ref=e531]
+          - cell "تعديل موافقة رفض" [ref=e532]:
+            - link "تعديل" [ref=e533] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/794
+            - button "موافقة" [ref=e535] [cursor=pointer]
+            - button "رفض" [ref=e537] [cursor=pointer]
+        - row "2ZKQ2H53 Test Test 100000200 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e538]:
+          - cell "2ZKQ2H53" [ref=e539]
+          - cell "Test Test" [ref=e540]
+          - cell "100000200" [ref=e541]
+          - cell "A" [ref=e542]
+          - cell "0" [ref=e543]
+          - cell "2026-05-25" [ref=e544]
+          - cell "قيد الانتظار" [ref=e545]
+          - cell "تعديل موافقة رفض" [ref=e546]:
+            - link "تعديل" [ref=e547] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/793
+            - button "موافقة" [ref=e549] [cursor=pointer]
+            - button "رفض" [ref=e551] [cursor=pointer]
+        - row "9BNTW25C Test Test 100000100 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e552]:
+          - cell "9BNTW25C" [ref=e553]
+          - cell "Test Test" [ref=e554]
+          - cell "100000100" [ref=e555]
+          - cell "A" [ref=e556]
+          - cell "0" [ref=e557]
+          - cell "2026-05-25" [ref=e558]
+          - cell "قيد الانتظار" [ref=e559]
+          - cell "تعديل موافقة رفض" [ref=e560]:
+            - link "تعديل" [ref=e561] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/792
+            - button "موافقة" [ref=e563] [cursor=pointer]
+            - button "رفض" [ref=e565] [cursor=pointer]
+        - row "FRJK3LLA وليد الرفاعي 100000014 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e566]:
+          - cell "FRJK3LLA" [ref=e567]
+          - cell "وليد الرفاعي" [ref=e568]
+          - cell "100000014" [ref=e569]
+          - cell "A" [ref=e570]
+          - cell "0" [ref=e571]
+          - cell "2026-05-25" [ref=e572]
+          - cell "قيد الانتظار" [ref=e573]
+          - cell "تعديل موافقة رفض" [ref=e574]:
+            - link "تعديل" [ref=e575] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/791
+            - button "موافقة" [ref=e577] [cursor=pointer]
+            - button "رفض" [ref=e579] [cursor=pointer]
+        - row "AKD2GWVV أحمد حسن 100000002 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e580]:
+          - cell "AKD2GWVV" [ref=e581]
+          - cell "أحمد حسن" [ref=e582]
+          - cell "100000002" [ref=e583]
+          - cell "A" [ref=e584]
+          - cell "0" [ref=e585]
+          - cell "2026-05-25" [ref=e586]
+          - cell "قيد الانتظار" [ref=e587]
+          - cell "تعديل موافقة رفض" [ref=e588]:
+            - link "تعديل" [ref=e589] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/790
+            - button "موافقة" [ref=e591] [cursor=pointer]
+            - button "رفض" [ref=e593] [cursor=pointer]
+        - row "9MMUQNNQ Valid User 202605255 A 1 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e594]:
+          - cell "9MMUQNNQ" [ref=e595]
+          - cell "Valid User" [ref=e596]
+          - cell "202605255" [ref=e597]
+          - cell "A" [ref=e598]
+          - cell "1" [ref=e599]
+          - cell "2026-05-25" [ref=e600]
+          - cell "قيد الانتظار" [ref=e601]
+          - cell "تعديل موافقة رفض" [ref=e602]:
+            - link "تعديل" [ref=e603] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/788
+            - button "موافقة" [ref=e605] [cursor=pointer]
+            - button "رفض" [ref=e607] [cursor=pointer]
+        - row "RMA466P6 SickTest NoDetails 202605254 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e608]:
+          - cell "RMA466P6" [ref=e609]
+          - cell "SickTest NoDetails" [ref=e610]
+          - cell "202605254" [ref=e611]
+          - cell "A" [ref=e612]
+          - cell "0" [ref=e613]
+          - cell "2026-05-25" [ref=e614]
+          - cell "قيد الانتظار" [ref=e615]
+          - cell "تعديل موافقة رفض" [ref=e616]:
+            - link "تعديل" [ref=e617] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/787
+            - button "موافقة" [ref=e619] [cursor=pointer]
+            - button "رفض" [ref=e621] [cursor=pointer]
+        - row "EDNXE6HA Sick NoDetails 202605253 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e622]:
+          - cell "EDNXE6HA" [ref=e623]
+          - cell "Sick NoDetails" [ref=e624]
+          - cell "202605253" [ref=e625]
+          - cell "A" [ref=e626]
+          - cell "0" [ref=e627]
+          - cell "2026-05-25" [ref=e628]
+          - cell "قيد الانتظار" [ref=e629]
+          - cell "تعديل موافقة رفض" [ref=e630]:
+            - link "تعديل" [ref=e631] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/786
+            - button "موافقة" [ref=e633] [cursor=pointer]
+            - button "رفض" [ref=e635] [cursor=pointer]
+        - row "6ZL7DCBU Married NoWife 202605252 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e636]:
+          - cell "6ZL7DCBU" [ref=e637]
+          - cell "Married NoWife" [ref=e638]
+          - cell "202605252" [ref=e639]
+          - cell "A" [ref=e640]
+          - cell "0" [ref=e641]
+          - cell "2026-05-25" [ref=e642]
+          - cell "قيد الانتظار" [ref=e643]
+          - cell "تعديل موافقة رفض" [ref=e644]:
+            - link "تعديل" [ref=e645] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/785
+            - button "موافقة" [ref=e647] [cursor=pointer]
+            - button "رفض" [ref=e649] [cursor=pointer]
+        - row "ZHMYEJ7E Test Last 202605251 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e650]:
+          - cell "ZHMYEJ7E" [ref=e651]
+          - cell "Test Last" [ref=e652]
+          - cell "202605251" [ref=e653]
+          - cell "A" [ref=e654]
+          - cell "0" [ref=e655]
+          - cell "2026-05-25" [ref=e656]
+          - cell "قيد الانتظار" [ref=e657]
+          - cell "تعديل موافقة رفض" [ref=e658]:
+            - link "تعديل" [ref=e659] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/784
+            - button "موافقة" [ref=e661] [cursor=pointer]
+            - button "رفض" [ref=e663] [cursor=pointer]
+        - row "5AS2RTMF Married Test 222333444 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e664]:
+          - cell "5AS2RTMF" [ref=e665]
+          - cell "Married Test" [ref=e666]
+          - cell "222333444" [ref=e667]
+          - cell "A" [ref=e668]
+          - cell "0" [ref=e669]
+          - cell "2026-05-25" [ref=e670]
+          - cell "قيد الانتظار" [ref=e671]
+          - cell "تعديل موافقة رفض" [ref=e672]:
+            - link "تعديل" [ref=e673] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/783
+            - button "موافقة" [ref=e675] [cursor=pointer]
+            - button "رفض" [ref=e677] [cursor=pointer]
+        - row "6V3EJW6X Sick Test 111222333 A 0 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e678]:
+          - cell "6V3EJW6X" [ref=e679]
+          - cell "Sick Test" [ref=e680]
+          - cell "111222333" [ref=e681]
+          - cell "A" [ref=e682]
+          - cell "0" [ref=e683]
+          - cell "2026-05-25" [ref=e684]
+          - cell "قيد الانتظار" [ref=e685]
+          - cell "تعديل موافقة رفض" [ref=e686]:
+            - link "تعديل" [ref=e687] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/782
+            - button "موافقة" [ref=e689] [cursor=pointer]
+            - button "رفض" [ref=e691] [cursor=pointer]
+        - row "XCDB3QLH Test Test 999888777 A 1 2026-05-25 قيد الانتظار تعديل موافقة رفض" [ref=e692]:
+          - cell "XCDB3QLH" [ref=e693]
+          - cell "Test Test" [ref=e694]
+          - cell "999888777" [ref=e695]
+          - cell "A" [ref=e696]
+          - cell "1" [ref=e697]
+          - cell "2026-05-25" [ref=e698]
+          - cell "قيد الانتظار" [ref=e699]
+          - cell "تعديل موافقة رفض" [ref=e700]:
+            - link "تعديل" [ref=e701] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/781
+            - button "موافقة" [ref=e703] [cursor=pointer]
+            - button "رفض" [ref=e705] [cursor=pointer]
+        - row "S48XXY98 ???? ???? 123456789 A 1 2026-05-23 قيد الانتظار تعديل موافقة رفض" [ref=e706]:
+          - cell "S48XXY98" [ref=e707]
+          - cell "???? ????" [ref=e708]
+          - cell "123456789" [ref=e709]
+          - cell "A" [ref=e710]
+          - cell "1" [ref=e711]
+          - cell "2026-05-23" [ref=e712]
+          - cell "قيد الانتظار" [ref=e713]
+          - cell "تعديل موافقة رفض" [ref=e714]:
+            - link "تعديل" [ref=e715] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/780
+            - button "موافقة" [ref=e717] [cursor=pointer]
+            - button "رفض" [ref=e719] [cursor=pointer]
+  - contentinfo [ref=e720]:
+    - generic [ref=e721]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

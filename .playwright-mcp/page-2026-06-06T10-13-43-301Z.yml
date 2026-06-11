@@ -1,0 +1,108 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "دخول المشرفين" [ref=e11] [cursor=pointer]:
+            - /url: /Admin/Login
+  - main [ref=e13]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - heading "نموذج تسجيل العائلات" [level=1] [ref=e17]
+        - paragraph [ref=e18]: يتم حفظ البيانات تلقائياً في المتصفح
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21] [cursor=pointer]:
+            - generic [ref=e22]: "1"
+            - generic [ref=e23]: رب الأسرة
+          - generic [ref=e24] [cursor=pointer]:
+            - generic [ref=e25]: "2"
+            - generic [ref=e26]: أفراد الأسرة
+          - generic [ref=e27] [cursor=pointer]:
+            - generic [ref=e28]: "3"
+            - generic [ref=e29]: السكن
+          - generic [ref=e30] [cursor=pointer]:
+            - generic [ref=e31]: "4"
+            - generic [ref=e32]: المراجعة
+        - generic [ref=e33]:
+          - generic [ref=e286]:
+            - heading "مراجعة البيانات وتأكيد التسجيل" [level=2] [ref=e287]
+            - generic [ref=e288]:
+              - generic [ref=e289]:
+                - heading "رب الأسرة" [level=3] [ref=e290]
+                - generic [ref=e291]:
+                  - generic [ref=e292]: "الاسم: أحمد محمد سالم حسن"
+                  - generic [ref=e293]: "رقم الهوية: 123456782"
+                  - generic [ref=e294]: "رقم الهاتف: 0591111111"
+                  - generic [ref=e295]: "المحفظة: 123456789"
+                  - generic [ref=e296]: "نوع المحفظة: بنك"
+                  - generic [ref=e297]: "القاطع:"
+                  - generic [ref=e298]: "تاريخ الميلاد: 1990-01-15"
+                  - generic [ref=e299]: "الجنس: ذكر"
+                  - generic [ref=e300]: "الحالة الاجتماعية: متزوج"
+                  - generic [ref=e301]: "الحالة الصحية: سليم"
+                  - generic [ref=e302]: "المنزل مدمر: لا"
+                  - generic [ref=e303]: "أسير: لا"
+              - generic [ref=e304]:
+                - heading "أفراد الأسرة (1)" [level=3] [ref=e305]
+                - generic [ref=e307]:
+                  - generic [ref=e308]: "الاسم: فاطمة حسن"
+                  - generic [ref=e309]: "رقم الهوية: 572949550"
+                  - generic [ref=e310]: "صلة القرابة: زوجة"
+                  - generic [ref=e311]: "أسير: لا"
+                  - generic [ref=e312]: "الحالة الصحية: سليم"
+              - generic [ref=e313]:
+                - heading "السكن والحالات الخاصة" [level=3] [ref=e314]
+                - generic [ref=e315]:
+                  - generic [ref=e316]: "رب أسرة طفل: لا"
+                  - generic [ref=e317]: "ربة أسرة امرأة: لا"
+                  - generic [ref=e318]: "الزوج خارج البلاد: لا"
+                  - generic [ref=e319]: "شخص خارجي: لا"
+                  - generic [ref=e320]: "يسكن في خيمة: نعم"
+                  - generic [ref=e321]: "نوع الخيمة: خيمة صينية"
+                  - generic [ref=e322]: "حفائظ: لا"
+                  - generic [ref=e323]: "أسر بنفس الخيمة: لا"
+                  - generic [ref=e324]: "الرغبات (حسب الأهمية): الأولى: ? ، الثانية: ? ، الثالثة: ? ، الرابعة: ? ، الخامسة: ?"
+              - generic [ref=e325]:
+                - heading "الحمام" [level=3] [ref=e326]
+                - generic [ref=e327]:
+                  - generic [ref=e328]: "يوجد حمام: نعم"
+                  - generic [ref=e329]: "نوع الحمام: خاص"
+                  - generic [ref=e330]: "حالة الحمام: جيد"
+            - generic [ref=e331]:
+              - generic [ref=e332]: ملاحظات حول الحالة
+              - textbox "أي ملاحظات إضافية عن حالة العائلة..." [ref=e333]
+            - generic [ref=e334]:
+              - heading "إنشاء كلمة مرور للتعديل لاحقاً" [level=3] [ref=e335]
+              - generic [ref=e336]:
+                - generic [ref=e337]:
+                  - generic [ref=e338]: كلمة المرور
+                  - generic [ref=e339]:
+                    - textbox [ref=e340]
+                    - button [ref=e341] [cursor=pointer]:
+                      - img [ref=e342]
+                - generic [ref=e345]:
+                  - generic [ref=e346]: تأكيد كلمة المرور
+                  - generic [ref=e347]:
+                    - textbox [ref=e348]
+                    - button [ref=e349] [cursor=pointer]:
+                      - img [ref=e350]
+              - generic [ref=e353]:
+                - checkbox "أتعهد بأن جميع البيانات المقدمة صحيحة ودقيقة وأتحمل المسؤولية الكاملة عن صحة المعلومات. كما أتعهد بإبلاغ إدارة المخيم في حال حدوث أي تغيير في بيانات الأسرة." [ref=e354]
+                - generic [ref=e355]: أتعهد بأن جميع البيانات المقدمة صحيحة ودقيقة وأتحمل المسؤولية الكاملة عن صحة المعلومات. كما أتعهد بإبلاغ إدارة المخيم في حال حدوث أي تغيير في بيانات الأسرة.
+          - generic [ref=e113]:
+            - button "السابق" [ref=e125] [cursor=pointer]
+            - generic [ref=e114]:
+              - button "✕ مسح الكل" [ref=e115] [cursor=pointer]
+              - button "تأكيد وإرسال" [ref=e356] [cursor=pointer]
+  - contentinfo [ref=e117]:
+    - generic [ref=e118]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

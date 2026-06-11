@@ -1,0 +1,134 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "دخول المشرفين" [ref=e11] [cursor=pointer]:
+            - /url: /Admin/Login
+  - main [ref=e13]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - heading "نموذج تسجيل العائلات" [level=1] [ref=e17]
+        - paragraph [ref=e18]: يتم حفظ البيانات تلقائياً في المتصفح
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21] [cursor=pointer]:
+            - generic [ref=e22]: "1"
+            - generic [ref=e23]: رب الأسرة
+          - generic [ref=e24] [cursor=pointer]:
+            - generic [ref=e25]: "2"
+            - generic [ref=e26]: أفراد الأسرة
+          - generic [ref=e27] [cursor=pointer]:
+            - generic [ref=e28]: "3"
+            - generic [ref=e29]: السكن
+          - generic [ref=e30] [cursor=pointer]:
+            - generic [ref=e31]: "4"
+            - generic [ref=e32]: المراجعة
+        - generic [ref=e33]:
+          - generic [ref=e119]:
+            - generic [ref=e120]:
+              - heading "أفراد الأسرة" [level=2] [ref=e121]
+              - button "+ إضافة فرد" [active] [ref=e122] [cursor=pointer]
+            - generic [ref=e126]:
+              - button "✕" [ref=e127] [cursor=pointer]
+              - generic [ref=e128]:
+                - generic [ref=e129]:
+                  - generic [ref=e130]: الاسم الأول
+                  - textbox [ref=e131]
+                - generic [ref=e132]:
+                  - generic [ref=e133]: الاسم الثاني
+                  - textbox [ref=e134]
+                - generic [ref=e135]:
+                  - generic [ref=e136]: الاسم الثالث
+                  - textbox [ref=e137]
+                - generic [ref=e138]:
+                  - generic [ref=e139]: اسم العائلة
+                  - textbox [ref=e140]
+                - generic [ref=e141]:
+                  - generic [ref=e142]: رقم الهوية
+                  - textbox [ref=e143]
+                - generic [ref=e144]:
+                  - generic [ref=e145]: تاريخ الميلاد
+                  - textbox [ref=e146]
+                - generic [ref=e147]:
+                  - generic [ref=e148]: الجنس
+                  - combobox [ref=e149]:
+                    - option "ذكر" [selected]
+                    - option "أنثى"
+                - generic [ref=e150]:
+                  - generic [ref=e151]: رقم هوية الأم
+                  - textbox [ref=e152]
+                - generic [ref=e153]:
+                  - generic [ref=e154]: صلة القرابة
+                  - combobox [ref=e155]:
+                    - option "اختر..." [selected]
+                    - option "زوج"
+                    - option "زوجة"
+                    - option "ابن"
+                    - option "ابنة"
+                    - option "أم"
+                    - option "أب"
+                    - option "أخ"
+                    - option "أخت"
+                    - option "جدة/جد"
+                    - option "حفيد/حفيدة"
+                    - option "أخ غير شقيق"
+                    - option "أخت غير شقيقة"
+                    - option "Other"
+                - generic [ref=e156]:
+                  - generic [ref=e157]: الحالة الاجتماعية
+                  - combobox [ref=e158]:
+                    - option "اختر..." [selected]
+                    - option "متزوج"
+                    - option "أعزب"
+                    - option "أرمل"
+                    - option "مطلق"
+                    - option "منفصل"
+                - generic [ref=e159]:
+                  - generic [ref=e160]: المستوى التعليمي
+                  - combobox [ref=e161]:
+                    - option "اختر..." [selected]
+                    - option "بدون"
+                    - option "ابتدائي"
+                    - option "إعدادي"
+                    - option "ثانوي"
+                    - option "جامعي"
+                    - option "دراسات عليا"
+                - generic [ref=e162]:
+                  - checkbox [ref=e163]
+                  - generic [ref=e164]: أسير
+              - generic [ref=e165]:
+                - generic [ref=e167]:
+                  - checkbox [ref=e168]
+                  - generic [ref=e169]: حامل
+                - generic [ref=e171]:
+                  - checkbox [ref=e172]
+                  - generic [ref=e173]: مرضع
+              - generic [ref=e174]:
+                - heading "الحالة الصحية" [level=4] [ref=e175]
+                - generic [ref=e176]:
+                  - generic [ref=e177] [cursor=pointer]:
+                    - radio "سليم" [checked] [ref=e178]
+                    - text: سليم
+                  - generic [ref=e179] [cursor=pointer]:
+                    - radio "مريض" [ref=e180]
+                    - text: مريض
+                - generic [ref=e182]:
+                  - checkbox [ref=e183]
+                  - generic [ref=e184]: هل تعرض لإصابة؟
+          - generic [ref=e113]:
+            - button "السابق" [ref=e124] [cursor=pointer]
+            - generic [ref=e114]:
+              - button "✕ مسح الكل" [ref=e115] [cursor=pointer]
+              - button "التالي" [ref=e116] [cursor=pointer]
+  - contentinfo [ref=e117]:
+    - generic [ref=e118]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

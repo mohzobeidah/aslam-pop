@@ -1,0 +1,48 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "دخول المشرفين" [ref=e11] [cursor=pointer]:
+            - /url: /Admin/Login
+  - main [ref=e13]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - heading "نموذج تسجيل العائلات" [level=1] [ref=e17]
+        - paragraph [ref=e18]: يتم حفظ البيانات تلقائياً في المتصفح
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21] [cursor=pointer]:
+            - generic [ref=e22]: "1"
+            - generic [ref=e23]: رب الأسرة
+          - generic [ref=e24] [cursor=pointer]:
+            - generic [ref=e25]: "2"
+            - generic [ref=e26]: أفراد الأسرة
+          - generic [ref=e27] [cursor=pointer]:
+            - generic [ref=e28]: "3"
+            - generic [ref=e29]: السكن
+          - generic [ref=e30] [cursor=pointer]:
+            - generic [ref=e31]: "4"
+            - generic [ref=e32]: المراجعة
+        - generic [ref=e33]:
+          - generic [ref=e119]:
+            - generic [ref=e120]:
+              - heading "أفراد الأسرة" [level=2] [ref=e121]
+              - button "+ إضافة فرد" [ref=e122] [cursor=pointer]
+            - paragraph [ref=e123]: لم يتم إضافة أفراد بعد. اضغط على "إضافة فرد" للبدء.
+          - generic [ref=e113]:
+            - button "السابق" [ref=e124] [cursor=pointer]
+            - generic [ref=e114]:
+              - button "✕ مسح الكل" [ref=e115] [cursor=pointer]
+              - button "التالي" [active] [ref=e116] [cursor=pointer]
+  - contentinfo [ref=e117]:
+    - generic [ref=e118]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

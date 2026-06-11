@@ -1,0 +1,79 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "دخول المشرفين" [ref=e11] [cursor=pointer]:
+            - /url: /Admin/Login
+  - main [ref=e13]:
+    - generic [ref=e16]:
+      - heading "مخيم السلام" [level=1] [ref=e17]
+      - paragraph [ref=e18]: معاً لدعم العائلات المتضررة وتوفير سبل العيش الكريم
+      - paragraph [ref=e19]: نسعى لتسجيل الأسر المتضررة وتقديم المساعدات الغذائية والطبية والإيوائية للأسر الأكثر احتياجاً
+      - generic [ref=e20]:
+        - link "تسجيل عائلة جديدة" [ref=e21] [cursor=pointer]:
+          - /url: /Registration
+        - link "تسجيل الدخول لتعديل البيانات" [ref=e22] [cursor=pointer]:
+          - /url: /Record/Login
+    - generic [ref=e23]:
+      - heading "لحظات من مخيم السلام" [level=2] [ref=e24]
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - img "توزيع الخيام" [ref=e28]
+          - img "المساعدات الغذائية" [ref=e30]
+          - img "الدعم الطبي" [ref=e32]
+          - img "التعليم" [ref=e34]
+        - button "❮" [ref=e35] [cursor=pointer]
+        - button "❯" [ref=e36] [cursor=pointer]
+    - generic [ref=e42]:
+      - generic [ref=e43]:
+        - generic [ref=e44]: ١٢٠٠+
+        - generic [ref=e45]: عائلة مسجلة
+      - generic [ref=e46]:
+        - generic [ref=e47]: ٤٥٠٠+
+        - generic [ref=e48]: فرد مستفيد
+      - generic [ref=e49]:
+        - generic [ref=e50]: ٣٠٠+
+        - generic [ref=e51]: خيمة موزعة
+      - generic [ref=e52]:
+        - generic [ref=e53]: ١٠٠٠+
+        - generic [ref=e54]: سلة غذائية
+    - generic [ref=e56]:
+      - generic [ref=e57]:
+        - heading "من نحن" [level=2] [ref=e58]
+        - paragraph [ref=e59]: مخيم السلام هو مبادرة إنسانية تهدف إلى دعم العائلات المتضررة والنازحة. نعمل على تسجيل الأسر وتقييم احتياجاتهم بدقة لتقديم المساعدات المناسبة لكل حالة.
+        - paragraph [ref=e60]: نؤمن بأن لكل عائلة الحق في حياة كريمة، لذلك نحرص على توفير الدعم الغذائي والطبي والإيوائي والتعليمي للأسر الأكثر احتياجاً.
+      - generic [ref=e61]:
+        - heading "مجالات الدعم" [level=3] [ref=e62]
+        - list [ref=e63]:
+          - listitem [ref=e64]:
+            - generic [ref=e65]: ●
+            - text: المساعدات الغذائية الشهرية
+          - listitem [ref=e66]:
+            - generic [ref=e67]: ●
+            - text: الرعاية الصحية والدواء
+          - listitem [ref=e68]:
+            - generic [ref=e69]: ●
+            - text: توفير الخيام والمأوى
+          - listitem [ref=e70]:
+            - generic [ref=e71]: ●
+            - text: دعم التعليم للأطفال
+          - listitem [ref=e72]:
+            - generic [ref=e73]: ●
+            - text: الملابس والبطانيات الشتوية
+    - generic [ref=e74]:
+      - heading "انضم إلينا في دعم العائلات" [level=2] [ref=e75]
+      - paragraph [ref=e76]: سجل عائلتك الآن لتحصل على الدعم الذي تستحقه
+      - link "تسجيل عائلة جديدة" [ref=e77] [cursor=pointer]:
+        - /url: /Registration
+  - contentinfo [ref=e78]:
+    - generic [ref=e79]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

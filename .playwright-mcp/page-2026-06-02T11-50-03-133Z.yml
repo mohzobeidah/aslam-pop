@@ -1,0 +1,147 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "دخول المشرفين" [ref=e11] [cursor=pointer]:
+            - /url: /Admin/Login
+  - main [ref=e13]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - heading "نموذج تسجيل العائلات" [level=1] [ref=e17]
+        - paragraph [ref=e18]: يتم حفظ البيانات تلقائياً في المتصفح
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21] [cursor=pointer]:
+            - generic [ref=e22]: "1"
+            - generic [ref=e23]: رب الأسرة
+          - generic [ref=e24] [cursor=pointer]:
+            - generic [ref=e25]: "2"
+            - generic [ref=e26]: أفراد الأسرة
+          - generic [ref=e27] [cursor=pointer]:
+            - generic [ref=e28]: "3"
+            - generic [ref=e29]: السكن
+          - generic [ref=e30] [cursor=pointer]:
+            - generic [ref=e31]: "4"
+            - generic [ref=e32]: المراجعة
+        - generic [ref=e33]:
+          - generic [ref=e185]:
+            - heading "السكن والحالات الخاصة" [level=2] [ref=e186]
+            - generic [ref=e187]:
+              - generic [ref=e188]:
+                - checkbox [ref=e189]
+                - generic [ref=e190]: رب الأسرة طفل (أقل من 18 سنة)
+              - generic [ref=e191]:
+                - checkbox [ref=e192]
+                - generic [ref=e193]: ربة الأسرة امرأة (أرملة / مطلقة / زوجها غائب)
+              - generic [ref=e194]:
+                - checkbox [ref=e195]
+                - generic [ref=e196]: الزوج خارج البلاد
+              - generic [ref=e197]:
+                - checkbox [ref=e198]
+                - generic [ref=e199]: هناك شخص خارج الأسرة مشمول في الكفالة
+              - generic [ref=e200]:
+                - generic [ref=e201]: هل تسكن العائلة في خيمة؟
+                - generic [ref=e202]:
+                  - generic [ref=e203] [cursor=pointer]:
+                    - radio "نعم" [ref=e204]
+                    - text: نعم
+                  - generic [ref=e205] [cursor=pointer]:
+                    - radio "لا" [ref=e206]
+                    - text: لا
+              - generic [ref=e207]:
+                - checkbox [ref=e208]
+                - generic [ref=e209]: هل تحتاج العائلة حفائظ (لكبار السن أو آخرين)؟
+              - generic [ref=e210]:
+                - checkbox [ref=e211]
+                - generic [ref=e212]: هل يوجد أكثر من عائلة تسكن في نفس الخيمة؟
+              - generic [ref=e213]:
+                - heading "الحمام" [level=3] [ref=e214]
+                - generic [ref=e215]:
+                  - generic [ref=e216]: هل يوجد حمام؟
+                  - generic [ref=e217]:
+                    - generic [ref=e218] [cursor=pointer]:
+                      - radio "نعم" [ref=e219]
+                      - text: نعم
+                    - generic [ref=e220] [cursor=pointer]:
+                      - radio "لا" [ref=e221]
+                      - text: لا
+              - generic [ref=e222]:
+                - heading "الرغبات (رتب احتياجاتك حسب الأهمية)" [level=3] [ref=e223]
+                - generic [ref=e224]:
+                  - generic [ref=e225]:
+                    - generic [ref=e226]: "الرغبة 1:"
+                    - combobox [ref=e227]:
+                      - option "اختر الرغبة..." [selected]
+                      - option "خيم"
+                      - option "اغطية"
+                      - option "فرشات"
+                      - option "ادوات مطبخ"
+                      - option "شوادر"
+                      - option "ملابس"
+                      - option "طرد صحي"
+                      - option "طرد غذائي"
+                  - generic [ref=e228]:
+                    - generic [ref=e229]: "الرغبة 2:"
+                    - combobox [ref=e230]:
+                      - option "اختر الرغبة..." [selected]
+                      - option "خيم"
+                      - option "اغطية"
+                      - option "فرشات"
+                      - option "ادوات مطبخ"
+                      - option "شوادر"
+                      - option "ملابس"
+                      - option "طرد صحي"
+                      - option "طرد غذائي"
+                  - generic [ref=e231]:
+                    - generic [ref=e232]: "الرغبة 3:"
+                    - combobox [ref=e233]:
+                      - option "اختر الرغبة..." [selected]
+                      - option "خيم"
+                      - option "اغطية"
+                      - option "فرشات"
+                      - option "ادوات مطبخ"
+                      - option "شوادر"
+                      - option "ملابس"
+                      - option "طرد صحي"
+                      - option "طرد غذائي"
+                  - generic [ref=e234]:
+                    - generic [ref=e235]: "الرغبة 4:"
+                    - combobox [ref=e236]:
+                      - option "اختر الرغبة..." [selected]
+                      - option "خيم"
+                      - option "اغطية"
+                      - option "فرشات"
+                      - option "ادوات مطبخ"
+                      - option "شوادر"
+                      - option "ملابس"
+                      - option "طرد صحي"
+                      - option "طرد غذائي"
+                  - generic [ref=e237]:
+                    - generic [ref=e238]: "الرغبة 5:"
+                    - combobox [ref=e239]:
+                      - option "اختر الرغبة..." [selected]
+                      - option "خيم"
+                      - option "اغطية"
+                      - option "فرشات"
+                      - option "ادوات مطبخ"
+                      - option "شوادر"
+                      - option "ملابس"
+                      - option "طرد صحي"
+                      - option "طرد غذائي"
+          - generic [ref=e113]:
+            - button "السابق" [ref=e124] [cursor=pointer]
+            - generic [ref=e114]:
+              - button "✕ مسح الكل" [ref=e115] [cursor=pointer]
+              - button "التالي" [active] [ref=e116] [cursor=pointer]
+  - contentinfo [ref=e117]:
+    - generic [ref=e118]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

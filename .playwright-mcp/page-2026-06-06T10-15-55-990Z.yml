@@ -1,0 +1,169 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "دخول المشرفين" [ref=e11] [cursor=pointer]:
+            - /url: /Admin/Login
+  - main [ref=e13]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - heading "نموذج تسجيل العائلات" [level=1] [ref=e17]
+        - paragraph [ref=e18]: يتم حفظ البيانات تلقائياً في المتصفح
+      - generic [ref=e19]:
+        - list [ref=e21]:
+          - listitem [ref=e22]: رقم المحفظة يجب أن يتكون من 10 أرقام ويبدأ بـ 059 أو 056
+        - generic [ref=e23]:
+          - generic [ref=e24] [cursor=pointer]:
+            - generic [ref=e25]: "1"
+            - generic [ref=e26]: رب الأسرة
+          - generic [ref=e27] [cursor=pointer]:
+            - generic [ref=e28]: "2"
+            - generic [ref=e29]: أفراد الأسرة
+          - generic [ref=e30] [cursor=pointer]:
+            - generic [ref=e31]: "3"
+            - generic [ref=e32]: السكن
+          - generic [ref=e33] [cursor=pointer]:
+            - generic [ref=e34]: "4"
+            - generic [ref=e35]: المراجعة
+        - generic [ref=e36]:
+          - generic [ref=e187]:
+            - heading "السكن والحالات الخاصة" [level=2] [ref=e188]
+            - generic [ref=e189]:
+              - generic [ref=e190]:
+                - checkbox [ref=e191]
+                - generic [ref=e192]: رب الأسرة طفل (أقل من 18 سنة)
+              - generic [ref=e193]:
+                - checkbox [ref=e194]
+                - generic [ref=e195]: ربة الأسرة امرأة (أرملة / مطلقة / زوجها غائب)
+              - generic [ref=e196]:
+                - checkbox [ref=e197]
+                - generic [ref=e198]: الزوج خارج البلاد
+              - generic [ref=e199]:
+                - checkbox [ref=e200]
+                - generic [ref=e201]: هناك شخص خارج الأسرة مشمول في الكفالة
+              - generic [ref=e202]:
+                - generic [ref=e203]: هل تسكن العائلة في خيمة؟
+                - generic [ref=e204]:
+                  - generic [ref=e205] [cursor=pointer]:
+                    - radio "نعم" [checked] [ref=e206]
+                    - text: نعم
+                  - generic [ref=e207] [cursor=pointer]:
+                    - radio "لا" [ref=e208]
+                    - text: لا
+              - generic [ref=e209]:
+                - generic [ref=e210]: نوع الخيمة
+                - combobox [ref=e211]:
+                  - option "اختر النوع..."
+                  - option "تركيب خشب وشوادر"
+                  - option "حديد وشوادر"
+                  - option "قبة"
+                  - option "إماراتية"
+                  - option "قطرية"
+                  - option "خيمة صينية" [selected]
+                  - option "خيمة قماش وخشب"
+                  - option "أخرى"
+                - textbox "يرجى تحديد النوع الآخر" [ref=e212]
+              - generic [ref=e213]:
+                - checkbox [ref=e214]
+                - generic [ref=e215]: هل تحتاج العائلة حفائظ (لكبار السن أو آخرين)؟
+              - generic [ref=e216]:
+                - checkbox [ref=e217]
+                - generic [ref=e218]: هل يوجد أكثر من عائلة تسكن في نفس الخيمة؟
+              - generic [ref=e219]:
+                - heading "الحمام" [level=3] [ref=e220]
+                - generic [ref=e221]:
+                  - generic [ref=e222]: هل يوجد حمام؟
+                  - generic [ref=e223]:
+                    - generic [ref=e224] [cursor=pointer]:
+                      - radio "نعم" [checked] [ref=e225]
+                      - text: نعم
+                    - generic [ref=e226] [cursor=pointer]:
+                      - radio "لا" [ref=e227]
+                      - text: لا
+                - generic [ref=e228]:
+                  - generic [ref=e229]:
+                    - generic [ref=e230]: نوع الحمام
+                    - generic [ref=e231]:
+                      - generic [ref=e232] [cursor=pointer]:
+                        - radio "خاص" [checked] [ref=e233]
+                        - text: خاص
+                      - generic [ref=e234] [cursor=pointer]:
+                        - radio "مشترك" [ref=e235]
+                        - text: مشترك
+                  - generic [ref=e236]:
+                    - generic [ref=e237]: حالة الحمام
+                    - combobox [ref=e238]:
+                      - option "اختر..."
+                      - option "جيد" [selected]
+                      - option "متوسط"
+                      - option "سيء"
+              - generic [ref=e239]:
+                - heading "الرغبات (رتب احتياجاتك حسب الأهمية)" [level=3] [ref=e240]
+                - generic [ref=e241]:
+                  - generic [ref=e242]:
+                    - generic [ref=e243]: "الرغبة 1:"
+                    - combobox [ref=e244]:
+                      - option "اختر الرغبة..."
+                      - option "خيم" [selected]
+                      - option "اغطية"
+                      - option "فرشات"
+                      - option "ادوات مطبخ"
+                      - option "شوادر"
+                      - option "ملابس"
+                      - option "طرد صحي"
+                      - option "طرد غذائي"
+                  - generic [ref=e245]:
+                    - generic [ref=e246]: "الرغبة 2:"
+                    - combobox [ref=e247]:
+                      - option "اختر الرغبة..."
+                      - option "اغطية" [selected]
+                      - option "فرشات"
+                      - option "ادوات مطبخ"
+                      - option "شوادر"
+                      - option "ملابس"
+                      - option "طرد صحي"
+                      - option "طرد غذائي"
+                  - generic [ref=e248]:
+                    - generic [ref=e249]: "الرغبة 3:"
+                    - combobox [ref=e250]:
+                      - option "اختر الرغبة..."
+                      - option "فرشات" [selected]
+                      - option "ادوات مطبخ"
+                      - option "شوادر"
+                      - option "ملابس"
+                      - option "طرد صحي"
+                      - option "طرد غذائي"
+                  - generic [ref=e251]:
+                    - generic [ref=e252]: "الرغبة 4:"
+                    - combobox [ref=e253]:
+                      - option "اختر الرغبة..."
+                      - option "ادوات مطبخ" [selected]
+                      - option "شوادر"
+                      - option "ملابس"
+                      - option "طرد صحي"
+                      - option "طرد غذائي"
+                  - generic [ref=e254]:
+                    - generic [ref=e255]: "الرغبة 5:"
+                    - combobox [ref=e256]:
+                      - option "اختر الرغبة..."
+                      - option "شوادر" [selected]
+                      - option "ملابس"
+                      - option "طرد صحي"
+                      - option "طرد غذائي"
+          - generic [ref=e116]:
+            - button "السابق" [ref=e186] [cursor=pointer]
+            - generic [ref=e117]:
+              - button "✕ مسح الكل" [ref=e118] [cursor=pointer]
+              - button "التالي" [active] [ref=e119] [cursor=pointer]
+  - contentinfo [ref=e120]:
+    - generic [ref=e121]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

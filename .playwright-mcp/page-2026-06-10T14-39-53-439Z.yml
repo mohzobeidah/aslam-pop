@@ -1,0 +1,128 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "الشكاوى" [ref=e11] [cursor=pointer]:
+            - /url: /Complaint
+          - link "المشاريع" [ref=e12] [cursor=pointer]:
+            - /url: /Project
+          - link "المساعدات" [ref=e13] [cursor=pointer]:
+            - /url: /Assistance
+          - link "لوحة التحكم" [ref=e14] [cursor=pointer]:
+            - /url: /Admin/Dashboard
+          - link "التقارير" [ref=e15] [cursor=pointer]:
+            - /url: /Report
+          - link "سجل التدقيق" [ref=e16] [cursor=pointer]:
+            - /url: /Admin/AuditLogs
+          - link "تغيير كلمة المرور" [ref=e17] [cursor=pointer]:
+            - /url: /Admin/ChangePassword
+          - link "🔔" [ref=e18] [cursor=pointer]:
+            - /url: /Admin/Notifications
+          - link "تسجيل خروج" [ref=e19] [cursor=pointer]:
+            - /url: /Admin/Logout
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - heading "النازحين" [level=1] [ref=e23]
+      - generic [ref=e24]: "إجمالي: 1"
+    - generic [ref=e25]:
+      - link "769 مقبول" [ref=e26] [cursor=pointer]:
+        - /url: /Admin/Refugees?status=Approved
+        - generic [ref=e27]:
+          - generic [ref=e28]: "769"
+          - generic [ref=e29]: مقبول
+      - link "3 قيد المراجعة" [ref=e30] [cursor=pointer]:
+        - /url: /Admin/Refugees?status=Pending
+        - generic [ref=e31]:
+          - generic [ref=e32]: "3"
+          - generic [ref=e33]: قيد المراجعة
+      - link "1 مرفوض" [ref=e34] [cursor=pointer]:
+        - /url: /Admin/Refugees?status=Rejected
+        - generic [ref=e35]:
+          - generic [ref=e36]: "1"
+          - generic [ref=e37]: مرفوض
+    - generic [ref=e38]:
+      - link "134 القاطع مخيم السلام قاطع A-جبر الدربى" [ref=e39] [cursor=pointer]:
+        - /url: /Admin/Refugees?sector=%D9%85%D8%AE%D9%8A%D9%85%20%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D9%82%D8%A7%D8%B7%D8%B9%20A-%D8%AC%D8%A8%D8%B1%20%D8%A7%D9%84%D8%AF%D8%B1%D8%A8%D9%89&status=Approved
+        - generic [ref=e40]: "134"
+        - generic [ref=e41]: القاطع مخيم السلام قاطع A-جبر الدربى
+      - link "214 القاطع مخيم السلام قاطع B-ابو جهاد الاخرس" [ref=e42] [cursor=pointer]:
+        - /url: /Admin/Refugees?sector=%D9%85%D8%AE%D9%8A%D9%85%20%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D9%82%D8%A7%D8%B7%D8%B9%20B-%D8%A7%D8%A8%D9%88%20%D8%AC%D9%87%D8%A7%D8%AF%20%D8%A7%D9%84%D8%A7%D8%AE%D8%B1%D8%B3&status=Approved
+        - generic [ref=e43]: "214"
+        - generic [ref=e44]: القاطع مخيم السلام قاطع B-ابو جهاد الاخرس
+      - link "212 القاطع مخيم السلام قاطع C-أكرم عابدين" [ref=e45] [cursor=pointer]:
+        - /url: /Admin/Refugees?sector=%D9%85%D8%AE%D9%8A%D9%85%20%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D9%82%D8%A7%D8%B7%D8%B9%20C-%D8%A3%D9%83%D8%B1%D9%85%20%D8%B9%D8%A7%D8%A8%D8%AF%D9%8A%D9%86&status=Approved
+        - generic [ref=e46]: "212"
+        - generic [ref=e47]: القاطع مخيم السلام قاطع C-أكرم عابدين
+      - link "209 القاطع مخيم السلام قاطع D-اياد فايق عبد الحليم جودة" [ref=e48] [cursor=pointer]:
+        - /url: /Admin/Refugees?sector=%D9%85%D8%AE%D9%8A%D9%85%20%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D9%82%D8%A7%D8%B7%D8%B9%20D-%D8%A7%D9%8A%D8%A7%D8%AF%20%D9%81%D8%A7%D9%8A%D9%82%20%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D8%AD%D9%84%D9%8A%D9%85%20%D8%AC%D9%88%D8%AF%D8%A9%20&status=Approved
+        - generic [ref=e49]: "209"
+        - generic [ref=e50]: القاطع مخيم السلام قاطع D-اياد فايق عبد الحليم جودة
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e54]: بحث
+        - textbox "رقم الهوية أو الاسم..." [ref=e55]: "800843799"
+      - generic [ref=e56]:
+        - generic [ref=e57]: القاطع
+        - combobox [ref=e58]:
+          - option "الكل" [selected]
+          - option "مخيم السلام قاطع A-جبر الدربى"
+          - option "مخيم السلام قاطع B-ابو جهاد الاخرس"
+          - option "مخيم السلام قاطع C-أكرم عابدين"
+          - option "مخيم السلام قاطع D-اياد فايق عبد الحليم جودة"
+      - generic [ref=e59]:
+        - generic [ref=e60]: الحالة
+        - combobox [ref=e61]:
+          - option "الكل"
+          - option "مقبول" [selected]
+          - option "قيد المراجعة"
+          - option "مرفوض"
+      - button "بحث" [ref=e62] [cursor=pointer]
+      - link "إلغاء" [ref=e63] [cursor=pointer]:
+        - /url: /Admin/Refugees
+      - link "⬇ تصدير Excel" [ref=e64] [cursor=pointer]:
+        - /url: /Admin/ExportRefugeesToExcel?search=800843799&status=Approved
+    - table [ref=e66]:
+      - rowgroup [ref=e67]:
+        - row "الاسم رقم الهوية الهاتف القاطع الجنس عدد الأفراد الحالة الصحية الحالة تاريخ التسجيل إجراءات" [ref=e68]:
+          - columnheader "الاسم" [ref=e69]
+          - columnheader "رقم الهوية" [ref=e70]
+          - columnheader "الهاتف" [ref=e71]
+          - columnheader "القاطع" [ref=e72]
+          - columnheader "الجنس" [ref=e73]
+          - columnheader "عدد الأفراد" [ref=e74]
+          - columnheader "الحالة الصحية" [ref=e75]
+          - columnheader "الحالة" [ref=e76]
+          - columnheader "تاريخ التسجيل" [ref=e77]
+          - columnheader "إجراءات" [ref=e78]
+      - rowgroup [ref=e79]:
+        - row "محمد محمد خليل ابو زبيدة 800843799 0567050248 مخيم السلام قاطع A-جبر الدربى ذكر 6 مريض مقبول 2026/05/21 تعديل عرض إعادة تعيين كلمة المرور إزالة" [ref=e80]:
+          - cell "محمد محمد خليل ابو زبيدة" [ref=e81]
+          - cell "800843799" [ref=e82]
+          - cell "0567050248" [ref=e83]
+          - cell "مخيم السلام قاطع A-جبر الدربى" [ref=e84]
+          - cell "ذكر" [ref=e85]
+          - cell "6" [ref=e86]
+          - cell "مريض" [ref=e87]
+          - cell "مقبول" [ref=e88]
+          - cell "2026/05/21" [ref=e89]
+          - cell "تعديل عرض إعادة تعيين كلمة المرور إزالة" [ref=e90]:
+            - link "تعديل" [ref=e91] [cursor=pointer]:
+              - /url: /Admin/AdminEditRegistration/63
+            - link "عرض" [ref=e92] [cursor=pointer]:
+              - /url: /Admin/RefugeeDetails/63
+            - button "إعادة تعيين كلمة المرور" [ref=e93] [cursor=pointer]
+            - button "إزالة" [ref=e95] [cursor=pointer]
+    - link "← العودة إلى لوحة التحكم" [ref=e97] [cursor=pointer]:
+      - /url: /Admin/Dashboard
+  - contentinfo [ref=e98]:
+    - generic [ref=e99]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

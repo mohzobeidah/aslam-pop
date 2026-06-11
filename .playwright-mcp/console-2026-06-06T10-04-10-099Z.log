@@ -1,0 +1,11 @@
+[      49ms] [WARNING] cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation @ https://cdn.tailwindcss.com/:63
+[     158ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "new-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:5392/Registration/Index:0
+[     158ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "new-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:5392/Registration/Index:0
+[  289495ms] [LOG] Rendering desires with data: [Object, Object, Object, Object, Object, Object, Object, Object] @ http://localhost:5392/Registration/Index:962
+[  477797ms] [LOG] Rendering desires with data: [Object, Object, Object, Object, Object, Object, Object, Object] @ http://localhost:5392/Registration/Index:962
+[  530638ms] [LOG] Rendering desires with data: [Object, Object, Object, Object, Object, Object, Object, Object] @ http://localhost:5392/Registration/Index:962
+[  606757ms] [WARNING] cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation @ https://cdn.tailwindcss.com/:63
+[  606892ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "new-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:5392/Registration/Submit:0
+[  606892ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "new-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:5392/Registration/Submit:0
+[  704838ms] [LOG] Rendering desires with data: [Object, Object, Object, Object, Object, Object, Object, Object] @ http://localhost:5392/Registration/Submit:967
+[ 3514738ms] [WARNING] cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation @ https://cdn.tailwindcss.com/:63

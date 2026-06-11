@@ -1,0 +1,60 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "الشكاوى" [ref=e11] [cursor=pointer]:
+            - /url: /Complaint
+          - link "المشاريع" [ref=e12] [cursor=pointer]:
+            - /url: /Project
+          - link "المساعدات" [ref=e13] [cursor=pointer]:
+            - /url: /Assistance
+          - link "لوحة التحكم" [ref=e14] [cursor=pointer]:
+            - /url: /Admin/Dashboard
+          - link "سجل التدقيق" [ref=e15] [cursor=pointer]:
+            - /url: /Admin/AuditLogs
+          - link "🔔" [ref=e16] [cursor=pointer]:
+            - /url: /Admin/Notifications
+          - link "تسجيل خروج" [ref=e17] [cursor=pointer]:
+            - /url: /Admin/Logout
+  - main [ref=e19]:
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]: 🔑
+        - heading "تسجيل الدخول" [level=1] [ref=e24]
+        - paragraph [ref=e25]: أدخل رقم الهوية وكلمة المرور لتعديل بيانات العائلة
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e28]: رقم هوية رب الأسرة
+          - textbox "9 أرقام" [ref=e29]:
+            - /placeholder: أدخل رقم الهوية (9 أرقام)
+        - generic [ref=e30]:
+          - generic [ref=e31]: كلمة المرور
+          - generic [ref=e32]:
+            - textbox "أدخل كلمة المرور" [ref=e33]
+            - button [ref=e34] [cursor=pointer]:
+              - img [ref=e35]
+        - generic:
+          - generic:
+            - list
+        - button "دخول للتعديل" [ref=e38] [cursor=pointer]
+      - generic [ref=e39]:
+        - paragraph [ref=e40]:
+          - text: لا تملك حساباً؟
+          - link "تسجيل عائلة جديدة" [ref=e41] [cursor=pointer]:
+            - /url: /Registration
+        - paragraph [ref=e42]:
+          - text: نسيت كلمة المرور؟
+          - link "البحث عن طريق معرف التسجيل" [ref=e43] [cursor=pointer]:
+            - /url: /Record/Search
+  - contentinfo [ref=e44]:
+    - generic [ref=e45]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة

@@ -1,0 +1,350 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "نظام تسجيل العائلات" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - button "☀️" [ref=e7] [cursor=pointer]
+          - link "تسجيل جديد" [ref=e8] [cursor=pointer]:
+            - /url: /Registration
+          - link "تسجيل الدخول" [ref=e9] [cursor=pointer]:
+            - /url: /Record/Login
+          - link "تقديم شكوى" [ref=e10] [cursor=pointer]:
+            - /url: /Complaint/Create
+          - link "الشكاوى" [ref=e11] [cursor=pointer]:
+            - /url: /Complaint
+          - link "المشاريع" [ref=e12] [cursor=pointer]:
+            - /url: /Project
+          - link "المساعدات" [ref=e13] [cursor=pointer]:
+            - /url: /Assistance
+          - link "لوحة التحكم" [ref=e14] [cursor=pointer]:
+            - /url: /Admin/Dashboard
+          - link "سجل التدقيق" [ref=e15] [cursor=pointer]:
+            - /url: /Admin/AuditLogs
+          - link "🔔" [ref=e16] [cursor=pointer]:
+            - /url: /Admin/Notifications
+          - link "تسجيل خروج" [ref=e17] [cursor=pointer]:
+            - /url: /Admin/Logout
+  - main [ref=e19]:
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "تعديل بيانات العائلة" [level=1] [ref=e23]
+        - paragraph [ref=e24]: "معرف التسجيل: PJDPXZTR"
+        - link "تغيير كلمة المرور" [ref=e26] [cursor=pointer]:
+          - /url: /Admin/ChangePassword
+      - generic [ref=e27]:
+        - list [ref=e30]:
+          - listitem [ref=e31]: The MaritalStatus field is required.
+          - listitem [ref=e32]: The value '1,2,3,4,5' is not valid.
+          - listitem [ref=e33]: يرجى تصحيح الأخطاء في البيانات
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - heading "بيانات رب الأسرة" [level=2] [ref=e36]
+            - generic [ref=e37]:
+              - generic [ref=e38]:
+                - generic [ref=e39]: الاسم الأول
+                - textbox [ref=e40]: كريم
+              - generic [ref=e41]:
+                - generic [ref=e42]: الاسم الثاني
+                - textbox [ref=e43]: حسام
+              - generic [ref=e44]:
+                - generic [ref=e45]: الاسم الثالث
+                - textbox [ref=e46]: نادر
+              - generic [ref=e47]:
+                - generic [ref=e48]: اسم العائلة
+                - textbox [ref=e49]: السالم
+            - generic [ref=e50]:
+              - generic [ref=e51]:
+                - generic [ref=e52]: رقم الهوية
+                - textbox [ref=e53]: "900709925"
+              - generic [ref=e54]:
+                - generic [ref=e55]: القاطع
+                - combobox [ref=e56]:
+                  - option "اختر القاطع..."
+                  - option "A" [selected]
+                  - option "B"
+                  - option "C"
+                  - option "D"
+                  - option "أكرم عابدينققققققققققق"
+                  - option "ابو جهاد الاخرس"
+                  - option "ابو حمزة عيد"
+                  - option "جبر الدربى"
+              - generic [ref=e57]:
+                - generic [ref=e58]: تاريخ الميلاد
+                - textbox [ref=e59]: 1982-09-25
+              - generic [ref=e60]:
+                - generic [ref=e61]: الجنس
+                - generic [ref=e62]:
+                  - generic [ref=e63] [cursor=pointer]:
+                    - radio "ذكر" [checked] [ref=e64]
+                    - text: ذكر
+                  - generic [ref=e65] [cursor=pointer]:
+                    - radio "أنثى" [ref=e66]
+                    - text: أنثى
+              - generic [ref=e67]:
+                - generic [ref=e68]: رقم الهاتف
+                - textbox [ref=e69]: "0591234572"
+              - generic [ref=e70]:
+                - generic [ref=e71]: المحفظة
+                - textbox [ref=e72]: "0591234567"
+              - generic [ref=e73]:
+                - generic [ref=e74]: نوع المحفظة
+                - combobox [ref=e75]:
+                  - option "اختر نوع المحفظة..."
+                  - option "بنك" [selected]
+                  - option "بال بي"
+                  - option "جوال بي"
+              - generic [ref=e76]:
+                - generic [ref=e77]: مكان السكن الأصلي
+                - combobox [ref=e78]:
+                  - option "اختر المنطقة..."
+                  - option "غزة" [selected]
+                  - option "خانيونيس"
+                  - option "شمال غزة"
+                  - option "رفح"
+                  - option "دير البلح"
+                  - option "النصيرات"
+                  - option "المغازي"
+              - generic [ref=e79]:
+                - generic [ref=e80]: الحالة الاجتماعية
+                - combobox [ref=e81]:
+                  - option "اختر الحالة..."
+                  - option "متزوج" [selected]
+                  - option "أعزب"
+                  - option "أرمل"
+                  - option "مطلق"
+                  - option "منفصل"
+              - generic [ref=e82]:
+                - generic [ref=e83]: الوظيفة
+                - textbox [ref=e84]: موظف
+              - generic [ref=e85]:
+                - generic [ref=e86]: المستوى التعليمي
+                - combobox [ref=e87]:
+                  - option "اختر..."
+                  - option "بدون"
+                  - option "ابتدائي"
+                  - option "إعدادي"
+                  - option "ثانوي"
+                  - option "جامعي" [selected]
+                  - option "دراسات عليا"
+              - generic [ref=e88]:
+                - generic [ref=e89] [cursor=pointer]:
+                  - checkbox "المنزل مدمر" [ref=e90]
+                  - generic [ref=e91]: المنزل مدمر
+                - generic [ref=e92] [cursor=pointer]:
+                  - checkbox "أسير" [ref=e93]
+                  - generic [ref=e94]: أسير
+            - generic [ref=e95]:
+              - heading "الحالة الصحية" [level=3] [ref=e96]
+              - generic [ref=e97]:
+                - generic [ref=e98] [cursor=pointer]:
+                  - radio "سليم" [checked] [ref=e99]
+                  - text: سليم
+                - generic [ref=e100] [cursor=pointer]:
+                  - radio "مريض" [ref=e101]
+                  - text: مريض
+              - generic [ref=e103]:
+                - checkbox [ref=e104]
+                - generic [ref=e105]: هل تعرض لإصابة؟
+              - generic [ref=e106]:
+                - heading "المرفقات" [level=3] [ref=e107]
+                - generic [ref=e108]:
+                  - generic [ref=e109]: صورة الهوية
+                  - button "Choose File" [ref=e110]
+                - generic [ref=e111]:
+                  - generic [ref=e112]: تقرير طبي
+                  - button "Choose File" [ref=e113]
+              - generic [ref=e114]:
+                - checkbox [ref=e115]
+                - generic [ref=e116]: حامل
+              - generic [ref=e117]:
+                - checkbox [ref=e118]
+                - generic [ref=e119]: مرضع
+          - generic [ref=e120]:
+            - generic [ref=e121]:
+              - heading "أفراد الأسرة" [level=2] [ref=e122]
+              - button "+ إضافة فرد" [ref=e123] [cursor=pointer]
+            - generic [ref=e125]:
+              - button "✕" [ref=e126] [cursor=pointer]
+              - generic [ref=e127]:
+                - generic [ref=e128]:
+                  - generic [ref=e129]: الاسم الأول
+                  - textbox [ref=e130]: هند
+                - generic [ref=e131]:
+                  - generic [ref=e132]: الاسم الثاني
+                  - textbox [ref=e133]: كريم
+                - generic [ref=e134]:
+                  - generic [ref=e135]: الاسم الثالث
+                  - textbox [ref=e136]: حسام
+                - generic [ref=e137]:
+                  - generic [ref=e138]: اسم العائلة
+                  - textbox [ref=e139]: السالم
+                - generic [ref=e140]:
+                  - generic [ref=e141]: رقم الهوية
+                  - textbox [ref=e142]: "900709935"
+                - generic [ref=e143]:
+                  - generic [ref=e144]: تاريخ الميلاد
+                  - textbox [ref=e145]: 1985-03-15
+                - generic [ref=e146]:
+                  - generic [ref=e147]: الجنس
+                  - combobox [ref=e148]:
+                    - option "ذكر"
+                    - option "أنثى" [selected]
+                - generic [ref=e149]:
+                  - generic [ref=e150]: صلة القرابة
+                  - combobox [ref=e151]:
+                    - option "اختر..."
+                    - option "زوج"
+                    - option "زوجة" [selected]
+                    - option "ابن"
+                    - option "ابنة"
+                    - option "أم"
+                    - option "أب"
+                    - option "أخ"
+                    - option "أخت"
+                    - option "جدة/جد"
+                    - option "حفيد/حفيدة"
+                    - option "أخ غير شقيق"
+                    - option "أخت غير شقيقة"
+                    - option "Other"
+                - generic [ref=e152]:
+                  - generic [ref=e153]: الحالة الاجتماعية *
+                  - combobox [ref=e154]:
+                    - option "اختر..." [selected]
+                    - option "متزوج"
+                    - option "أعزب"
+                    - option "أرمل"
+                    - option "مطلق"
+                    - option "منفصل"
+              - generic [ref=e155]:
+                - generic [ref=e156] [cursor=pointer]:
+                  - checkbox "أسير" [ref=e157]
+                  - generic [ref=e158]: أسير
+                - generic [ref=e159] [cursor=pointer]:
+                  - checkbox "زوجها مسجون" [ref=e160]
+                  - generic [ref=e161]: زوجها مسجون
+              - generic [ref=e162]:
+                - heading "الحالة الصحية" [level=4] [ref=e163]
+                - generic [ref=e164]:
+                  - generic [ref=e165] [cursor=pointer]:
+                    - radio "سليم" [checked] [ref=e166]
+                    - text: سليم
+                  - generic [ref=e167] [cursor=pointer]:
+                    - radio "مريض" [ref=e168]
+                    - text: مريض
+                - generic [ref=e170]:
+                  - checkbox [ref=e171]
+                  - generic [ref=e172]: هل تعرض لإصابة؟
+          - generic [ref=e173]:
+            - heading "السكن والحالات الخاصة" [level=2] [ref=e174]
+            - generic [ref=e175]:
+              - generic [ref=e176]:
+                - checkbox [ref=e177]
+                - generic [ref=e178]: رب الأسرة طفل (أقل من 18 سنة)
+              - generic [ref=e179]:
+                - checkbox [ref=e180]
+                - generic [ref=e181]: ربة الأسرة امرأة
+              - generic [ref=e182]:
+                - checkbox [ref=e183]
+                - generic [ref=e184]: هناك شخص خارج الأسرة مشمول في الكفالة
+              - generic [ref=e185]:
+                - generic [ref=e186]: هل تسكن العائلة في خيمة؟
+                - generic [ref=e187]:
+                  - generic [ref=e188] [cursor=pointer]:
+                    - radio "نعم" [ref=e189]
+                    - text: نعم
+                  - generic [ref=e190] [cursor=pointer]:
+                    - radio "لا" [checked] [ref=e191]
+                    - text: لا
+              - generic [ref=e192]:
+                - checkbox [ref=e193]
+                - generic [ref=e194]: هل تحتاج العائلة حفائظ (لكبار السن أو آخرين)؟
+              - generic [ref=e195]:
+                - checkbox [ref=e196]
+                - generic [ref=e197]: هل يوجد أكثر من عائلة تسكن في نفس الخيمة؟
+          - generic [ref=e198]:
+            - heading "الحمام" [level=3] [ref=e199]
+            - generic [ref=e200]:
+              - generic [ref=e201]: هل يوجد حمام؟
+              - generic [ref=e202]:
+                - generic [ref=e203] [cursor=pointer]:
+                  - radio "نعم" [ref=e204]
+                  - text: نعم
+                - generic [ref=e205] [cursor=pointer]:
+                  - radio "لا" [checked] [ref=e206]
+                  - text: لا
+          - generic [ref=e207]:
+            - heading "الرغبات (رتب احتياجاتك حسب الأهمية)" [level=3] [ref=e208]
+            - generic [ref=e209]:
+              - generic [ref=e210]:
+                - generic [ref=e211]: "الرغبة 1:"
+                - combobox [ref=e212]:
+                  - option "اختر الرغبة..." [selected]
+                  - option "خيم"
+                  - option "اغطية"
+                  - option "فرشات"
+                  - option "ادوات مطبخ"
+                  - option "شوادر"
+                  - option "ملابس"
+                  - option "طرد صحي"
+                  - option "طرد غذائي"
+              - generic [ref=e213]:
+                - generic [ref=e214]: "الرغبة 2:"
+                - combobox [ref=e215]:
+                  - option "اختر الرغبة..." [selected]
+                  - option "خيم"
+                  - option "اغطية"
+                  - option "فرشات"
+                  - option "ادوات مطبخ"
+                  - option "شوادر"
+                  - option "ملابس"
+                  - option "طرد صحي"
+                  - option "طرد غذائي"
+              - generic [ref=e216]:
+                - generic [ref=e217]: "الرغبة 3:"
+                - combobox [ref=e218]:
+                  - option "اختر الرغبة..." [selected]
+                  - option "خيم"
+                  - option "اغطية"
+                  - option "فرشات"
+                  - option "ادوات مطبخ"
+                  - option "شوادر"
+                  - option "ملابس"
+                  - option "طرد صحي"
+                  - option "طرد غذائي"
+              - generic [ref=e219]:
+                - generic [ref=e220]: "الرغبة 4:"
+                - combobox [ref=e221]:
+                  - option "اختر الرغبة..." [selected]
+                  - option "خيم"
+                  - option "اغطية"
+                  - option "فرشات"
+                  - option "ادوات مطبخ"
+                  - option "شوادر"
+                  - option "ملابس"
+                  - option "طرد صحي"
+                  - option "طرد غذائي"
+              - generic [ref=e222]:
+                - generic [ref=e223]: "الرغبة 5:"
+                - combobox [ref=e224]:
+                  - option "اختر الرغبة..." [selected]
+                  - option "خيم"
+                  - option "اغطية"
+                  - option "فرشات"
+                  - option "ادوات مطبخ"
+                  - option "شوادر"
+                  - option "ملابس"
+                  - option "طرد صحي"
+                  - option "طرد غذائي"
+          - generic [ref=e225]:
+            - heading "المرفقات" [level=3] [ref=e226]
+            - paragraph [ref=e227]: لا توجد مرفقات
+          - generic [ref=e228]:
+            - generic [ref=e229]: ملاحظات حول الحالة
+            - textbox "أي ملاحظات إضافية عن حالة العائلة..." [ref=e230]
+          - generic [ref=e231]:
+            - button "حفظ التعديلات" [ref=e232] [cursor=pointer]
+            - button "خروج" [ref=e233] [cursor=pointer]
+  - contentinfo [ref=e234]:
+    - generic [ref=e235]: © 2026 - نظام تسجيل العائلات - جميع الحقوق محفوظة
