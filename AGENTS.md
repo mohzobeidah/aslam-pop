@@ -23,7 +23,7 @@ Camp family registration system implemented as an **ASP.NET Core MVC** applicati
 ## ASP.NET Core Architecture
 ### Data Model
 - **Person**: Shared entity for family head and members (4-part name, ID, DOB, gender, health, maternity, prisoner flag, BathroomStatus, MotherIdNumber, etc.). Sector, PhoneNumber, Wallet/WalletType are on FamilyRegistration, not Person.
-- **FamilyRegistration**: Links to head (Person), members (FamilyMembers), housing/special-case fields (HasBathroom, BathroomType, BathroomStatus), sector, phone, wallet, approval workflow, and **Refugee Desires** (ranked dropdowns stored as FamilyDesire join records).
+- **FamilyRegistration**: Links to head (Person), members (FamilyMembers), housing/special-case fields (HasBathroom, BathroomType, BathroomStatus), sector, phone, wallet, approval workflow, and **Refugee Desires** (ranked dropdowns stored as FamilyDesire join records). Has soft delete fields: `IsDeleted`, `DeletedById`, `DeletedAt`.
 - **FamilyMember**: Join table `FamilyRegistration → Person` with `RelationshipToHead`.
 - **Attachment**: File metadata (`MedicalReport` or `IDImage`), stores relative paths.
 - **Admin**: Login with `AdminRole` (`Admin`=super, `Mandoob`=sector-limited), session-based auth, SHA256 password hashing.
@@ -63,6 +63,28 @@ Camp family registration system implemented as an **ASP.NET Core MVC** applicati
 - On login (`RecordController.Login`): sets `MustChangePassword` session flag when password == ID
 - Blocks `Edit` and `UploadFile` actions until password is changed
 - `ReturnEditWithPasswordChangeRequired()` helper shows edit view with forced change banner
+
+### Soft Delete / Remove from Camp
+- **RemoveRefugee** (`AdminController.RemoveRefugee`): POST action for approved registrations only — sets `IsDeleted = true`, `DeletedById`, `DeletedAt`
+- **Global query filter**: `HasQueryFilter(f => !f.IsDeleted)` on `FamilyRegistration` — all normal queries exclude deleted records
+- **DeletedRegistrations page** (`AdminController.DeletedRegistrations`): Lists soft-deleted registrations using `.IgnoreQueryFilters().Where(f => f.IsDeleted)`, with sector filter, shows who deleted and when
+- **RestoreRegistration** (`AdminController.RestoreRegistration`): POST action — sets `IsDeleted = false`, clears `DeletedById`/`DeletedAt`, **requires reason** (min 3 chars, validated server-side)
+- **Restore modal**: Popup with reason textarea, identical pattern to the rejection modal in `Registrations.cshtml`
+- **Audit**: Both removal and restoration are logged with full details (who, when, reason)
+- **Nav**: "المحذوفة" link in both desktop and mobile nav bars, and in the dashboard action bar (super admin)
+- **CanAccessRegistrationAsync fix**: Uses `.IgnoreQueryFilters()` so ماندوب can access their sector's deleted registrations
+
+### Error Pages (Unified)
+- **`HomeController.Error()`**: Accepts optional `?statusCode=` parameter — renders themed error page for 404, 403, 401, 400, and 500+
+- **`Program.cs`**: `UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}")` intercepts all HTTP errors
+- **`Error.cshtml`**: Unified view with:
+  - Large color-coded status code number (yellow=404, orange=403, red=500)
+  - Distinct SVG icons per error type (magnifying glass, prohibition, lock, warning triangle)
+  - Tailored Arabic messages for each status
+  - Request ID displayed only for server errors (500+)
+  - "إبلاغ عن المشكلة" button only for server errors
+  - "العودة للرئيسية" button on all pages
+- **`Forbid()` issue**: `StatusCode(403)` used instead of `Forbid()` — the app has no `AddAuthentication` middleware configured
 
 ### Rejection with Reason
 - **Rejection requires reason**: `RejectRegistration` POST now requires a `reason` parameter (validated server-side, min 3 chars)
@@ -175,7 +197,9 @@ Camp family registration system implemented as an **ASP.NET Core MVC** applicati
 
 ### Production Error Page
 - Implemented a professional, themed error view at `/Home/Error` for non-development environments.
-- Displays a user-friendly Arabic message and the Request ID for support tracking.
+- Unified page handles 404, 403, 401, 400, and 500+ errors with color-coded icons and tailored Arabic messages.
+- `UseStatusCodePagesWithReExecute` intercepts all HTTP errors before they reach the browser.
+- `Forbid()` replaced with `StatusCode(403)` since no `AddAuthentication` middleware is configured.
 
 ### Report System (Dynamic Excel Reporting)
 - **Controllers/ReportController.cs**: GET Index (column selection + filters), POST Preview (renders data grid), POST ExportExcel (generates .xlsx).

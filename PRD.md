@@ -80,6 +80,8 @@ The primary purpose of the application is to collect detailed demographic, healt
   - Force password change (if password matches ID)
   - Dashboard with CTE-based demographic statistics
   - Complaint / ticket management system
+  - Soft delete and restore workflow for removed families
+  - Unified error pages (404, 403, 500+) with color-coded icons and tailored messages
   - Financial recorder module (planned)
 
 ## 7. Data Schema (ASP.NET Core)
@@ -89,7 +91,7 @@ The primary purpose of the application is to collect detailed demographic, healt
 | Table | Description |
 | :--- | :--- |
 | **Persons** | Family heads and members — name (4 parts), ID, DOB, gender, health/disease/disability, injury, maternity fields, prisoner flags, BathroomStatus, MotherIdNumber |
-| **FamilyRegistrations** | Links to head Person, sector, phone, wallet, housing fields (tent/bathroom), approval workflow, rejection tracking, soft delete |
+| **FamilyRegistrations** | Links to head Person, sector, phone, wallet, housing fields (tent/bathroom), approval workflow, rejection tracking, soft delete (`IsDeleted`, `DeletedById`, `DeletedAt`) |
 | **FamilyMembers** | Join table linking FamilyRegistration → Person with RelationshipToHead |
 | **Attachments** | File metadata linked to Person (MedicalReport or IDImage), stores relative paths |
 | **Sectors** | Camp sectors with name, camp, coordinates, area, tent/bathroom counts |

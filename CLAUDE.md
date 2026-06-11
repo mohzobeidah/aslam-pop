@@ -3,13 +3,18 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-This repository contains an **ASP.NET Core MVC** application (`CampRegistrationApp/`) for camp family registration, admin management, projects/nominations, assistance, complaint system, and reporting.
+This repository contains an **ASP.NET Core MVC** application (`CampRegistrationApp/`) for camp family registration, admin management, projects/nominations, assistance, complaint system, reporting, and **soft-delete/restore** workflow.
 
 ## Common Commands
 ### ASP.NET Core (.NET 10)
 - Build: `dotnet build`
 - Run: `dotnet run --project CampRegistrationApp/CampRegistrationApp.csproj`
 - Test: `dotnet test`
+
+### Playwright E2E Tests (`CampRegistrationApp.PlaywrightTests/`)
+- Setup: `cd CampRegistrationApp.PlaywrightTests && npm install && npx playwright install chromium`
+- Run: `BASE_URL=http://localhost:5392 npx playwright test` (app must be running)
+- Run headed: `BASE_URL=http://localhost:5392 npx playwright test --headed`
 
 ## Architecture
 ### ASP.NET Core Version (`CampRegistrationApp/`)
@@ -21,7 +26,8 @@ This repository contains an **ASP.NET Core MVC** application (`CampRegistrationA
 - **Static Assets**: Managed in `wwwroot/`, uploaded files stored under `wwwroot/uploads/registrations/`.
 - **Session**: Used for admin authentication (`AdminId`, `AdminName`, `AdminRole`), refugee edit access (`EditRegistrationId`), and multi-step registration flow.
 - **Port**: HTTP on `localhost:5392`, HTTPS on `localhost:7126`.
-- **Production Error Page**: Custom themed error page at `/Home/Error` for production environments, displaying the Request ID for troubleshooting.
+- **Error Pages**: Unified error page at `/Home/Error` handling 404, 403, 401, 400, and 500+ with color-coded icons and tailored Arabic messages. Uses `UseStatusCodePagesWithReExecute`. `Forbid()` replaced with `StatusCode(403)` since no `AddAuthentication` middleware is configured.
+- **Deleted Registrations**: Soft-delete workflow with `IsDeleted` flag, global query filter, dedicated `/Admin/DeletedRegistrations` page, restore with reason modal, and audit logging.
 
 ## ASP.NET Core Data Model (Entity Relationships)
 ```
@@ -35,7 +41,7 @@ Admin (1) ──< (N) Notification
 Notification >── (0..1) Link (URL string)
 ```
 - **Person**: Shared entity for both Head of Family and Family Members. Fields include name (4 parts), ID, DOB, gender, governorate, **BathroomStatus (جيد/متوسط/سيء)**, marital/employment/education status, health info (diseases, disabilities, injuries), prisoner flag (أسير), optional maternity fields (pregnancy, nursing), MotherIdNumber. Sector, PhoneNumber, Wallet/WalletType are on FamilyRegistration, not Person.
-- **FamilyRegistration**: Links to FamilyHead (Person), has list of Members, plus housing/special-case fields (tent, bathroom, child-headed, female-headed, external support, diaper needs, multiple families in tent, HasBathroom, BathroomType, BathroomStatus), sector, phone, wallet/wallet type, and **Refugee Desires** (ranked dropdowns stored as FamilyDesire join records). Has unique 8-char `RecordId`. Approval workflow with `ApprovalStatus` (Pending/Approved/Rejected). Rejection tracking via `RejectedById`, `RejectedAt`, `RejectionReason`.
+- **FamilyRegistration**: Links to FamilyHead (Person), has list of Members, plus housing/special-case fields (tent, bathroom, child-headed, female-headed, external support, diaper needs, multiple families in tent, HasBathroom, BathroomType, BathroomStatus), sector, phone, wallet/wallet type, and **Refugee Desires** (ranked dropdowns stored as FamilyDesire join records). Has unique 8-char `RecordId`. Approval workflow with `ApprovalStatus` (Pending/Approved/Rejected). Rejection tracking via `RejectedById`, `RejectedAt`, `RejectionReason`. Soft delete via `IsDeleted`, `DeletedById`, `DeletedAt`.
 - **FamilyMember**: Join table linking `FamilyRegistration` → `Person` with a `RelationshipToHead` string.
 - **Attachment**: File metadata linked to a Person (`MedicalReport` or `IDImage`), storing relative file paths.
 - **Admin**: Login system with `AdminRole` enum (`Admin`=super, `Mandoob`=sector-limited). Linked optionally to a `Sector`.
@@ -84,6 +90,9 @@ Notification >── (0..1) Link (URL string)
 | `/Admin/GetNotificationCount` | `AdminController.GetNotificationCount` | JSON — unread notification count (polled by nav bell) |
 | `/Admin/ChangePassword` | `AdminController.ChangePassword` | GET/POST — change admin password (force-change if password == national ID) |
 | `/Admin/AuditLogs` | `AdminController.AuditLogs` | Audit log viewer with action/sector/date filters |
+| `/Admin/DeletedRegistrations` | `AdminController.DeletedRegistrations` | Lists soft-deleted registrations (ignore query filter), with sector filter |
+| `/Admin/RestoreRegistration` | `AdminController.RestoreRegistration` | POST — restore deleted registration with reason (min 3 chars) |
+| `/Home/Error?statusCode=` | `HomeController.Error` | Unified error page (404, 403, 401, 400, 500+) |
 | `/Record/ChangePassword` | `RecordController.ChangePassword` | GET/POST — force refugee password change if password == ID number |
 | `/Project` | `ProjectController.Index` | Project list (admin only) |
 | `/Project/Create` | `ProjectController.Create` | Create project (super admin only) |
@@ -178,7 +187,8 @@ Notification >── (0..1) Link (URL string)
 - No migrations — uses `EnsureCreated()` + manual SQL for new tables.
 - No try/catch in `Program.cs` startup seeding.
 - No logging framework beyond the default ASP.NET Core `ILogger`.
-- Soft delete pattern with `IsDeleted` flag + global query filters on Project and Nomination.
+- Soft delete pattern with `IsDeleted` flag — applied to Project, Nomination, Assistance, AssistanceBeneficiary, Complaint, and FamilyRegistration.
+- FamilyRegistration has a global query filter `HasQueryFilter(f => !f.IsDeleted)` — deleted registrations are hidden from all normal queries. Use `.IgnoreQueryFilters()` to access them (e.g., `DeletedRegistrations` page, `RestoreRegistration`, `CanAccessRegistrationAsync`).
 - `RowVersion` (SQL Server `rowversion`) for concurrency on Project and Nomination.
 - `AuditService` logs JSON-serialized old/new values for Create/Update/Delete operations.
 - `NormalizeBathroomType()` applied via `RegistrationConstants` in `MapToViewModel` and `Update` to handle null/empty bathroom type.
