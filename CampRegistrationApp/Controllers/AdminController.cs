@@ -385,6 +385,7 @@ ORDER BY COUNT(*) DESC;
             if (admin?.Sector == null) return false;
 
             var regSectorId = await _context.FamilyRegistrations
+                .IgnoreQueryFilters()
                 .Where(f => f.Id == registrationId)
                 .Select(f => f.SectorId)
                 .FirstOrDefaultAsync();
@@ -955,6 +956,8 @@ ORDER BY COUNT(*) DESC;
                 var admin = await _context.Admins.Include(a => a.Sector).FirstOrDefaultAsync(a => a.Id == adminId);
                 if (admin?.Sector != null)
                     query = query.Where(f => f.SectorId == admin.Sector.Id);
+                else if (admin == null)
+                    return NotFound();
             }
 
             if (!string.IsNullOrEmpty(sector))
@@ -1408,7 +1411,7 @@ ORDER BY COUNT(*) DESC;
             if (!IsAuthenticated()) return Unauthorized();
 
             if (!await CanAccessRegistrationAsync(id))
-                return Forbid();
+                return StatusCode(403);
 
             var registration = await _context.FamilyRegistrations
                 .IgnoreQueryFilters()
