@@ -93,6 +93,20 @@ namespace CampRegistrationApp.Models.ViewModels
         public string ApprovalStatus { get; set; } = string.Empty;
     }
 
+    public class DeletedRegistrationViewModel
+    {
+        public int Id { get; set; }
+        public string RecordId { get; set; } = string.Empty;
+        public string HeadName { get; set; } = string.Empty;
+        public string IdNumber { get; set; } = string.Empty;
+        public string Sector { get; set; } = string.Empty;
+        public DateTime RegistrationDate { get; set; }
+        public string? DeletedByName { get; set; }
+        public DateTime? DeletedAt { get; set; }
+        public string? RestoreReason { get; set; }
+        public int MemberCount { get; set; }
+    }
+
     public class RefugeeListPageViewModel
     {
         public List<RefugeeViewModel> Refugees { get; set; } = new();

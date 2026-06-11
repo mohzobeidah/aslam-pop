@@ -1,0 +1,122 @@
+@model List<DeletedRegistrationViewModel>
+@{
+    ViewData["Title"] = "التسجيلات المحذوفة";
+    var currentSector = ViewBag.CurrentSector as string;
+    var isSuper = ViewBag.IsSuperAdmin as bool? ?? false;
+}
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl text-camp-gold font-bold">التسجيلات المحذوفة</h1>
+    <div class="flex gap-2">
+        <a asp-action="Dashboard" class="bg-camp-accent-grey text-camp-gold px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
+            العودة للوحة التحكم
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@successMsg</div>
+}
+
+@if (TempData["Error"] is string errorMsg)
+{
+    <div class="bg-red-900/50 text-red-300 p-3 rounded-lg mb-4 text-sm">@errorMsg</div>
+}
+
+<!-- Filters -->
+<div class="bg-camp-accent-grey p-4 rounded-xl border border-gray-700 mb-6">
+    <form method="get" class="flex flex-wrap gap-4 items-end">
+        <div>
+            <label class="block text-xs text-gray-400 mb-1">القاطع</label>
+            <select name="sector" class="bg-camp-dark-grey border border-gray-600 rounded p-2 text-sm outline-none focus:border-camp-gold">
+                <option value="">جميع القواطع</option>
+                @foreach (var s in ViewBag.Sectors)
+                {
+                    <option value="@s" selected="@(currentSector == s)">@s</option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="bg-camp-gold text-black px-4 py-2 rounded font-bold text-sm hover:bg-yellow-500 transition">تصفية</button>
+    </form>
+</div>
+
+<!-- Results -->
+@if (!Model.Any())
+{
+    <div class="bg-camp-accent-grey p-8 rounded-xl border border-gray-700 text-center text-gray-400">
+        لا توجد تسجيلات محذوفة
+    </div>
+}
+else
+{
+    <div class="overflow-x-auto">
+        <table class="w-full bg-camp-accent-grey rounded-xl border border-gray-700">
+            <thead>
+                <tr class="border-b border-gray-700 text-camp-gold">
+                    <th class="p-3 text-right">معرف التسجيل</th>
+                    <th class="p-3 text-right">رب الأسرة</th>
+                    <th class="p-3 text-right">رقم الهوية</th>
+                    <th class="p-3 text-right">القاطع</th>
+                    <th class="p-3 text-center">عدد الأفراد</th>
+                    <th class="p-3 text-center">تاريخ التسجيل</th>
+                    <th class="p-3 text-center">تم الحذف بواسطة</th>
+                    <th class="p-3 text-center">تاريخ الحذف</th>
+                    <th class="p-3 text-center">إجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var reg in Model)
+                {
+                    <tr class="border-b border-gray-700 hover:bg-camp-dark-grey/50 transition">
+                        <td class="p-3 font-mono text-camp-gold text-sm" dir="ltr">@reg.RecordId</td>
+                        <td class="p-3 font-semibold text-white">@reg.HeadName</td>
+                        <td class="p-3 font-mono text-sm text-gray-300" dir="ltr">@reg.IdNumber</td>
+                        <td class="p-3 text-camp-gold">@reg.Sector</td>
+                        <td class="p-3 text-center text-gray-300">@reg.MemberCount</td>
+                        <td class="p-3 text-center text-gray-400">@reg.RegistrationDate.ToString("yyyy-MM-dd")</td>
+                        <td class="p-3 text-center text-gray-300">@reg.DeletedByName</td>
+                        <td class="p-3 text-center text-gray-400">@reg.DeletedAt?.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="p-3 text-center">
+                            <button type="button" onclick="showRestoreModal(@reg.Id, '@reg.HeadName')"
+                                    class="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-600 transition font-semibold text-sm">
+                                إعادة إلى المخيم
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<!-- Restore Modal -->
+<div id="restoreModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+    <div class="bg-camp-accent-grey rounded-xl border border-gray-700 p-6 w-full max-w-md">
+        <h3 class="text-lg text-camp-gold font-bold mb-3">إعادة تسجيل: <span id="restoreModalHeadName"></span></h3>
+        <form id="restoreForm" method="post" asp-action="RestoreRegistration">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="restoreModalId" />
+            <label class="block text-camp-gold text-sm mb-1">سبب الإعادة <span class="text-red-400">*</span></label>
+            <textarea name="reason" id="restoreReason" required minlength="3" rows="4"
+                      class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none"
+                      placeholder="اكتب سبب الإعادة..."></textarea>
+            <div class="mt-4 flex gap-2 justify-end">
+                <button type="button" onclick="closeRestoreModal()" class="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm">إلغاء</button>
+                <button type="submit" class="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm font-bold">تأكيد الإعادة</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showRestoreModal(id, name) {
+        document.getElementById('restoreModalId').value = id;
+        document.getElementById('restoreModalHeadName').textContent = name;
+        document.getElementById('restoreReason').value = '';
+        document.getElementById('restoreModal').classList.remove('hidden');
+    }
+    function closeRestoreModal() {
+        document.getElementById('restoreModal').classList.add('hidden');
+    }
+</script>

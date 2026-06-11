@@ -1352,6 +1352,107 @@ ORDER BY COUNT(*) DESC;
             return RedirectToAction("Refugees");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> DeletedRegistrations(string? sector = null)
+        {
+            if (!IsAuthenticated()) return RedirectToAction("Login");
+            if (RequiresPasswordChange()) return RedirectToAction("ChangePassword");
+
+            var query = _context.FamilyRegistrations
+                .IgnoreQueryFilters()
+                .Include(f => f.FamilyHead)
+                .Include(f => f.DeletedBy)
+                .Where(f => f.IsDeleted)
+                .AsQueryable();
+
+            var adminId = GetCurrentAdminId();
+            var adminRole = HttpContext.Session.GetString("AdminRole");
+
+            if (adminRole == "Mandoob")
+            {
+                var admin = await _context.Admins.Include(a => a.Sector).FirstAsync(a => a.Id == adminId);
+                if (admin.Sector != null)
+                    query = query.Where(f => f.SectorId == admin.Sector.Id);
+            }
+
+            if (!string.IsNullOrEmpty(sector))
+                query = query.Where(f => f.Sector.Name == sector);
+
+            var list = await query
+                .OrderByDescending(f => f.DeletedAt)
+                .Select(f => new DeletedRegistrationViewModel
+                {
+                    Id = f.Id,
+                    RecordId = f.RecordId,
+                    HeadName = f.FamilyHead.FirstName + " " + f.FamilyHead.LastName,
+                    IdNumber = f.FamilyHead.IdNumber,
+                    Sector = f.Sector.Name,
+                    RegistrationDate = f.RegistrationTimestamp,
+                    DeletedByName = f.DeletedBy != null ? f.DeletedBy.Name : null,
+                    DeletedAt = f.DeletedAt,
+                    MemberCount = f.Members.Count
+                })
+                .ToListAsync();
+
+            ViewBag.Sectors = await _context.Sectors.OrderBy(s => s.Name).Select(s => s.Name).ToListAsync();
+            ViewBag.CurrentSector = sector;
+            ViewBag.IsSuperAdmin = IsSuperAdmin();
+
+            return View(list);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RestoreRegistration(int id, string? reason)
+        {
+            if (!IsAuthenticated()) return Unauthorized();
+
+            if (!await CanAccessRegistrationAsync(id))
+                return Forbid();
+
+            var registration = await _context.FamilyRegistrations
+                .IgnoreQueryFilters()
+                .Include(f => f.FamilyHead)
+                .Include(f => f.Sector)
+                .Include(f => f.DeletedBy)
+                .FirstOrDefaultAsync(f => f.Id == id && f.IsDeleted);
+            if (registration == null) return NotFound();
+
+            if (string.IsNullOrWhiteSpace(reason) || reason.Trim().Length < 3)
+            {
+                TempData["Error"] = "يجب إدخال سبب الإعادة (3 أحرف على الأقل)";
+                return RedirectToAction("DeletedRegistrations");
+            }
+
+            var oldDeletedBy = registration.DeletedBy?.Name;
+            var oldDeletedAt = registration.DeletedAt;
+
+            registration.IsDeleted = false;
+            registration.DeletedById = null;
+            registration.DeletedAt = null;
+            await _context.SaveChangesAsync();
+
+            await _audit.LogAsync(GetCurrentAdminId(), "RestoreToCamp", "FamilyRegistrations",
+                registration.RecordId,
+                new
+                {
+                    headName = registration.FamilyHead.FullName,
+                    sector = registration.Sector?.Name,
+                    wasDeletedBy = oldDeletedBy,
+                    wasDeletedAt = oldDeletedAt
+                },
+                new
+                {
+                    isDeleted = false,
+                    restoredAt = JerusalemTime.Now,
+                    reason = reason.Trim()
+                },
+                source: "Web");
+
+            TempData["Success"] = $"تم إعادة {registration.FamilyHead.FullName} إلى المخيم";
+            return RedirectToAction("DeletedRegistrations");
+        }
+
         [HttpPost]
         public async Task<IActionResult> ResetPassword(int id)
         {
