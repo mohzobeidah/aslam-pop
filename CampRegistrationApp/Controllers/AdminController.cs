@@ -398,7 +398,7 @@ ORDER BY COUNT(*) DESC;
         // ──────────────────────────────────────
 
         [HttpGet]
-        public async Task<IActionResult> AuditLogs(int page = 1, string? actionFilter = null, string? tableFilter = null)
+        public async Task<IActionResult> AuditLogs(int page = 1, string? actionFilter = null, string? tableFilter = null, string? jsonFilter = null)
         {
             if (!IsAuthenticated() || !IsSuperAdmin()) return RedirectToAction("Dashboard");
 
@@ -411,6 +411,9 @@ ORDER BY COUNT(*) DESC;
 
             if (!string.IsNullOrEmpty(tableFilter))
                 query = query.Where(l => l.TableName.Contains(tableFilter));
+
+            if (!string.IsNullOrEmpty(jsonFilter))
+                query = query.Where(l => (l.OldValues != null && l.OldValues.Contains(jsonFilter)) || (l.NewValues != null && l.NewValues.Contains(jsonFilter)));
 
             var totalCount = await query.CountAsync();
             var logs = await query
@@ -426,7 +429,8 @@ ORDER BY COUNT(*) DESC;
                 Page = page,
                 PageSize = pageSize,
                 ActionFilter = actionFilter,
-                TableFilter = tableFilter
+                TableFilter = tableFilter,
+                JsonFilter = jsonFilter
             };
 
             return View(vm);

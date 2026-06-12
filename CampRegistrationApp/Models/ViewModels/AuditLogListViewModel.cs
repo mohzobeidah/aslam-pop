@@ -8,4 +8,5 @@ public class AuditLogListViewModel
     public int PageSize { get; set; } = 50;
     public string? ActionFilter { get; set; }
     public string? TableFilter { get; set; }
+    public string? JsonFilter { get; set; }
 }

@@ -18,6 +18,8 @@
            class="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm w-full sm:w-48" />
     <input type="text" name="tableFilter" value="@Model.TableFilter" placeholder="بحث حسب الجدول..."
            class="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm w-full sm:w-48" />
+    <input type="text" name="jsonFilter" value="@Model.JsonFilter" placeholder="بحث في JSON..."
+           class="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm w-full sm:w-48" />
     <div class="flex gap-2">
         <button type="submit" class="bg-camp-accent-grey text-camp-gold px-4 py-2 rounded-lg hover:bg-gray-700 transition text-sm">
             بحث
@@ -125,7 +127,7 @@
     <div class="flex justify-center gap-2 mt-6 flex-wrap">
         @for (int i = 1; i <= totalPages; i++)
         {
-            <a asp-action="AuditLogs" asp-route-page="@i" asp-route-actionFilter="@Model.ActionFilter" asp-route-tableFilter="@Model.TableFilter"
+            <a asp-action="AuditLogs" asp-route-page="@i" asp-route-actionFilter="@Model.ActionFilter" asp-route-tableFilter="@Model.TableFilter" asp-route-jsonFilter="@Model.JsonFilter"
                class="px-3 py-1 rounded @(i == Model.Page ? "bg-camp-gold text-black" : "bg-gray-800 text-gray-300 hover:bg-gray-700") transition text-sm">
                 @i
             </a>
