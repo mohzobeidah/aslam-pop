@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CampRegistrationApp.Models;
 
@@ -24,6 +25,12 @@ public class AssistanceImport
     public int DuplicateRows { get; set; }
 
     public string? ErrorFilePath { get; set; }
+
+    [NotMapped]
+    public List<string> ImportErrors { get; set; } = new();
+
+    [NotMapped]
+    public List<string> ImportWarnings { get; set; } = new();
 
     public virtual ICollection<AssistanceBeneficiary> Beneficiaries { get; set; } = new List<AssistanceBeneficiary>();
 }

@@ -186,7 +186,7 @@ public class AssistanceService : IAssistanceService
     public async Task<AssistanceBeneficiary> AddBeneficiaryAsync(AssistanceBeneficiary beneficiary, int userId)
     {
         var exists = await _context.AssistanceBeneficiaries
-            .AnyAsync(b => b.NationalId == beneficiary.NationalId && b.AssistanceId == beneficiary.AssistanceId && !b.IsDeleted);
+            .AnyAsync(b => b.NationalId == beneficiary.NationalId && b.AssistanceId == beneficiary.AssistanceId);
         if (exists)
             throw new InvalidOperationException("رقم الهوية موجود مسبقاً في هذه المساعدة");
 
@@ -207,7 +207,7 @@ public class AssistanceService : IAssistanceService
             ?? throw new InvalidOperationException("الشخص غير موجود");
 
         var exists = await _context.AssistanceBeneficiaries
-            .AnyAsync(b => b.NationalId == person.IdNumber && b.AssistanceId == assistanceId && !b.IsDeleted);
+            .AnyAsync(b => b.NationalId == person.IdNumber && b.AssistanceId == assistanceId);
         if (exists)
             throw new InvalidOperationException("رقم الهوية موجود مسبقاً في هذه المساعدة");
 
@@ -295,5 +295,116 @@ public class AssistanceService : IAssistanceService
             .Include(b => b.CreatedBy)
             .Where(b => b.AssistanceId == assistanceId && !b.IsDeleted)
             .ToListAsync();
+    }
+
+    // ── Bulk operations ──
+
+    public async Task<List<FamilyHeadListItem>> GetFamilyHeadsAsync(string? sectorName = null, int? assistanceId = null)
+    {
+        var query = _context.FamilyRegistrations
+            .AsNoTracking()
+            .Include(fr => fr.FamilyHead)
+            .Include(fr => fr.Sector)
+            .Where(fr => !fr.IsDeleted);
+
+        if (!string.IsNullOrEmpty(sectorName))
+            query = query.Where(fr => fr.Sector.Name == sectorName);
+
+        var heads = await query
+            .Select(fr => new
+            {
+                fr.FamilyHead.Id,
+                fr.FamilyHead.FirstName,
+                fr.FamilyHead.SecondName,
+                fr.FamilyHead.ThirdName,
+                fr.FamilyHead.LastName,
+                fr.FamilyHead.IdNumber,
+                fr.PhoneNumber,
+                SectorName = fr.Sector.Name
+            })
+            .ToListAsync();
+
+        List<string>? existingNationalIds = null;
+        if (assistanceId.HasValue)
+        {
+            existingNationalIds = await _context.AssistanceBeneficiaries
+                .AsNoTracking()
+                .Where(b => b.AssistanceId == assistanceId.Value && !b.IsDeleted)
+                .Select(b => b.NationalId)
+                .ToListAsync();
+        }
+
+        return heads
+            .OrderBy(h => h.FirstName)
+            .ThenBy(h => h.SecondName)
+            .ThenBy(h => h.ThirdName)
+            .ThenBy(h => h.LastName)
+            .Select(h => new FamilyHeadListItem
+            {
+                Id = h.Id,
+                FullName = $"{h.FirstName} {h.SecondName} {h.ThirdName} {h.LastName}",
+                IdNumber = h.IdNumber,
+                Phone = h.PhoneNumber,
+                Sector = h.SectorName,
+                AlreadyNominated = existingNationalIds?.Contains(h.IdNumber) ?? false
+            }).ToList();
+    }
+
+    public async Task AddMultipleBeneficiariesAsync(int assistanceId, List<int> personIds, int userId)
+    {
+        foreach (var personId in personIds)
+        {
+            var person = await _context.Persons.FindAsync(personId);
+            if (person == null) continue;
+
+            var exists = await _context.AssistanceBeneficiaries
+                .AnyAsync(b => b.NationalId == person.IdNumber && b.AssistanceId == assistanceId);
+            if (exists) continue;
+
+            string? sectorName = null;
+            var headRegistration = await _context.FamilyRegistrations
+                .Include(fr => fr.Sector)
+                .FirstOrDefaultAsync(fr => fr.FamilyHeadId == personId);
+            if (headRegistration != null)
+                sectorName = headRegistration.Sector?.Name;
+
+            if (sectorName == null)
+            {
+                var memberRegistration = await _context.FamilyMembers
+                    .Include(fm => fm.Registration).ThenInclude(fr => fr.Sector)
+                    .FirstOrDefaultAsync(fm => fm.PersonId == personId);
+                sectorName = memberRegistration?.Registration.Sector?.Name;
+            }
+
+            var sector = !string.IsNullOrEmpty(sectorName)
+                ? await _context.Sectors.FirstOrDefaultAsync(s => s.Name == sectorName)
+                : null;
+
+            _context.AssistanceBeneficiaries.Add(new AssistanceBeneficiary
+            {
+                AssistanceId = assistanceId,
+                FullName = person.FullName,
+                NationalId = person.IdNumber,
+                Phone = await _context.FamilyRegistrations
+                    .Where(fr => fr.FamilyHeadId == personId)
+                    .Select(fr => fr.PhoneNumber)
+                    .FirstOrDefaultAsync() ?? "",
+                SectorId = sector?.Id ?? 0,
+                Status = BeneficiaryStatus.Active,
+                CreatedById = userId,
+                CreatedAt = JerusalemTime.Now
+            });
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> PersonExistsInAssistanceAsync(int assistanceId, int personId)
+    {
+        var person = await _context.Persons.FindAsync(personId);
+        if (person == null) return false;
+
+        return await _context.AssistanceBeneficiaries
+            .AnyAsync(b => b.NationalId == person.IdNumber && b.AssistanceId == assistanceId);
     }
 }

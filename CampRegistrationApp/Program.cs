@@ -427,6 +427,9 @@ using (var scope = app.Services.CreateScope())
             CONSTRAINT [FK_AB_Admins_CreatedById] FOREIGN KEY ([CreatedById]) REFERENCES [Admins]([Id])
         )");
     db.Database.ExecuteSqlRaw(@"
+        IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_AssistanceBeneficiaries_NationalId_AssistanceId')
+        DROP INDEX [IX_AssistanceBeneficiaries_NationalId_AssistanceId] ON [AssistanceBeneficiaries]");
+    db.Database.ExecuteSqlRaw(@"
         IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_AB_NationalId_AssistanceId')
         CREATE UNIQUE INDEX [IX_AB_NationalId_AssistanceId] ON [AssistanceBeneficiaries] ([NationalId], [AssistanceId]) WHERE [IsDeleted] = 0");
     db.Database.ExecuteSqlRaw(@"

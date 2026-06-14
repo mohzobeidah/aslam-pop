@@ -3,6 +3,7 @@
     ViewData["Title"] = "تفاصيل المساعدة";
     var isSuper = ViewBag.IsSuperAdmin as bool? ?? false;
     var isViewer = ViewBag.IsViewer as bool? ?? false;
+    var sectors = ViewBag.Sectors as List<Sector> ?? new();
 }
 <div class="mb-6">
     <a asp-action="Index" class="text-gray-400 hover:text-camp-gold transition">← العودة للمساعدات</a>
@@ -10,6 +11,14 @@
 
 @if (TempData["Success"] is string sm) { <div class="bg-green-900/50 text-green-300 p-3 rounded-lg mb-4 text-sm">@sm</div> }
 @if (TempData["Error"] is string em) { <div class="bg-red-900/50 text-red-300 p-3 rounded-lg mb-4 text-sm">@em</div> }
+@if (TempData["ImportErrors"] is string importErrors)
+{
+    <div class="bg-yellow-900/50 text-yellow-300 p-3 rounded-lg mb-4 text-sm whitespace-pre-line" dir="ltr">@importErrors.Replace(" | ", "\n")</div>
+}
+@if (TempData["ImportWarnings"] is string importWarnings)
+{
+    <div class="bg-blue-900/50 text-blue-300 p-3 rounded-lg mb-4 text-sm whitespace-pre-line">@importWarnings.Replace(" | ", "\n")</div>
+}
 
 <div class="bg-camp-accent-grey p-6 rounded-xl border border-gray-700 mb-6">
     <div class="flex justify-between items-start">
@@ -54,11 +63,19 @@
 <!-- Beneficiaries -->
 <div class="bg-camp-accent-grey p-6 rounded-xl border border-gray-700">
     <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl text-camp-gold font-bold">المستفيدون (@Model.Beneficiaries.Count)</h2>
+        <h2 class="text-xl text-camp-gold font-bold">المستفيدون (@Model.Beneficiaries.Count(b => !b.IsDeleted))</h2>
         <div class="flex gap-2">
             @if (!isViewer)
             {
-                <a asp-action="Import" asp-route-assistanceId="@Model.Id" class="bg-blue-700 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">📥 استيراد</a>
+                <button onclick="openBulkModal()" class="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-500 transition font-bold">إضافة متعددة</button>
+                <button onclick="openExcelModal()" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-500 transition font-bold">رفع Excel</button>
+                <a asp-action="DownloadTemplate" class="text-camp-gold hover:text-yellow-400 text-sm underline self-center">تحميل قالب</a>
+                @if (isSuper && Model.Beneficiaries.Any(b => !b.IsDeleted))
+                {
+                    <form method="post" asp-action="DeleteAllBeneficiaries" asp-route-id="@Model.Id" class="inline" onsubmit="return confirm('حذف جميع المستفيدين لهذه المساعدة؟')">
+                        <button type="submit" class="bg-red-700 text-white px-3 py-1 rounded text-sm hover:bg-red-600 font-bold">حذف الكل</button>
+                    </form>
+                }
             }
         </div>
     </div>
@@ -107,7 +124,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var b in Model.Beneficiaries.OrderByDescending(b => b.CreatedAt))
+                @foreach (var b in Model.Beneficiaries.Where(b => !b.IsDeleted).OrderByDescending(b => b.CreatedAt))
                 {
                     <tr class="border-b border-gray-700 hover:bg-camp-dark-grey/50 transition">
                         <td class="p-2 text-white font-bold">@b.FullName</td>
@@ -129,16 +146,99 @@
                 }
                 @if (!Model.Beneficiaries.Any())
                 {
-                    <tr><td colspan="@(isViewer ? 6 : 7)" class="p-4 text-center text-gray-500">لا يوجد مستفيدون بعد</td></tr>
+                    <tr><td colspan="@(isViewer ? 5 : 6)" class="p-4 text-center text-gray-500">لا يوجد مستفيدون بعد</td></tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
 
+<!-- Bulk Add Modal -->
+<div id="bulkModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70" onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="bg-camp-accent-grey rounded-xl border border-gray-700 shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+        <div class="flex justify-between items-center p-5 border-b border-gray-700">
+            <h3 class="text-xl font-bold text-camp-gold">إضافة عدة مستفيدين</h3>
+            <button onclick="closeBulkModal()" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <div class="p-5 overflow-y-auto flex-1">
+            <div class="flex items-center gap-2 mb-3">
+                <label class="text-gray-300 text-sm">القطاع:</label>
+                <select id="bulkSectorFilter" onchange="filterBulkList()"
+                        class="bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none">
+                    <option value="">جميع القطاعات</option>
+                    @foreach (var sec in sectors)
+                    {
+                        <option value="@sec.Name">@sec.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="flex items-center gap-2 mb-4">
+                <label class="text-gray-300 text-sm">بحث:</label>
+                <input type="text" id="bulkSearch" placeholder="ابحث بالاسم أو رقم الهوية..."
+                       class="flex-1 bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm focus:border-camp-gold outline-none"
+                       oninput="filterBulkList()" />
+            </div>
+            <div class="flex items-center gap-3 mb-3 text-sm">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="selectAllCheck" onchange="toggleSelectAll()" class="accent-camp-gold" />
+                    <span class="text-camp-gold">تحديد الكل</span>
+                </label>
+                <button onclick="clearSelection()" class="text-gray-400 hover:text-white transition">إلغاء التحديد</button>
+                <span id="selectedCount" class="text-gray-400">0 مختار</span>
+            </div>
+            <div id="bulkList" class="space-y-1 max-h-96 overflow-y-auto"></div>
+            <div id="bulkLoading" class="text-center text-gray-400 py-8">جاري التحميل...</div>
+        </div>
+        <div class="p-5 border-t border-gray-700 flex justify-between items-center">
+            <div class="flex gap-2">
+                <button onclick="closeBulkModal()" class="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition text-sm">إلغاء</button>
+                <button id="confirmBulkBtn" onclick="confirmBulkAdd()" disabled class="bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition font-bold text-sm disabled:opacity-50">
+                    إضافة المختارين
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Excel Import Modal -->
+<div id="excelModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70" onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="bg-camp-accent-grey rounded-xl border border-gray-700 shadow-2xl max-w-lg w-full mx-4">
+        <div class="flex justify-between items-center p-5 border-b border-gray-700">
+            <h3 class="text-xl font-bold text-camp-gold">رفع ملف Excel</h3>
+            <button onclick="closeExcelModal()" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <div class="p-5 space-y-4">
+            <p class="text-gray-300 text-sm">
+                يجب أن يحتوي الملف على العمود التالي: <strong class="text-camp-gold">NationalId</strong> (رقم الهوية).<br><span class="text-gray-400">يتم جلب الاسم ورقم الجوال تلقائياً من النظام.</span>
+            </p>
+            <a asp-action="DownloadTemplate"
+               class="inline-block text-camp-gold hover:text-yellow-400 transition text-sm underline">
+                تحميل قالب Excel
+            </a>
+            <form method="post" asp-action="ImportExcel" enctype="multipart/form-data"
+                  class="space-y-3" id="excelForm">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div>
+                    <label class="block text-camp-gold mb-1 text-sm">اختر ملف Excel</label>
+                    <input type="file" name="excelFile" accept=".xlsx"
+                           class="w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 text-sm file:bg-camp-gold file:text-black file:border-0 file:rounded file:px-3 file:py-1 file:font-bold file:cursor-pointer" />
+                </div>
+                <button type="submit" class="w-full bg-camp-gold text-black px-4 py-2 rounded-lg hover:bg-yellow-500 transition font-bold text-sm">
+                    رفع واستيراد
+                </button>
+            </form>
+        </div>
+        <div class="p-5 border-t border-gray-700 text-left">
+            <button onclick="closeExcelModal()" class="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition text-sm">إغلاق</button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         let selectedPersonId = null;
+        let allHeads = [];
+        let selectedHeadIds = new Set();
 
         async function searchPerson() {
             const query = document.getElementById('personSearch').value.trim();
@@ -165,15 +265,28 @@
                     return;
                 }
 
-                resultList.innerHTML = data.slice(0, 10).map(p => `
-                    <div class="result-item cursor-pointer p-2 rounded hover:bg-gray-700 transition border border-transparent hover:border-camp-gold"
-                         onclick="selectPerson(${p.id}, '${p.name.replace(/'/g, "\\'")}', '${p.idNumber}', '${(p.phone || '')}', this)">
+                const items = data.slice(0, 100);
+
+                const checkPromises = items.map(p =>
+                    fetch(`/Assistance/CheckPersonInAssistance?assistanceId=@Model.Id&personId=${p.id}`)
+                        .then(r => r.json())
+                        .then(d => ({ id: p.id, exists: d.exists }))
+                );
+                const checks = await Promise.all(checkPromises);
+                const existsMap = Object.fromEntries(checks.map(c => [c.id, c.exists]));
+
+                resultList.innerHTML = items.map(p => `
+                    <div class="result-item cursor-pointer p-2 rounded hover:bg-gray-700 transition border border-transparent hover:border-camp-gold ${existsMap[p.id] ? 'opacity-50' : ''}"
+                         onclick="${existsMap[p.id] ? '' : `selectPerson(${p.id}, '${p.name.replace(/'/g, "\\'")}', '${p.idNumber}', '${(p.phone || '')}', this)`}"
+                         data-person-id="${p.id}">
                         <div class="flex justify-between items-center">
                             <div>
                                 <span class="text-white font-bold">${p.name}</span>
                                 <span class="text-gray-400 mr-2" dir="ltr">${p.idNumber}</span>
                             </div>
-                            <span class="text-camp-gold text-xs">اختيار</span>
+                            ${existsMap[p.id]
+                                ? '<span class="text-yellow-400 text-xs">موجود مسبقاً</span>'
+                                : '<span class="text-camp-gold text-xs">اختيار</span>'}
                         </div>
                         ${p.phone ? `<div class="text-gray-500 text-xs" dir="ltr">${p.phone}</div>` : ''}
                     </div>
@@ -209,5 +322,139 @@
                 searchPerson();
             }
         });
+
+        /* ─── Bulk Add Modal ─── */
+
+        async function openBulkModal() {
+            document.getElementById('bulkModal').classList.remove('hidden');
+            document.getElementById('bulkList').innerHTML = '';
+            document.getElementById('bulkLoading').classList.remove('hidden');
+            document.getElementById('selectAllCheck').checked = false;
+            document.getElementById('bulkSearch').value = '';
+            document.getElementById('bulkSectorFilter').value = '';
+            selectedHeadIds = new Set();
+            updateSelectedCount();
+
+            try {
+                const res = await fetch(`/Assistance/GetFamilyHeads?assistanceId=@Model.Id`);
+                allHeads = await res.json();
+                renderBulkList(allHeads);
+            } catch {
+                document.getElementById('bulkList').innerHTML = '<div class="text-red-400 text-center py-4">فشل تحميل البيانات</div>';
+            } finally {
+                document.getElementById('bulkLoading').classList.add('hidden');
+            }
+        }
+
+        function closeBulkModal() {
+            document.getElementById('bulkModal').classList.add('hidden');
+        }
+
+        function renderBulkList(heads) {
+            const list = document.getElementById('bulkList');
+            if (heads.length === 0) {
+                list.innerHTML = '<div class="text-gray-500 text-center py-4">لا توجد نتائج</div>';
+                return;
+            }
+            list.innerHTML = heads.map(h => `
+                <div class="flex items-center gap-3 p-2 rounded hover:bg-gray-800 transition ${h.alreadyNominated ? 'opacity-50' : ''}">
+                    <input type="checkbox" class="head-check accent-camp-gold cursor-pointer"
+                           data-id="${h.id}"
+                           ${h.alreadyNominated ? 'disabled' : ''}
+                           ${selectedHeadIds.has(h.id) ? 'checked' : ''}
+                           onchange="toggleHead(${h.id}, this.checked)" />
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-white font-bold text-sm truncate">${h.fullName}</span>
+                            <span class="text-gray-400 text-xs" dir="ltr">${h.idNumber}</span>
+                            ${h.alreadyNominated ? '<span class="text-yellow-400 text-xs">موجود مسبقاً</span>' : ''}
+                        </div>
+                        <div class="text-gray-500 text-xs">
+                            ${h.phone ? `<span dir="ltr">${h.phone}</span> · ` : ''}
+                            ${h.sector || ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterBulkList() {
+            const q = document.getElementById('bulkSearch').value.trim().toLowerCase();
+            const sector = document.getElementById('bulkSectorFilter').value;
+            const filtered = allHeads.filter(h => {
+                if (sector && h.sector !== sector) return false;
+                if (!q) return true;
+                return h.fullName.toLowerCase().includes(q) ||
+                       h.idNumber.includes(q) ||
+                       (h.phone || '').includes(q);
+            });
+            renderBulkList(filtered);
+        }
+
+        function toggleHead(id, checked) {
+            if (checked) selectedHeadIds.add(id);
+            else selectedHeadIds.delete(id);
+            updateSelectedCount();
+        }
+
+        function toggleSelectAll() {
+            const checked = document.getElementById('selectAllCheck').checked;
+            document.querySelectorAll('.head-check:not(:disabled)').forEach(cb => {
+                cb.checked = checked;
+                const id = parseInt(cb.dataset.id);
+                if (checked) selectedHeadIds.add(id);
+                else selectedHeadIds.delete(id);
+            });
+            updateSelectedCount();
+        }
+
+        function clearSelection() {
+            selectedHeadIds.clear();
+            document.querySelectorAll('.head-check').forEach(cb => cb.checked = false);
+            document.getElementById('selectAllCheck').checked = false;
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const count = selectedHeadIds.size;
+            document.getElementById('selectedCount').textContent = count + ' مختار';
+            document.getElementById('confirmBulkBtn').disabled = count === 0;
+        }
+
+        async function confirmBulkAdd() {
+            if (selectedHeadIds.size === 0) return;
+
+            const ids = Array.from(selectedHeadIds);
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Assistance/AddMultipleBeneficiaries';
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            const append = (name, val) => {
+                const inp = document.createElement('input');
+                inp.type = 'hidden';
+                inp.name = name;
+                inp.value = val;
+                form.appendChild(inp);
+            };
+
+            append('assistanceId', '@Model.Id');
+            if (token) append('__RequestVerificationToken', token);
+            ids.forEach(id => append('personIds', id));
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        /* ─── Excel Import Modal ─── */
+
+        function openExcelModal() {
+            document.getElementById('excelModal').classList.remove('hidden');
+        }
+
+        function closeExcelModal() {
+            document.getElementById('excelModal').classList.add('hidden');
+        }
     </script>
 }

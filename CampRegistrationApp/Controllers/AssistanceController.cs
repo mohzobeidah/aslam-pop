@@ -71,6 +71,7 @@ public class AssistanceController : Controller
 
         ViewBag.IsSuperAdmin = IsSuperAdmin();
         ViewBag.IsViewer = IsViewer();
+        ViewBag.Sectors = await _context.Sectors.OrderBy(s => s.Name).ToListAsync();
         return View(assistance);
     }
 
@@ -456,5 +457,141 @@ public class AssistanceController : Controller
             : $"مستفيدون_{JerusalemTime.Now:yyyyMMdd}.xlsx";
 
         return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+    }
+
+    // ──────────────────────────────────────
+    //  Import Excel on Details page
+    // ──────────────────────────────────────
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ImportExcel(int id, IFormFile excelFile)
+    {
+        if (!IsAuthenticated() || IsViewer()) return RedirectToAction("Details", new { id });
+
+        if (excelFile == null || excelFile.Length == 0)
+        {
+            TempData["Error"] = "يرجى اختيار ملف Excel";
+            return RedirectToAction("Details", new { id });
+        }
+
+        var sectorId = IsSuperAdmin()
+            ? (await _context.Assistances.FindAsync(id))?.SectorId ?? 0
+            : await GetUserSectorId();
+
+        using var stream = new MemoryStream();
+        await excelFile.CopyToAsync(stream);
+        stream.Position = 0;
+
+        try
+        {
+            var result = await _importService.ImportFromExcelAsync(
+                stream, excelFile.FileName, id, GetUserId(), sectorId);
+
+            var msg = $"تم استيراد {result.SuccessRows} مستفيد";
+            if (result.DuplicateRows > 0) msg += $"، {result.DuplicateRows} مكرر";
+            if (result.FailedRows > 0) msg += $"، {result.FailedRows} فشل";
+            TempData["Success"] = msg;
+
+            if (result.ImportErrors.Count > 0)
+                TempData["ImportErrors"] = string.Join(" | ", result.ImportErrors.Take(20));
+            if (result.ImportWarnings.Count > 0)
+                TempData["ImportWarnings"] = string.Join(" | ", result.ImportWarnings.Take(20));
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = $"فشل استيراد Excel: {ex.Message}";
+        }
+
+        return RedirectToAction("Details", new { id });
+    }
+
+    // ──────────────────────────────────────
+    //  Delete All Beneficiaries
+    // ──────────────────────────────────────
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAllBeneficiaries(int id)
+    {
+        if (!IsAuthenticated() || IsViewer()) return RedirectToAction("Details", new { id });
+        if (!IsSuperAdmin())
+        {
+            TempData["Error"] = "ليس لديك صلاحية";
+            return RedirectToAction("Details", new { id });
+        }
+
+        var beneficiaries = await _context.AssistanceBeneficiaries
+            .Where(b => b.AssistanceId == id && !b.IsDeleted)
+            .ToListAsync();
+
+        var count = beneficiaries.Count;
+        var assistanceName = await _context.Assistances.Where(a => a.Id == id).Select(a => a.Name).FirstOrDefaultAsync();
+        var adminName = await _context.Admins.Where(a => a.Id == GetUserId()).Select(a => a.Name).FirstOrDefaultAsync();
+
+        foreach (var b in beneficiaries)
+        {
+            b.IsDeleted = true;
+        }
+
+        await _context.SaveChangesAsync();
+
+        await _audit.LogAsync(GetUserId(), "DeleteAllBeneficiaries", "AssistanceBeneficiaries",
+            $"المساعدة:{assistanceName},عدد:{count}",
+            new { المساعدة = assistanceName, العدد = count, تاريخ_الحذف = DateTime.UtcNow, المسؤول = adminName },
+            null);
+
+        TempData["Success"] = $"تم حذف {count} مستفيد بنجاح";
+        return RedirectToAction("Details", new { id });
+    }
+
+    // ──────────────────────────────────────
+    //  Bulk Add Beneficiaries
+    // ──────────────────────────────────────
+
+    [HttpGet]
+    public async Task<IActionResult> GetFamilyHeads(int assistanceId)
+    {
+        if (!IsAuthenticated()) return Unauthorized();
+
+        string? sectorName = null;
+        if (!IsSuperAdmin())
+        {
+            var admin = await _context.Admins
+                .Include(a => a.Sector)
+                .FirstOrDefaultAsync(a => a.Id == GetUserId());
+            sectorName = admin?.Sector?.Name;
+        }
+
+        var heads = await _assistanceService.GetFamilyHeadsAsync(sectorName, assistanceId);
+        return Json(heads);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddMultipleBeneficiaries(int assistanceId, List<int> personIds)
+    {
+        if (!IsAuthenticated() || IsViewer()) return Unauthorized();
+
+        try
+        {
+            await _assistanceService.AddMultipleBeneficiariesAsync(assistanceId, personIds, GetUserId());
+            TempData["Success"] = $"تمت إضافة {personIds.Count} مستفيد بنجاح";
+        }
+        catch (Exception ex)
+        {
+            TempData["Error"] = "حدث خطأ: " + ex.Message;
+        }
+
+        return RedirectToAction("Details", new { id = assistanceId });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> CheckPersonInAssistance(int assistanceId, int personId)
+    {
+        if (!IsAuthenticated()) return Unauthorized();
+
+        var exists = await _assistanceService.PersonExistsInAssistanceAsync(assistanceId, personId);
+        return Json(new { exists });
     }
 }

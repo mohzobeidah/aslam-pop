@@ -21,4 +21,9 @@ public interface IAssistanceService
 
     // Person search
     Task<List<Person>> SearchPersonsAsync(string query, string? sectorName);
+
+    // Bulk operations
+    Task<List<FamilyHeadListItem>> GetFamilyHeadsAsync(string? sectorName = null, int? assistanceId = null);
+    Task AddMultipleBeneficiariesAsync(int assistanceId, List<int> personIds, int userId);
+    Task<bool> PersonExistsInAssistanceAsync(int assistanceId, int personId);
 }

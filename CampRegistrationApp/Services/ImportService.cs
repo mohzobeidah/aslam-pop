@@ -22,7 +22,7 @@ public class ImportService : IImportService
         using var workbook = new XLWorkbook();
         var ws = workbook.Worksheets.Add("المستفيدين");
 
-        var headers = new[] { "FullName", "NationalId", "Phone", "Sector" };
+        var headers = new[] { "NationalId" };
         int col = 1;
         foreach (var h in headers)
         {
@@ -49,7 +49,7 @@ public class ImportService : IImportService
         };
 
         var errors = new List<(int Row, string Error)>();
-        int success = 0, duplicates = 0;
+        int success = 0, duplicates = 0, notFound = 0;
         var beneficiaries = new List<AssistanceBeneficiary>();
 
         using var workbook = new XLWorkbook(excelStream);
@@ -63,7 +63,7 @@ public class ImportService : IImportService
             rowNum++;
             try
             {
-                var nationalId = row.Cell(2).GetString().Trim();
+                var nationalId = row.Cell(1).GetString().Trim();
                 if (string.IsNullOrEmpty(nationalId))
                 {
                     errors.Add((rowNum, "رقم الهوية فارغ"));
@@ -71,7 +71,7 @@ public class ImportService : IImportService
                 }
 
                 var exists = await _context.AssistanceBeneficiaries
-                    .AnyAsync(b => b.NationalId == nationalId && b.AssistanceId == assistanceId && !b.IsDeleted);
+                    .AnyAsync(b => b.NationalId == nationalId && b.AssistanceId == assistanceId);
                 if (exists)
                 {
                     duplicates++;
@@ -79,12 +79,25 @@ public class ImportService : IImportService
                     continue;
                 }
 
+                var person = await _context.Persons
+                    .FirstOrDefaultAsync(p => p.IdNumber == nationalId);
+
+                if (person == null)
+                {
+                    notFound++;
+                    errors.Add((rowNum, $"{nationalId} غير موجود في النظام"));
+                    continue;
+                }
+
                 var beneficiary = new AssistanceBeneficiary
                 {
                     AssistanceId = assistanceId,
-                    FullName = row.Cell(1).GetString().Trim(),
+                    FullName = person.FullName,
                     NationalId = nationalId,
-                    Phone = row.Cell(3).GetString().Trim(),
+                    Phone = await _context.FamilyRegistrations
+                        .Where(f => f.FamilyHeadId == person.Id)
+                        .Select(f => f.PhoneNumber)
+                        .FirstOrDefaultAsync() ?? "",
                     SectorId = sectorId,
                     Status = BeneficiaryStatus.Active,
                     CreatedById = userId,
@@ -105,6 +118,7 @@ public class ImportService : IImportService
         import.SuccessRows = success;
         import.FailedRows = errors.Count;
         import.DuplicateRows = duplicates;
+        import.ImportErrors = errors.Select(e => $"الصف {e.Row}: {e.Error}").ToList();
 
         _context.AssistanceImports.Add(import);
         await _context.SaveChangesAsync();

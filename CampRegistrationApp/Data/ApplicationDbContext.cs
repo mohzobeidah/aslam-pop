@@ -315,10 +315,6 @@ namespace CampRegistrationApp.Data
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<AssistanceBeneficiary>()
-                .HasIndex(b => new { b.NationalId, b.AssistanceId })
-                .IsUnique();
-
-            modelBuilder.Entity<AssistanceBeneficiary>()
                 .HasQueryFilter(b => !b.IsDeleted);
 
             modelBuilder.Entity<AssistanceBeneficiary>()
