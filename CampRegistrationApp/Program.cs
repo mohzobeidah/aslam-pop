@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection;
 using CampRegistrationApp.Data;
 using CampRegistrationApp.Models;
 using CampRegistrationApp.Middleware;
@@ -48,6 +49,11 @@ builder.Services.AddSession(options =>
 });
 
 var app = builder.Build();
+
+// Ensure DataProtection keys directory exists
+var dpKeysDir = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtectionKeys");
+if (!Directory.Exists(dpKeysDir))
+    Directory.CreateDirectory(dpKeysDir);
 
 // Ensure Database is created for development
 if (!builder.Configuration.GetValue<bool>("Database:SkipRegistration")
