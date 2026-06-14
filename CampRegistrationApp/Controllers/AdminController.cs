@@ -80,14 +80,15 @@ namespace CampRegistrationApp.Controllers
         // ──────────────────────────────────────
 
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string? returnUrl = null)
         {
             if (IsAuthenticated()) return RedirectToAction("Dashboard");
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string nationalId, string password)
+        public async Task<IActionResult> Login(string nationalId, string password, string? returnUrl = null)
         {
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
             var rateKey = $"admin-login:{ip}";
@@ -97,6 +98,7 @@ namespace CampRegistrationApp.Controllers
                     new { nationalId, reason = "محاولات كثيرة جداً" },
                     null);
                 ModelState.AddModelError("", "محاولات كثيرة جداً. الرجاء المحاولة لاحقاً.");
+                ViewBag.ReturnUrl = returnUrl;
                 return View();
             }
 
@@ -110,6 +112,7 @@ namespace CampRegistrationApp.Controllers
                     new { nationalId, reason = "رقم الهوية أو كلمة المرور غير صحيحة" },
                     null);
                 ModelState.AddModelError("", "رقم الهوية أو كلمة المرور غير صحيحة");
+                ViewBag.ReturnUrl = returnUrl;
                 return View();
             }
 
@@ -128,6 +131,9 @@ namespace CampRegistrationApp.Controllers
 
             if (passwordMatchesNationalId)
                 return RedirectToAction("ChangePassword");
+
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
 
             return RedirectToAction("Dashboard");
         }

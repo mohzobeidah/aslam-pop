@@ -18,6 +18,10 @@
         }
 
         <form method="post" asp-action="Login">
+            @if (ViewBag.ReturnUrl is string returnUrl)
+            {
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+            }
             <div class="mb-4">
                 <label class="block text-gray-300 text-sm mb-1">رقم الهوية</label>
                 <input type="text" name="nationalId" required
