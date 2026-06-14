@@ -1741,6 +1741,17 @@ ORDER BY COUNT(*) DESC;
                 var oldPersons = await _context.Persons
                     .Where(p => oldPersonIds.Contains(p.Id) && p.Id != registration.FamilyHeadId)
                     .ToListAsync();
+
+                // Soft-delete any nominations referencing these persons before removing them
+                var oldPersonIdsToDelete = oldPersons.Select(p => p.Id).ToList();
+                var relatedNominations = await _context.Nominations
+                    .Where(n => oldPersonIdsToDelete.Contains(n.PersonId) && !n.IsDeleted)
+                    .ToListAsync();
+                foreach (var nom in relatedNominations)
+                {
+                    nom.IsDeleted = true;
+                }
+
                 _context.Persons.RemoveRange(oldPersons);
                 await _context.SaveChangesAsync();
 
