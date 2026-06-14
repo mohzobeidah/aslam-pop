@@ -4,10 +4,33 @@ using CampRegistrationApp.Data;
 using CampRegistrationApp.Models;
 using CampRegistrationApp.Middleware;
 using CampRegistrationApp.Services;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
 using System.Security.Cryptography;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ── Serilog ──────────────────────────────────────────────
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Warning()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Error)
+    .WriteTo.Console()
+    .WriteTo.MSSqlServer(
+        connectionString: builder.Configuration.GetConnectionString("DefaultConnection")
+            ?? "Server=localhost\\SQLEXPRESS;Database=db53123;Trusted_Connection=True;TrustServerCertificate=True",
+        sinkOptions: new MSSqlServerSinkOptions
+        {
+            TableName = "LogEvents",
+            AutoCreateSqlTable = true,
+            SchemaName = "dbo"
+        })
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+// ─────────────────────────────────────────────────────────
 
 // Add services to the container.
 builder.Services.AddControllersWithViews()
