@@ -1556,6 +1556,8 @@ ORDER BY COUNT(*) DESC;
 
             var model = MapToViewModel(registration);
 
+            HttpContext.Session.SetInt32("EditRegistrationId", registration.Id);
+
             ViewBag.FormAction = "AdminUpdateRegistration";
             ViewBag.FormController = "Admin";
             ViewBag.HeadAttachments = registration.FamilyHead.Attachments.ToList();
@@ -1810,6 +1812,7 @@ ORDER BY COUNT(*) DESC;
                     $"تعديل بيانات بواسطة المشرف: {head.FullName} - رقم القيد: {registration.RecordId}",
                     $"/Admin/RefugeeDetails/{registration.Id}");
 
+                HttpContext.Session.Remove("EditRegistrationId");
                 TempData["Success"] = "تم تعديل البيانات بنجاح";
                 return RedirectToAction("RefugeeDetails", new { id = registration.Id });
             }
