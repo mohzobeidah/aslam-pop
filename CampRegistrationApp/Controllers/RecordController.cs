@@ -467,6 +467,9 @@ namespace CampRegistrationApp.Controllers
                     nom.IsDeleted = true;
                 }
 
+                // Persist nomination soft-deletes FIRST to avoid FK conflict
+                await _context.SaveChangesAsync();
+
                 _context.Persons.RemoveRange(oldPersons);
                 await _context.SaveChangesAsync();
 
