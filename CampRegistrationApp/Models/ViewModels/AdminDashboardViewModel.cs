@@ -7,6 +7,17 @@ namespace CampRegistrationApp.Models.ViewModels
         public int TotalAdmins { get; set; }
         public int TotalSectors { get; set; }
         public int TotalApprovedRefugees { get; set; }
+        public List<AdminLoginStat> AdminLoginData { get; set; } = new();
+        public int PendingCount { get; set; }
+        public int ApprovedCount { get; set; }
+        public int RejectedCount { get; set; }
+    }
+
+    public class AdminLoginStat
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public int LoginCount { get; set; }
     }
 
     public class SectorDashboard

@@ -361,13 +361,58 @@ ORDER BY COUNT(*) DESC;
                 sectors = sectors.Where(s => s.SectorName == sectorName).ToList();
             }
 
+            var adminLogins = await _context.AuditLogs
+                .Where(al => al.Action == "Login" && (al.Role == "Admin" || al.Role == "Mandoob"))
+                .GroupBy(al => new { al.UserId, al.Role })
+                .Select(g => new { g.Key.UserId, g.Key.Role, LoginCount = g.Count() })
+                .ToListAsync();
+
+            var loginAdminIds = adminLogins.Select(m => m.UserId).ToList();
+            var loginAdminNames = await _context.Admins
+                .Where(a => loginAdminIds.Contains(a.Id))
+                .ToDictionaryAsync(a => a.Id, a => a.Name);
+
+            var adminLoginData = adminLogins
+                .Select(m => new AdminLoginStat
+                {
+                    Name = loginAdminNames.GetValueOrDefault(m.UserId, $"مسؤول #{m.UserId}"),
+                    Role = m.Role == "Admin" ? "مدير" : "مندوب",
+                    LoginCount = m.LoginCount
+                })
+                .OrderByDescending(m => m.LoginCount)
+                .ToList();
+
+            var statusCounts = await _context.FamilyRegistrations
+                .Where(f => !f.IsDeleted)
+                .GroupBy(f => f.ApprovalStatus)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            if (!isAdmin)
+            {
+                var adminSectorId = admin.SectorId;
+                statusCounts = await _context.FamilyRegistrations
+                    .Where(f => !f.IsDeleted && f.SectorId == adminSectorId)
+                    .GroupBy(f => f.ApprovalStatus)
+                    .Select(g => new { Status = g.Key, Count = g.Count() })
+                    .ToListAsync();
+            }
+
+            var pendingCount = statusCounts.Where(s => s.Status == RegistrationApprovalStatus.Pending).Sum(s => s.Count);
+            var approvedCount = statusCounts.Where(s => s.Status == RegistrationApprovalStatus.Approved).Sum(s => s.Count);
+            var rejectedCount = statusCounts.Where(s => s.Status == RegistrationApprovalStatus.Rejected).Sum(s => s.Count);
+
             var model = new DashboardViewModel
             {
                 Sectors = sectors,
                 TotalRegistrations = sectors.Sum(s => s.TotalFamilies),
                 TotalAdmins = isAdmin ? await _context.Admins.CountAsync() : 0,
                 TotalSectors = isAdmin ? await _context.Sectors.CountAsync() : 0,
-                TotalApprovedRefugees = sectors.Sum(s => s.ApprovedFamilyCount)
+                TotalApprovedRefugees = sectors.Sum(s => s.ApprovedFamilyCount),
+                AdminLoginData = adminLoginData,
+                PendingCount = pendingCount,
+                ApprovedCount = approvedCount,
+                RejectedCount = rejectedCount
             };
 
             ViewBag.IsMandoob = !isAdmin;
