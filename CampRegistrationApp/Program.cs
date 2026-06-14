@@ -35,6 +35,10 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddSingleton<IRateLimiterService, RateLimiterService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(
+        Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtectionKeys")))
+    .SetApplicationName("CampRegistrationApp");
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
